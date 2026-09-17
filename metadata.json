@@ -1,0 +1,6 @@
+{
+  "name": "THE RUSH WAY",
+  "description": "Professional coaching application with Google Sheets synchronization, 20-sheet coaching database, two-way sync, and PDF reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

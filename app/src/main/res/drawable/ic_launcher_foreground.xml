@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Centered within 66dp safe zone (21dp to 87dp, center at 54,54) -->
+
+    <!-- Outer Head Wings / Cheek Silhouette -->
+    <path
+        android:fillColor="#0E1628"
+        android:pathData="M27,30 L35,42 L25,48 L33,62 L54,84 L54,44 Z" />
+    <path
+        android:fillColor="#0E1628"
+        android:pathData="M81,30 L73,42 L83,48 L75,62 L54,84 L54,44 Z" />
+
+    <!-- Upper Wings / Horns (Deep Purple) -->
+    <path
+        android:fillColor="#4C2889"
+        android:pathData="M27,30 L39,37 L53,37 L54,44 L36,42 Z" />
+    <path
+        android:fillColor="#4C2889"
+        android:pathData="M81,30 L69,37 L55,37 L54,44 L72,42 Z" />
+
+    <!-- Left Visor Eye (Electric Purple Gradient) -->
+    <path
+        android:pathData="M35,39 L51,44 L51,56 L43,63 L34,50 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="34"
+                android:startY="39"
+                android:endX="51"
+                android:endY="63"
+                android:type="linear">
+                <item android:color="#7C3AED" android:offset="0.0" />
+                <item android:color="#4C2889" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Right Visor Eye (Electric Purple Gradient) -->
+    <path
+        android:pathData="M73,39 L57,44 L57,56 L65,63 L74,50 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="74"
+                android:startY="39"
+                android:endX="57"
+                android:endY="63"
+                android:type="linear">
+                <item android:color="#A855F7" android:offset="0.0" />
+                <item android:color="#4C2889" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Lower Jaw / Mask Base (Dark Navy) -->
+    <path
+        android:fillColor="#0A0E1A"
+        android:pathData="M42,62 L66,62 L54,83 Z" />
+
+    <!-- Mask Grille / Abdominal 6-Pack Plate (White Highlights) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="miter"
+        android:pathData="M42,62 L66,62 L54,83 Z" />
+
+    <!-- Grille Divider Lines -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.4"
+        android:pathData="M45,67 L63,67" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.4"
+        android:pathData="M48,72 L60,72" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.4"
+        android:pathData="M51,77 L57,77" />
+
+    <!-- Center Vertical Grille Spine -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:pathData="M54,62 L54,83" />
+
+    <!-- Center Forehead Bridge Contour -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:pathData="M54,37 L54,62" />
+
+    <!-- Cheek Contours and Highlights -->
+    <path
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="1.2"
+        android:pathData="M33,48 L42,62 M75,48 L66,62" />
+    <path
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="1.2"
+        android:pathData="M27,30 L53,37 M81,30 L55,37" />
+</vector>
