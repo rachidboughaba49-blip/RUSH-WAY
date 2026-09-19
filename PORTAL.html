@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE RUSH WAY | بوابة المتدرب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: #0b0f19; color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .portal-card { width: 100%; max-width: 480px; background: #161f30; border: 1px solid #23324a; border-radius: 20px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        .brand-header { text-align: center; border-bottom: 1px solid #23324a; padding-bottom: 15px; margin-bottom: 20px; }
+        .brand-header h1 { font-size: 1.6rem; color: #38b2ac; font-weight: 900; letter-spacing: 1px; }
+        .brand-header p { font-size: 0.85rem; color: #94a3b8; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; }
+        input { width: 100%; padding: 12px; background: #0b0f19; border: 1px solid #334155; border-radius: 10px; color: #fff; font-size: 1rem; outline: none; transition: 0.2s; }
+        input:focus { border-color: #38b2ac; box-shadow: 0 0 0 2px rgba(56,178,172,0.2); }
+        
+        .btn-action { width: 100%; padding: 13px; background: #38b2ac; color: #0b0f19; font-weight: 800; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-action:hover { background: #319795; }
+        
+        /* شاشة المتدرب بعد الدخول */
+        #dashboard-view { display: none; }
+        .client-badge { background: rgba(56,178,172,0.12); border-right: 4px solid #38b2ac; padding: 12px; border-radius: 8px; margin-bottom: 18px; }
+        .plan-section { background: #0b0f19; border: 1px solid #23324a; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .plan-title { color: #38b2ac; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; border-bottom: 1px dashed #23324a; padding-bottom: 5px; }
+        .plan-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; }
+        .plan-item span:first-child { color: #94a3b8; }
+        .plan-item span:last-child { color: #fff; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="portal-card">
+    <div class="brand-header">
+        <h1>THE RUSH WAY</h1>
+        <p>بوابة المتابعة والخطة الفردية • Coach Rush</p>
+    </div>
+
+    <!-- 1. شاشة تسجيل الدخول بالرقم السري -->
+    <div id="login-view">
+        <form onsubmit="handleClientLogin(event)">
+            <div class="form-group">
+                <label>رقم الهاتف المسجل</label>
+                <input type="tel" id="login-phone" placeholder="05 / 06 / 07..." dir="ltr" required>
+            </div>
+            <div class="form-group">
+                <label>الرمز السري الخاص بك (PIN Code)</label>
+                <input type="password" id="login-pin" maxlength="6" placeholder="••••" style="letter-spacing: 5px; text-align: center;" required>
+            </div>
+            <button type="submit" class="btn-action">دخول إلى خطتي 🔐</button>
+        </form>
+    </div>
+
+    <!-- 2. لوحة تحكم المتدرب (عرض فقط بدون تعديل) -->
+    <div id="dashboard-view">
+        <div class="client-badge">
+            <h3 id="view-client-name" style="color: #38b2ac; margin-bottom: 3px;">-</h3>
+            <p id="view-client-goal" style="font-size: 0.85rem; color: #cbd5e1;">الهدف: -</p>
+        </div>
+
+        <div class="plan-section">
+            <div class="plan-title">🥗 الخطة الغذائية اليومية</div>
+            <div class="plan-item"><span>البروتين المعتمد:</span> <span id="view-protein">-</span></div>
+            <div class="plan-item"><span>الكربوهيدرات:</span> <span id="view-carbs">-</span></div>
+            <div class="plan-item"><span>الدهون والألياف:</span> <span id="view-fats">-</span></div>
+        </div>
+
+        <div class="plan-section">
+            <div class="plan-title">💊 البروتوكول والمكملات الرياضية</div>
+            <p id="view-supps" style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.5;">-</p>
+        </div>
+
+        <a href="checkin.html" class="btn-action" style="display: block; text-align: center; text-decoration: none; margin-bottom: 10px;">إرسال المتابعة الأسبوعية (Check-in) 📊</a>
+        <button onclick="handleLogout()" style="width: 100%; background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 10px; border-radius: 10px; cursor: pointer;">تسجيل الخروج</button>
+    </div>
+</div>
+
+<script>
+    // جلب قاعدة بيانات المشتركين المسجلة في التطبيق
+    function handleClientLogin(e) {
+        e.preventDefault();
+        const phone = document.getElementById('login-phone').value.trim();
+        const pin = document.getElementById('login-pin').value.trim();
+
+        const localData = localStorage.getItem('rush_way_athletes');
+        const athletes = localData ? JSON.parse(localData) : [];
+
+        // التحقق من تطابق رقم الهاتف والرمز السري (أو آخر 4 أرقام من الهاتف كرمز افتراضي)
+        const client = athletes.find(a => a.phone === phone && (a.pin === pin || (!a.pin && phone.endsWith(pin))));
+
+        if (!client) {
+            alert("عذراً، رقم الهاتف أو الرمز السري غير صحيح! تواصل مع الكوتش للتأكد.");
+            return;
+        }
+
+        // عرض بيانات المشترك بأمان
+        document.getElementById('view-client-name').innerText = client.name;
+        document.getElementById('view-client-goal').innerText = `الهدف: ${client.goal || 'بناء عضلات وحرق دهون'}`;
+        
+        // الخطة الغذائية إن وجدت
+        document.getElementById('view-protein').innerText = client.protein || "لحم بقري صافي / سمك أبيض";
+        document.getElementById('view-carbs').innerText = client.carbs || "أرز أبيض / شوفان";
+        document.getElementById('view-fats').innerText = client.fats || "زيت زيتون، سلطة خضراء";
+        document.getElementById('view-supps').innerText = client.supplements || "كرياتين 5غ + واي بروتين بعد التمرين";
+
+        document.getElementById('login-view').style.display = 'none';
+        document.getElementById('dashboard-view').style.display = 'block';
+    }
+
+    function handleLogout() {
+        document.getElementById('dashboard-view').style.display = 'none';
+        document.getElementById('login-view').style.display = 'block';
+        document.getElementById('login-pin').value = '';
+    }
+</script>
+
+</body>
+</html>
