@@ -26,6 +26,19 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
+    <!-- شاشة القفل السري للمدرب -->
+<div id="coach-lock-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0f19; z-index: 999999; display: flex; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #161f30; border: 1px solid #23324a; border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔐</div>
+        <h2 style="color: #38b2ac; margin-bottom: 5px; font-weight: 800;">THE RUSH WAY</h2>
+        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">لوحة تحكم المدرب • وصول مصرح فقط</p>
+        
+        <form onsubmit="verifyCoachPin(event)">
+            <input type="password" id="coach-pin-input" maxlength="4" placeholder="••••" style="width: 100%; padding: 14px; font-size: 1.8rem; text-align: center; letter-spacing: 12px; background: #0b0f19; border: 2px solid #334155; border-radius: 12px; color: #fff; outline: none; margin-bottom: 20px;" required autofocus>
+            <button type="submit" style="width: 100%; padding: 14px; background: #38b2ac; border: none; border-radius: 10px; color: #0b0f19; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s;">فتح النظام 🚀</button>
+        </form>
+    </div>
+</div>
     <!-- Offline status notification -->
     <div id="offline-banner" class="offline-banner">
       ⚠️ وضع عدم الاتصال: يتم حفظ جميع التغييرات محلياً وسيتم المزامنة عند عودة الإنترنت.

@@ -1137,3 +1137,30 @@ async function handleSaveNutrition(event) {
         closeNutritionModal();
     }
 }
+// ==========================================
+// نظام قفل وحماية لوحة المدرب
+// ==========================================
+const COACH_SECRET_PIN = "1994"; // <--- يمكنك تغيير الرمز السري هنا
+
+function verifyCoachPin(e) {
+    e.preventDefault();
+    const enteredPin = document.getElementById('coach-pin-input').value;
+    const lockScreen = document.getElementById('coach-lock-screen');
+
+    if (enteredPin === COACH_SECRET_PIN) {
+        // حفظ جلسة الدخول في المتصفح حتى لا يطلبها في كل نقرة
+        sessionStorage.setItem('coach_unlocked', 'true');
+        lockScreen.style.display = 'none';
+    } else {
+        alert("الرمز السري غير صحيح! تم رفض الوصول.");
+        document.getElementById('coach-pin-input').value = "";
+    }
+}
+
+// التحقق عند تحميل الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('coach_unlocked') === 'true') {
+        const lockScreen = document.getElementById('coach-lock-screen');
+        if (lockScreen) lockScreen.style.display = 'none';
+    }
+});
