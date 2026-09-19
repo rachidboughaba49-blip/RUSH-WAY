@@ -1363,3 +1363,91 @@ body {
 .offline-banner.active {
   display: block;
 }
+/* ===================================================
+   تنسيقات مخصصة للهواتف الذكية (Mobile App View)
+=================================================== */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        font-size: 14px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* رأس الصفحة والشعار */
+    header, .top-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        padding: 15px 10px;
+    }
+
+    /* بطاقة المتدرب */
+    .athlete-card {
+        padding: 14px !important;
+        margin-bottom: 12px !important;
+        border-radius: 14px !important;
+    }
+
+    /* رأس البطاقة: تنظيم الاسم والأزرار عمودياً */
+    .card-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    .card-header > div:first-child {
+        text-align: right !important;
+    }
+
+    /* صف أزرار التحكم بالبطاقة لتناسب لمس الأصابع */
+    .card-header > div:last-child {
+        width: 100%;
+        align-items: stretch !important;
+    }
+
+    .card-header .status-tag {
+        align-self: flex-start;
+        margin-bottom: 5px;
+    }
+
+    .card-header div[style*="display: flex; gap:"] {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px !important;
+        width: 100%;
+    }
+
+    .card-header button {
+        padding: 9px 5px !important;
+        font-size: 0.85rem !important;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* شبكة القياسات (الوزن والخصر والهدف) */
+    .metrics-row {
+        background: #151c2c;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px !important;
+    }
+
+    /* النوافذ المنبثقة لتأخذ حجم الشاشة بنعومة */
+    .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        padding: 18px !important;
+        max-height: 85vh !important;
+        border-radius: 16px !important;
+    }
+
+    .modal-header h3 {
+        font-size: 1.05rem !important;
+    }
+
+    /* الحقول والقوائم المنسدلة */
+    input, select, textarea {
+        font-size: 16px !important; /* يمنع متصفح الآيفون من عمل Zoom إجباري عند الكتابة */
+        padding: 10px !important;
+    }
+}
