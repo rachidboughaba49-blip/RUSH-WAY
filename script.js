@@ -35,82 +35,92 @@ let currentSelectedMuscle = 'chest';
  */
 const EXERCISE_DATABASE = {
   chest: [
-    { id: 'ex_c1', name: 'Incline Dumbbell Press', nameAr: 'ضغط دمبلز مائل للأعلى', muscleGroup: 'الصدر', targetHead: 'الألياف العلوية (Clavicular Head)', volume: '3-4 مجموعات × 8-10 تكرار' },
-    { id: 'ex_c2', name: 'Flat Barbell Bench Press', nameAr: 'ضغط بار مستوي كلاسيكي', muscleGroup: 'الصدر', targetHead: 'وسط وأسفل الصدر (Sternal Head)', volume: '3 مجموعات × 6-8 تكرار (RPE 8)' },
-    { id: 'ex_c3', name: 'Low-to-High Cable Flyes', nameAr: 'تجميع كابل سفلي لمائل', muscleGroup: 'الصدر', targetHead: 'الصدر العلوي والتقريب المائل', volume: '3 مجموعات × 12-15 تكرار' },
-    { id: 'ex_c4', name: 'Weighted Chest Dips', nameAr: 'متوازي بالوزن مع ميلان للأمام', muscleGroup: 'الصدر', targetHead: 'الحافة السفلية للصدر (Costal Head)', volume: '3 مجموعات × 8-12 تكرار' },
-    { id: 'ex_c5', name: 'Pec Deck Fly Machine', nameAr: 'فراشة الصدر على الجهاز مع ثبات ثانيتين', muscleGroup: 'الصدر', targetHead: 'عزل ألياف الصدر وانقباض قمي', volume: '3 مجموعات × 12-15 تكرار' }
+    { id: 'ex_c1', name: 'Incline Dumbbell Press', nameAr: 'ضغط دمبلز مائل للأعلى', muscleGroup: 'الصدر', targetHead: 'الألياف العلوية (Clavicular Head)', volume: '3-4 مجموعات × 8-10 تكرار', equipment: 'dumbbell', biomech: 'زاوية بنش 30 درجة مع نزول متحكم به لعصر أعلى الصدر' },
+    { id: 'ex_c2', name: 'Flat Barbell Bench Press', nameAr: 'ضغط بار مستوي كلاسيكي', muscleGroup: 'الصدر', targetHead: 'وسط وأسفل الصدر (Sternal Head)', volume: '3 مجموعات × 6-8 تكرار (RPE 8)', equipment: 'barbell', biomech: 'استقرار الأكتاف وتراجع لوحي الكتف مع قوس طبيعي خفيف' },
+    { id: 'ex_c3', name: 'Low-to-High Cable Flyes', nameAr: 'تجميع كابل سفلي لمائل', muscleGroup: 'الصدر', targetHead: 'الصدر العلوي والتقريب المائل', volume: '3 مجموعات × 12-15 تكرار', equipment: 'cable', biomech: 'شد مستمر عبر كامل المدى الحركي مع ثبات قمي ثانيتين' },
+    { id: 'ex_c4', name: 'Weighted Chest Dips', nameAr: 'متوازي بالوزن مع ميلان للأمام', muscleGroup: 'الصدر', targetHead: 'الحافة السفلية للصدر (Costal Head)', volume: '3 مجموعات × 8-12 تكرار', equipment: 'bodyweight', biomech: 'ميل الجذع 30 درجة للأمام لتركيز الحمل بعيداً عن الترايسبس' },
+    { id: 'ex_c5', name: 'Pec Deck Fly Machine', nameAr: 'فراشة الصدر على الجهاز مع ثبات ثانيتين', muscleGroup: 'الصدر', targetHead: 'عزل ألياف الصدر وانقباض قمي', volume: '3 مجموعات × 12-15 تكرار', equipment: 'machine', biomech: 'كوع نصف منثنٍ مع عصر الألياف في منتصف الحركة' }
   ],
   front_delts: [
-    { id: 'ex_fd1', name: 'Seated Dumbbell Shoulder Press', nameAr: 'ضغط دمبلز جالس للأكتاف', muscleGroup: 'الأكتاف', targetHead: 'الكتف الأمامي (Anterior Deltoid)', volume: '3-4 مجموعات × 8-10 تكرار' },
-    { id: 'ex_fd2', name: 'Cable Lateral Raises', nameAr: 'رفرفة كابل جانبية خلف الظهر', muscleGroup: 'الأكتاف', targetHead: 'الكتف الجانبي (Lateral Deltoid)', volume: '4 مجموعات × 12-15 تكرار' },
-    { id: 'ex_fd3', name: 'Standing Overhead Barbell Press', nameAr: 'ضغط عسكري بالبار واقف', muscleGroup: 'الأكتاف', targetHead: 'الكتف الأمامي والكتلة الشاملة', volume: '3 مجموعات × 6-8 تكرار' },
-    { id: 'ex_fd4', name: 'Dumbbell Incline Y-Raise', nameAr: 'رفرفة Y على بنش مائل مسنود', muscleGroup: 'الأكتاف', targetHead: 'الكتف الجانبي والأعلى', volume: '3 مجموعات × 12-15 تكرار' }
+    { id: 'ex_fd1', name: 'Seated Dumbbell Shoulder Press', nameAr: 'ضغط دمبلز جالس للأكتاف', muscleGroup: 'الأكتاف', targetHead: 'الكتف الأمامي (Anterior Deltoid)', volume: '3-4 مجموعات × 8-10 تكرار', equipment: 'dumbbell', biomech: 'إبقاء الكوع بزاوية 45 درجة أمام الجسم لحماية الكفة المدورة' },
+    { id: 'ex_fd2', name: 'Cable Lateral Raises', nameAr: 'رفرفة كابل جانبية خلف الظهر', muscleGroup: 'الأكتاف', targetHead: 'الكتف الجانبي (Lateral Deltoid)', volume: '4 مجموعات × 12-15 تكرار', equipment: 'cable', biomech: 'مقاومة مستمرة مع مسار مائل خفيف للأمام' },
+    { id: 'ex_fd3', name: 'Standing Overhead Barbell Press', nameAr: 'ضغط عسكري بالبار واقف', muscleGroup: 'الأكتاف', targetHead: 'الكتف الأمامي والكتلة الشاملة', volume: '3 مجموعات × 6-8 تكرار', equipment: 'barbell', biomech: 'شد الكور والمؤخرة مع دفع رأسي مستقيم وثبات الرأس' },
+    { id: 'ex_fd4', name: 'Dumbbell Incline Y-Raise', nameAr: 'رفرفة Y على بنش مائل مسنود', muscleGroup: 'الأكتاف', targetHead: 'الكتف الجانبي والأعلى', volume: '3 مجموعات × 12-15 تكرار', equipment: 'dumbbell', biomech: 'رفع بزاوية 30 درجة خارجياً لتحفيز الألياف الجانبية المعزولة' }
   ],
   rear_delts: [
-    { id: 'ex_rd1', name: 'Reverse Pec Deck Fly', nameAr: 'فراشة خلفية للأكتاف على الجهاز', muscleGroup: 'الأكتاف الخلفية', targetHead: 'الكتف الخلفي (Posterior Deltoid)', volume: '4 مجموعات × 12-15 تكرار' },
-    { id: 'ex_rd2', name: 'Cable Face Pulls with External Rotation', nameAr: 'سحب حبل كابل للوجه مع دوران خارجي', muscleGroup: 'الأكتاف الخلفية', targetHead: 'الكتف الخلفي والروتاتور كف', volume: '3-4 مجموعات × 15-20 تكرار' },
-    { id: 'ex_rd3', name: 'Incline Dumbbell Rear Lateral Raise', nameAr: 'رفرفة دمبلز خلفية على بنش مائل', muscleGroup: 'الأكتاف الخلفية', targetHead: 'الكتف الخلفي المعزول', volume: '3 مجموعات × 12-15 تكرار' }
+    { id: 'ex_rd1', name: 'Reverse Pec Deck Fly', nameAr: 'فراشة خلفية للأكتاف على الجهاز', muscleGroup: 'الأكتاف الخلفية', targetHead: 'الكتف الخلفي (Posterior Deltoid)', volume: '4 مجموعات × 12-15 تكرار', equipment: 'machine', biomech: 'تثبيت اللوحين والتركيز على دفع المرفقين للخارج وليس للخلف' },
+    { id: 'ex_rd2', name: 'Cable Face Pulls with External Rotation', nameAr: 'سحب حبل كابل للوجه مع دوران خارجي', muscleGroup: 'الأكتاف الخلفية', targetHead: 'الكتف الخلفي والروتاتور كف', volume: '3-4 مجموعات × 15-20 تكرار', equipment: 'cable', biomech: 'سحب الحبل لمستوى الجبهة مع قيادة اليدين أعلى من المرفقين' },
+    { id: 'ex_rd3', name: 'Incline Dumbbell Rear Lateral Raise', nameAr: 'رفرفة دمبلز خلفية على بنش مائل', muscleGroup: 'الأكتاف الخلفية', targetHead: 'الكتف الخلفي المعزول', volume: '3 مجموعات × 12-15 تكرار', equipment: 'dumbbell', biomech: 'صدر مسنود على البنش لإلغاء أي دفع بالجاذبية أو الجذع' }
   ],
   traps: [
-    { id: 'ex_tr1', name: 'Dumbbell Shrugs with 2s Squeeze', nameAr: 'شراجز دمبلز مع عصر قمي ثانيتين', muscleGroup: 'الترابيس', targetHead: 'الترابيس العلوية (Upper Trapezius)', volume: '4 مجموعات × 10-12 تكرار' },
-    { id: 'ex_tr2', name: 'Chest-Supported Incline Kelso Shrugs', nameAr: 'شراجز كيلسو على بنش مائل مسنود', muscleGroup: 'الترابيس', targetHead: 'الترابيس الوسطى والسفلية', volume: '3 مجموعات × 12-15 تكرار' }
+    { id: 'ex_tr1', name: 'Dumbbell Shrugs with 2s Squeeze', nameAr: 'شراجز دمبلز مع عصر قمي ثانيتين', muscleGroup: 'الترابيس', targetHead: 'الترابيس العلوية (Upper Trapezius)', volume: '4 مجموعات × 10-12 تكرار', equipment: 'dumbbell', biomech: 'رفع رأسي نقي بدون دوران المفاصل مع ثبات ثانيتين في القمة' },
+    { id: 'ex_tr2', name: 'Chest-Supported Incline Kelso Shrugs', nameAr: 'شراجز كيلسو على بنش مائل مسنود', muscleGroup: 'الترابيس', targetHead: 'الترابيس الوسطى والسفلية', volume: '3 مجموعات × 12-15 تكرار', equipment: 'dumbbell', biomech: 'سحب لوحي الكتف للخلف مع الحفاظ على استقامة الذراعين' }
   ],
   lats: [
-    { id: 'ex_l1', name: 'Neutral-Grip Lat Pulldown', nameAr: 'سحب ظهر قبضة محايدة للصدر', muscleGroup: 'الظهر / المجنص', targetHead: 'ألياف المجنص السفلية (Iliac Lat)', volume: '3-4 مجموعات × 8-10 تكرار' },
-    { id: 'ex_l2', name: 'Single-Arm Half-Kneeling Cable Pulldown', nameAr: 'سحب كابل فردي للظهر في وضع الركوع', muscleGroup: 'الظهر / المجنص', targetHead: 'عزل المجنص بدون مساعدة القطنية', volume: '3 مجموعات × 10-12 تكرار' },
-    { id: 'ex_l3', name: 'Chest-Supported T-Bar Row', nameAr: 'سحب T-Bar مسنود الصدر', muscleGroup: 'الظهر', targetHead: 'سماكة الظهر والوسط', volume: '3-4 مجموعات × 8-10 تكرار' },
-    { id: 'ex_l4', name: 'Seated Cable Row (Wide Grip)', nameAr: 'سحب كابل أرضي قبضة واسعة', muscleGroup: 'الظهر', targetHead: 'أعلى الظهر والترابيس الوسطى', volume: '3 مجموعات × 10-12 تكرار' }
+    { id: 'ex_l1', name: 'Neutral-Grip Lat Pulldown', nameAr: 'سحب ظهر قبضة محايدة للصدر', muscleGroup: 'الظهر / المجنص', targetHead: 'ألياف المجنص السفلية (Iliac Lat)', volume: '3-4 مجموعات × 8-10 تكرار', equipment: 'cable', biomech: 'قيادة الحركة بالمرفقين باتجاه الجيوب لزيادة قصر ألياف المجنص' },
+    { id: 'ex_l2', name: 'Single-Arm Half-Kneeling Cable Pulldown', nameAr: 'سحب كابل فردي للظهر في وضع الركوع', muscleGroup: 'الظهر / المجنص', targetHead: 'عزل المجنص بدون مساعدة القطنية', volume: '3 مجموعات × 10-12 تكرار', equipment: 'cable', biomech: 'استطالة علوية كاملة ومحاذاة كابل مع مسار الألياف العضلية' },
+    { id: 'ex_l3', name: 'Chest-Supported T-Bar Row', nameAr: 'سحب T-Bar مسنود الصدر', muscleGroup: 'الظهر', targetHead: 'سماكة الظهر والوسط', volume: '3-4 مجموعات × 8-10 تكرار', equipment: 'machine', biomech: 'صدر مثبت تماماً وتفجير بالسحب مع رجوع بطيء' },
+    { id: 'ex_l4', name: 'Seated Cable Row (Wide Grip)', nameAr: 'سحب كابل أرضي قبضة واسعة', muscleGroup: 'الظهر', targetHead: 'أعلى الظهر والترابيس الوسطى', volume: '3 مجموعات × 10-12 تكرار', equipment: 'cable', biomech: 'تقريب لوحي الكتف عند الوصول للبطن ومدى حركي كامل' }
   ],
   lower_back: [
-    { id: 'ex_lb1', name: '45-Degree Hyperextensions', nameAr: 'تمديد ظهر بزاوية 45 مع حمل وزن', muscleGroup: 'أسفل الظهر', targetHead: 'الانتصاب الشوكي (Erector Spinae)', volume: '3 مجموعات × 12-15 تكرار' },
-    { id: 'ex_lb2', name: 'Romanian Deadlift (Dumbbell)', nameAr: 'ديدليفت روماني بالدمبلز', muscleGroup: 'السلسلة الخلفية', targetHead: 'القطنية والخلفيات والأرداف', volume: '3-4 مجموعات × 8-10 تكرار' }
+    { id: 'ex_lb1', name: '45-Degree Hyperextensions', nameAr: 'تمديد ظهر بزاوية 45 مع حمل وزن', muscleGroup: 'أسفل الظهر', targetHead: 'الانتصاب الشوكي (Erector Spinae)', volume: '3 مجموعات × 12-15 تكرار', equipment: 'bodyweight', biomech: 'رفع الجذع حتى استواء خط الجسم دون فرط تقويس الفقرات' },
+    { id: 'ex_lb2', name: 'Romanian Deadlift (Dumbbell)', nameAr: 'ديدليفت روماني بالدمبلز', muscleGroup: 'السلسلة الخلفية', targetHead: 'القطنية والخلفيات والأرداف', volume: '3-4 مجموعات × 8-10 تكرار', equipment: 'dumbbell', biomech: 'دفع المؤخرة للخلف بمفصل الحوض مع بقاء الدمبلز ملاصقة للساقين' }
   ],
   biceps: [
-    { id: 'ex_b1', name: 'Incline Dumbbell Bicep Curl', nameAr: 'كيرل دمبلز على بنش مائل بمدى استطالة كامل', muscleGroup: 'البايسبس', targetHead: 'الرأس الطويل (Long Head Stretch)', volume: '3-4 مجموعات × 10-12 تكرار' },
-    { id: 'ex_b2', name: 'EZ-Bar Preacher Curl', nameAr: 'كيرل لاري سكوت بالبار المتعرج', muscleGroup: 'البايسبس', targetHead: 'الرأس القصير (Short Head Peak)', volume: '3 مجموعات × 8-10 تكرار' },
-    { id: 'ex_b3', name: 'Cross-Body Hammer Curls', nameAr: 'كيرل مطرقة متقاطع على الصدر', muscleGroup: 'البايسبس والساعد', targetHead: 'العضلة العضدية (Brachialis)', volume: '3 مجموعات × 10-12 تكرار' }
+    { id: 'ex_b1', name: 'Incline Dumbbell Bicep Curl', nameAr: 'كيرل دمبلز على بنش مائل بمدى استطالة كامل', muscleGroup: 'البايسبس', targetHead: 'الرأس الطويل (Long Head Stretch)', volume: '3-4 مجموعات × 10-12 تكرار', equipment: 'dumbbell', biomech: 'استطالة خلفية كاملة مع كبح النزول وتدوير خارجي للمعصم' },
+    { id: 'ex_b2', name: 'EZ-Bar Preacher Curl', nameAr: 'كيرل لاري سكوت بالبار المتعرج', muscleGroup: 'البايسبس', targetHead: 'الرأس القصير (Short Head Peak)', volume: '3 مجموعات × 8-10 تكرار', equipment: 'barbell', biomech: 'تثبيت الإبطين على المسند وعزل كامل بدون حركة تأرجح' },
+    { id: 'ex_b3', name: 'Cross-Body Hammer Curls', nameAr: 'كيرل مطرقة متقاطع على الصدر', muscleGroup: 'البايسبس والساعد', targetHead: 'العضلة العضدية (Brachialis)', volume: '3 مجموعات × 10-12 تكرار', equipment: 'dumbbell', biomech: 'قبضة رأسية محايدة وسحب باتجاه الكتف المعاكس لسماكة الذراع' }
   ],
   triceps: [
-    { id: 'ex_tri1', name: 'Overhead Dual-Rope Cable Extension', nameAr: 'تمديد كابل علوي بالحبل المزدوج', muscleGroup: 'الترايسبس', targetHead: 'الرأس الطويل (Long Head Stretch)', volume: '3-4 مجموعات × 10-12 تكرار' },
-    { id: 'ex_tri2', name: 'V-Bar Cable Pushdown', nameAr: 'ضغط كابل للأسفل بمسطرة V', muscleGroup: 'الترايسبس', targetHead: 'الرأس الجانبي (Lateral Head)', volume: '3 مجموعات × 10-12 تكرار' },
-    { id: 'ex_tri3', name: 'Dips between Benches / Parallel Bars', nameAr: 'غطس متوازي للترايسبس', muscleGroup: 'الترايسبس', targetHead: 'الكتلة الشاملة للذراع الخلفي', volume: '3 مجموعات × 10-12 تكرار' }
+    { id: 'ex_tri1', name: 'Overhead Dual-Rope Cable Extension', nameAr: 'تمديد كابل علوي بالحبل المزدوج', muscleGroup: 'الترايسبس', targetHead: 'الرأس الطويل (Long Head Stretch)', volume: '3-4 مجموعات × 10-12 تكرار', equipment: 'cable', biomech: 'فتح الحبل عند فرد الكوعين لضمان انقباض الرأس الطويل' },
+    { id: 'ex_tri2', name: 'V-Bar Cable Pushdown', nameAr: 'ضغط كابل للأسفل بمسطرة V', muscleGroup: 'الترايسبس', targetHead: 'الرأس الجانبي (Lateral Head)', volume: '3 مجموعات × 10-12 تكرار', equipment: 'cable', biomech: 'تثبيت الكوعين بجانب الأضلاع مع إغلاق تام في أسفل الحركة' },
+    { id: 'ex_tri3', name: 'Dips between Benches / Parallel Bars', nameAr: 'غطس متوازي للترايسبس', muscleGroup: 'الترايسبس', targetHead: 'الكتلة الشاملة للذراع الخلفي', volume: '3 مجموعات × 10-12 تكرار', equipment: 'bodyweight', biomech: 'جذع مستقيم عمودي مع نزول بزاوية 90 درجة لمفصل الكوع' }
   ],
   forearms: [
-    { id: 'ex_fo1', name: 'Reverse EZ-Bar Curl', nameAr: 'كيرل قبضة مقلوبة بالبار المتعرج', muscleGroup: 'الساعد', targetHead: 'العضدية الكعبرية (Brachioradialis)', volume: '3 مجموعات × 12-15 تكرار' },
-    { id: 'ex_fo2', name: 'Behind-the-Back Barbell Wrist Curl', nameAr: 'ثني معصم بالبار خلف الظهر', muscleGroup: 'الساعد والقبضة', targetHead: 'قابضات الأصابع والمعصم', volume: '3 مجموعات × 15-20 تكرار' }
+    { id: 'ex_fo1', name: 'Reverse EZ-Bar Curl', nameAr: 'كيرل قبضة مقلوبة بالبار المتعرج', muscleGroup: 'الساعد', targetHead: 'العضدية الكعبرية (Brachioradialis)', volume: '3 مجموعات × 12-15 تكرار', equipment: 'barbell', biomech: 'راحة اليد لأسفل مع رفع بطيء للتركيز على العضلة الكعبرية' },
+    { id: 'ex_fo2', name: 'Behind-the-Back Barbell Wrist Curl', nameAr: 'ثني معصم بالبار خلف الظهر', muscleGroup: 'الساعد والقبضة', targetHead: 'قابضات الأصابع والمعصم', volume: '3 مجموعات × 15-20 تكرار', equipment: 'barbell', biomech: 'حركة معصم نقية مع فرد الأصابع طفيفاً لزيادة المدى' }
   ],
   abs: [
-    { id: 'ex_ab1', name: 'Hanging Straight Leg Raise', nameAr: 'رفع الأرجل مستقيمة على العقلة', muscleGroup: 'البطن والكور', targetHead: 'البطن السفلية ومثبتات الحوض', volume: '3-4 مجموعات × 12-15 تكرار' },
-    { id: 'ex_ab2', name: 'Kneeling Cable Crunch', nameAr: 'طحن كابل للبطن في وضع الركوع', muscleGroup: 'البطن والكور', targetHead: 'البطن المستقيمة (Rectus Abdominis)', volume: '3 مجموعات × 12-15 تكرار' },
-    { id: 'ex_ab3', name: 'Cable Woodchopper', nameAr: 'تمرين تقطيع الخشب بالكابل', muscleGroup: 'البطن والكور', targetHead: 'العضلات المائلة (Obliques)', volume: '3 مجموعات × 12-15 تكرار لكل جهة' }
+    { id: 'ex_ab1', name: 'Hanging Straight Leg Raise', nameAr: 'رفع الأرجل مستقيمة على العقلة', muscleGroup: 'البطن والكور', targetHead: 'البطن السفلية ومثبتات الحوض', volume: '3-4 مجموعات × 12-15 تكرار', equipment: 'bodyweight', biomech: 'رفع الحوض للأعلى باتجاه الأضلاع وليس مجرد رفع الفخذين' },
+    { id: 'ex_ab2', name: 'Kneeling Cable Crunch', nameAr: 'طحن كابل للبطن في وضع الركوع', muscleGroup: 'البطن والكور', targetHead: 'البطن المستقيمة (Rectus Abdominis)', volume: '3 مجموعات × 12-15 تكرار', equipment: 'cable', biomech: 'ثني العمود الفقري عمداً مع تقريب المرفقين للركبتين وتفريغ الزفير' },
+    { id: 'ex_ab3', name: 'Cable Woodchopper', nameAr: 'تمرين تقطيع الخشب بالكابل', muscleGroup: 'البطن والكور', targetHead: 'العضلات المائلة (Obliques)', volume: '3 مجموعات × 12-15 تكرار لكل جهة', equipment: 'cable', biomech: 'دوران نابع من الجذع مع تثبيت نسبي لمفصل الحوض' }
   ],
   quads: [
-    { id: 'ex_q1', name: 'Heels-Elevated Hack Squat', nameAr: 'هاك سكوات مع كعوب مرفوعة وعمق كامل', muscleGroup: 'الفخذ الأمامي', targetHead: 'عزل الكوادز (Vastus Lateralis/Medialis)', volume: '3-4 مجموعات × 8-10 تكرار' },
-    { id: 'ex_q2', name: 'Seated Leg Extension with 1s Pause', nameAr: 'فرد أرجل جالس على الجهاز مع ثبات ثانية', muscleGroup: 'الفخذ الأمامي', targetHead: 'المستقيمة الفخذية (Rectus Femoris)', volume: '3 مجموعات × 12-15 تكرار' },
-    { id: 'ex_q3', name: 'Dumbbell Bulgarian Split Squat', nameAr: 'سكوات بلغاري بالدمبلز', muscleGroup: 'الفخذ الأمامي والأرداف', targetHead: 'القوة الأحادية وتوازن الساقين', volume: '3 مجموعات × 10-12 تكرار لكل ساق' },
-    { id: 'ex_q4', name: 'Barbell Front Squat', nameAr: 'سكوات أمامي بالبار الأولمبي', muscleGroup: 'الفخذ الأمامي', targetHead: 'الحمل المباشر على الكوادز والكور', volume: '3 مجموعات × 6-8 تكرار' }
+    { id: 'ex_q1', name: 'Heels-Elevated Hack Squat', nameAr: 'هاك سكوات مع كعوب مرفوعة وعمق كامل', muscleGroup: 'الفخذ الأمامي', targetHead: 'عزل الكوادز (Vastus Lateralis/Medialis)', volume: '3-4 مجموعات × 8-10 تكرار', equipment: 'machine', biomech: 'دفع الركبتين للأمام فوق أطراف الأصابع بمدى عميق لاستطالة ألياف الكوادز' },
+    { id: 'ex_q2', name: 'Seated Leg Extension with 1s Pause', nameAr: 'فرد أرجل جالس على الجهاز مع ثبات ثانية', muscleGroup: 'الفخذ الأمامي', targetHead: 'المستقيمة الفخذية (Rectus Femoris)', volume: '3 مجموعات × 12-15 تكرار', equipment: 'machine', biomech: 'ثبات ثانية في القمة ونزول 3 ثوانٍ بطيئة لتحفيز الضخامة' },
+    { id: 'ex_q3', name: 'Dumbbell Bulgarian Split Squat', nameAr: 'سكوات بلغاري بالدمبلز', muscleGroup: 'الفخذ الأمامي والأرداف', targetHead: 'القوة الأحادية وتوازن الساقين', volume: '3 مجموعات × 10-12 تكرار لكل ساق', equipment: 'dumbbell', biomech: 'التركيز على دفع الساق الأمامية مع حوض متوازن' },
+    { id: 'ex_q4', name: 'Barbell Front Squat', nameAr: 'سكوات أمامي بالبار الأولمبي', muscleGroup: 'الفخذ الأمامي', targetHead: 'الحمل المباشر على الكوادز والكور', volume: '3 مجموعات × 6-8 تكرار', equipment: 'barbell', biomech: 'مرفقان مرتفعان وجذع رأسي لتوزيع الثقل مباشرة على الفخذين' }
   ],
   hamstrings: [
-    { id: 'ex_h1', name: 'Seated Leg Curl with Full Hip Flexion', nameAr: 'ثني أرجل جالس مع استطالة حوض كاملة', muscleGroup: 'الفخذ الخلفي', targetHead: 'عزل الخلفيات (Semimembranosus/Biceps)', volume: '3-4 مجموعات × 10-12 تكرار' },
-    { id: 'ex_h2', name: 'Lying Leg Curl', nameAr: 'ثني أرجل مستلقي على الجهاز', muscleGroup: 'الفخذ الخلفي', targetHead: 'قمة انقباض الفخذ الخلفي', volume: '3 مجموعات × 10-12 تكرار' },
-    { id: 'ex_h3', name: 'Dumbbell Stiff-Legged Deadlift', nameAr: 'ديدليفت بأرجل شبه مفرودة بالدمبلز', muscleGroup: 'الفخذ الخلفي', targetHead: 'الاستطالة تحت الحمل والأوتار', volume: '3 مجموعات × 8-10 تكرار' }
+    { id: 'ex_h1', name: 'Seated Leg Curl with Full Hip Flexion', nameAr: 'ثني أرجل جالس مع استطالة حوض كاملة', muscleGroup: 'الفخذ الخلفي', targetHead: 'عزل الخلفيات (Semimembranosus/Biceps)', volume: '3-4 مجموعات × 10-12 تكرار', equipment: 'machine', biomech: 'ميل طفيف للأمام لزيادة استطالة أصل وتر الفخذ الخلفي بالحوض' },
+    { id: 'ex_h2', name: 'Lying Leg Curl', nameAr: 'ثني أرجل مستلقي على الجهاز', muscleGroup: 'الفخذ الخلفي', targetHead: 'قمة انقباض الفخذ الخلفي', volume: '3 مجموعات × 10-12 تكرار', equipment: 'machine', biomech: 'تثبيت الحوض على المسند لتجنب مساعدة القطنية أثناء الثني' },
+    { id: 'ex_h3', name: 'Dumbbell Stiff-Legged Deadlift', nameAr: 'ديدليفت بأرجل شبه مفرودة بالدمبلز', muscleGroup: 'الفخذ الخلفي', targetHead: 'الاستطالة تحت الحمل والأوتار', volume: '3 مجموعات × 8-10 تكرار', equipment: 'dumbbell', biomech: 'انحناء بمفصل الورك مع ثني ركبة طفيف جداً وتمدد عميق' }
   ],
   glutes: [
-    { id: 'ex_g1', name: 'Barbell Hip Thrust with 2s Squeeze', nameAr: 'دفع حوض بالبار الأولمبي مع ثبات ثانيتين', muscleGroup: 'الأرداف', targetHead: 'العضلة الإليوية الكبرى (Gluteus Maximus)', volume: '3-4 مجموعات × 8-10 تكرار' },
-    { id: 'ex_g2', name: 'Cable Glute Kickback', nameAr: 'ركل كابل خلفي للأرداف', muscleGroup: 'الأرداف', targetHead: 'عزل الأرداف العلوية والجانبية', volume: '3 مجموعات × 12-15 تكرار' }
+    { id: 'ex_g1', name: 'Barbell Hip Thrust with 2s Squeeze', nameAr: 'دفع حوض بالبار الأولمبي مع ثبات ثانيتين', muscleGroup: 'الأرداف', targetHead: 'العضلة الإليوية الكبرى (Gluteus Maximus)', volume: '3-4 مجموعات × 8-10 تكرار', equipment: 'barbell', biomech: 'قصبة الساق عمودية في قمة الرفع مع عصر قوي للمؤخرة وتثبيت الرقبة' },
+    { id: 'ex_g2', name: 'Cable Glute Kickback', nameAr: 'ركل كابل خلفي للأرداف', muscleGroup: 'الأرداف', targetHead: 'عزل الأرداف العلوية والجانبية', volume: '3 مجموعات × 12-15 تكرار', equipment: 'cable', biomech: 'حركة نصف دائرية للخارج بزاوية 30 درجة لاستهداف الألياف العلوية' }
   ],
   calves: [
-    { id: 'ex_cal1', name: 'Standing Machine Calf Raise', nameAr: 'رفع سمانة واقف مع تمدد كامل وتوقف ثانيتين', muscleGroup: 'السمانة / البطات', targetHead: 'الرؤوس الخارجية للسمانة (Gastrocnemius)', volume: '4 مجموعات × 10-12 تكرار' },
-    { id: 'ex_cal2', name: 'Seated Calf Raise', nameAr: 'رفع سمانة جالس على الجهاز', muscleGroup: 'السمانة / البطات', targetHead: 'العضلة النعلية العميقة (Soleus)', volume: '3 مجموعات × 15-20 تكرار' }
+    { id: 'ex_cal1', name: 'Standing Machine Calf Raise', nameAr: 'رفع سمانة واقف مع تمدد كامل وتوقف ثانيتين', muscleGroup: 'السمانة / البطات', targetHead: 'الرؤوس الخارجية للسمانة (Gastrocnemius)', volume: '4 مجموعات × 10-12 تكرار', equipment: 'machine', biomech: 'توقف ثانيتين في أسفل التمدد لإلغاء مرونة وتر أخيل واستدعاء الألياف العضلية' },
+    { id: 'ex_cal2', name: 'Seated Calf Raise', nameAr: 'رفع سمانة جالس على الجهاز', muscleGroup: 'السمانة / البطات', targetHead: 'العضلة النعلية العميقة (Soleus)', volume: '3 مجموعات × 15-20 تكرار', equipment: 'machine', biomech: 'ثني الركبة بزاوية 90 درجة يضع الحمل بالكامل على العضلة النعلية' }
+  ],
+  neck: [
+    { id: 'ex_nk1', name: 'Lying Neck Extension with Plate', nameAr: 'تمديد رقبة مستلقي مع وزن خفيف', muscleGroup: 'الرقبة', targetHead: 'عضلات الرقبة الخلفية وحماية الفقرات', volume: '3 مجموعات × 15-20 تكرار', equipment: 'bodyweight', biomech: 'مدى حركي بطيء ومتحكم فيه جداً مع وزن خفيف أو مقاومة اليدين' },
+    { id: 'ex_nk2', name: 'Lying Neck Flexion', nameAr: 'ثني رقبة للأمام مع وسادة', muscleGroup: 'الرقبة', targetHead: 'العضلة القصية الترقوية الحلمية (SCM)', volume: '3 مجموعات × 15-20 تكرار', equipment: 'bodyweight', biomech: 'تقريب الذقن للصدر ببطء دون شد المفاصل المفاجئ' }
   ]
 };
+
+// Muscle Aliases mapping
+EXERCISE_DATABASE.shoulders = EXERCISE_DATABASE.front_delts;
+EXERCISE_DATABASE.reardelts = EXERCISE_DATABASE.rear_delts;
 
 // Muscle Labels Dictionary for UI
 const MUSCLE_LABELS = {
   chest: 'الصدر (Chest)',
   front_delts: 'الأكتاف (Delts)',
+  shoulders: 'الأكتاف (Delts)',
   rear_delts: 'الأكتاف الخلفية (Rear Delts)',
+  reardelts: 'الأكتاف الخلفية (Rear Delts)',
   traps: 'الترابيس (Traps)',
   lats: 'الظهر / المجنص (Lats)',
   lower_back: 'أسفل الظهر (Lower Back)',
@@ -121,7 +131,97 @@ const MUSCLE_LABELS = {
   quads: 'الفخذ الأمامي (Quads)',
   hamstrings: 'الفخذ الخلفي (Hamstrings)',
   glutes: 'الأرداف (Glutes)',
-  calves: 'السمانة (Calves)'
+  calves: 'السمانة (Calves)',
+  neck: 'عضلات الرقبة (Neck)'
+};
+
+// Anatomical Biomechanics and Fiber Focus Dictionary
+const ANATOMICAL_FOCUS_DATA = {
+  chest: {
+    title: 'عضلات الصدر (Pectoralis Major & Minor)',
+    focus: 'الألياف الترقوية العلوية (Clavicular) والقصية الوسطى والسفلية (Sternal)',
+    biomech: 'استطالة عميقة تحت الحمل الميكانيكي مع زوايا دفع متعددة (مائل، مستوي، تجميع كابل) وعصر قمي.'
+  },
+  front_delts: {
+    title: 'عضلات الأكتاف (Anterior & Lateral Deltoids)',
+    focus: 'الرأس الأمامي والجانبي لعضلة الدالية',
+    biomech: 'دفع رأسي ورفرفة جانبية مع إبقاء الكوع في مستوى الكتف لتقليل إجهاد أوتار الكفة المدورة.'
+  },
+  shoulders: {
+    title: 'عضلات الأكتاف (Deltoids)',
+    focus: 'الرأس الأمامي والجانبي لعضلة الدالية',
+    biomech: 'دفع رأسي ورفرفة جانبية مع إبقاء الكوع في مستوى الكتف لتقليل إجهاد أوتار الكفة المدورة.'
+  },
+  rear_delts: {
+    title: 'الأكتاف الخلفية (Posterior Deltoid)',
+    focus: 'الرأس الخلفي للكتف وعضلات الكفة المدورة (Rotator Cuff)',
+    biomech: 'سحب بحبل للوجه وفراشة عكسية مع دوران خارجي للمعصم لعزل الألياف الخلفية بأمان.'
+  },
+  reardelts: {
+    title: 'الأكتاف الخلفية (Posterior Deltoid)',
+    focus: 'الرأس الخلفي للكتف وعضلات الكفة المدورة',
+    biomech: 'سحب بحبل للوجه وفراشة عكسية مع دوران خارجي للمعصم لعزل الألياف الخلفية بأمان.'
+  },
+  traps: {
+    title: 'عضلات الترابيس (Trapezius Complex)',
+    focus: 'الترابيس العلوية والوسطى والسفلية',
+    biomech: 'رفع الكتفين عمودياً مع ثبات قمي ثانيتين ثم هبوط بطيء لاستطالة كاملة لألياف الترابيس.'
+  },
+  lats: {
+    title: 'عضلات المجنص والظهر (Latissimus Dorsi & Rhomboids)',
+    focus: 'ألياف المجنص العلوية والحرقفية السفلية وسماكة الظهر',
+    biomech: 'سحب رأسي وأفقي مع قيادة الحركة بالكوع باتجاه الحوض وليس بالمعصم لتعظيم التحفيز.'
+  },
+  lower_back: {
+    title: 'أسفل الظهر (Erector Spinae & Lumbar)',
+    focus: 'الانتصاب الشوكي وحزام الأمان للعمود الفقري',
+    biomech: 'تمديد الظهر والديدليفت الروماني مع ثبات الحوض والحفاظ على الانحناء الطبيعي للفقرات.'
+  },
+  biceps: {
+    title: 'عضلة البايسبس (Biceps Brachii & Brachialis)',
+    focus: 'الرأس الطويل والرأس القصير والعضلة العضدية',
+    biomech: 'ثني الكوع بمدى حركي كامل مع كبح النزول السلبي وتدوير الكف للخارج (Supination).'
+  },
+  triceps: {
+    title: 'عضلة الترايسبس (Triceps Brachii)',
+    focus: 'الرؤوس الثلاثة: الطويل والجانبي والأوسط (Horseshoe)',
+    biomech: 'فرد كامل لمفصل الكوع مع ثبات أعلى الذراع، واستخدام زوايا فوق الرأس للرأس الطويل.'
+  },
+  forearms: {
+    title: 'الساعدين وقوة القبضة (Forearms & Grip)',
+    focus: 'العضدية الكعبرية وقابضات وباسطات الأصابع والمعصم',
+    biomech: 'ثني وبسط المعصم مع حمل أوزان حرة لتعزيز عصبية القبضة واستقرار المفاصل.'
+  },
+  abs: {
+    title: 'عضلات البطن والجذع (Rectus Abdominis & Obliques)',
+    focus: 'البطن المستقيمة والعضلات المائلة ومثبتات الحوض',
+    biomech: 'تقريب عظام الحوض نحو القفص الصدري مع تفريغ الهواء عند ذروة الانقباض العضلي.'
+  },
+  quads: {
+    title: 'الفخذ الأمامي (Quadriceps Femoris)',
+    focus: 'المتسعة الإنسية (دمعة الفخذ) والوحشية والمستقيمة الفخذية',
+    biomech: 'ثني ركبة عميق مع استقرار الكعب لضمان أقصى إجهاد ميكانيكي على ألياف الكوادز.'
+  },
+  hamstrings: {
+    title: 'الفخذ الخلفي (Hamstrings Group)',
+    focus: 'العضلة الفخذية ذات الرأسين وشبه الوترية وشبه الغشائية',
+    biomech: 'ثني الركبة واستطالة الحوض (Hip Hinge) مع الحفاظ على استقامة العمود الفقري.'
+  },
+  glutes: {
+    title: 'عضلات الأرداف (Gluteus Maximus & Medius)',
+    focus: 'العضلة الإليوية الكبرى والوسطى ودعم الحوض',
+    biomech: 'دفع حوض (Hip Thrust) وركل كابل مع عصر قمي قوي لمدة ثانيتين في أعلى نقطة.'
+  },
+  calves: {
+    title: 'عضلات السمانة والبطات (Gastrocnemius & Soleus)',
+    focus: 'الرؤوس الخارجية للسمانة والعضلة النعلية العميقة',
+    biomech: 'تمدد كامل في أسفل الحركة مع صعود انفجاري وثبات ثانية ونصف في قمة الانقباض.'
+  },
+  neck: {
+    title: 'عضلات الرقبة (Cervical Spine & Neck Flexors)',
+    focus: 'العضلة القصية الترقوية الحلمية ومثبتات الرقبة العميقة',
+    biomech: 'مقاومة خفيفة مدروسة بمدى حركي بطيء ومتحكم فيه لتقوية العمود الفقري العنقي.'
+  }
 };
 
 /**
@@ -201,6 +301,9 @@ function loadAthletesFromStorage() {
 function saveAthletesToStorage() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(athletes));
+    if (typeof populateStudioAthleteDropdown === 'function') {
+      populateStudioAthleteDropdown();
+    }
   } catch (err) {
     console.error('Failed saving athletes to localStorage:', err);
   }
@@ -511,6 +614,7 @@ function openWorkoutModal(athleteId) {
 
   switchBodyView('front');
   selectMuscleGroup('chest');
+  setupModalSvgInteractivity();
   renderBuilderRoutine();
 
   openModal('modal-workout-builder');
@@ -554,12 +658,33 @@ function renderMuscleChips() {
   `).join('');
 }
 
+function setupModalSvgInteractivity() {
+  document.querySelectorAll('#svg-body-front .muscle-node, #svg-body-back .muscle-node').forEach(node => {
+    node.style.cursor = 'pointer';
+    node.onclick = (e) => {
+      e.stopPropagation();
+      const muscleKey = node.dataset.muscle || node.dataset.key;
+      if (muscleKey) {
+        selectMuscleGroup(muscleKey);
+      }
+    };
+  });
+}
+
 function selectMuscleGroup(muscleKey) {
+  if (!muscleKey) return;
+  if (muscleKey === 'shoulders') muscleKey = 'front_delts';
+  if (muscleKey === 'reardelts') muscleKey = 'rear_delts';
+
   currentSelectedMuscle = muscleKey;
 
-  // Highlight SVG paths
-  document.querySelectorAll('.muscle-node').forEach(node => {
-    node.classList.toggle('selected', node.dataset.muscle === muscleKey);
+  // Highlight modal SVG paths
+  document.querySelectorAll('#svg-body-front .muscle-node, #svg-body-back .muscle-node').forEach(node => {
+    const key = node.dataset.muscle || node.dataset.key;
+    const isMatch = (key === muscleKey) ||
+                    (muscleKey === 'front_delts' && key === 'shoulders') ||
+                    (muscleKey === 'rear_delts' && key === 'reardelts');
+    node.classList.toggle('selected', !!isMatch);
   });
 
   // Highlight Chips
@@ -1137,29 +1262,399 @@ function renderAthletesView() {
 }
 
 function renderTrainingLibraryPreview() {
-  const container = document.getElementById('training-library-preview-grid');
+  initTrainingStudio();
+}
+
+/**
+ * ============================================================================
+ * 11.B ANATOMICAL TRAINING STUDIO ENGINE & ATHLETE BUILDER INTEGRATION
+ * ============================================================================
+ */
+let currentStudioMuscle = 'chest';
+let currentStudioView = 'front';
+let currentStudioEquipmentFilter = 'all';
+let currentStudioSearchQuery = '';
+let currentStudioTargetAthleteId = '';
+
+function initTrainingStudio() {
+  populateStudioAthleteDropdown();
+  switchStudioBodyView(currentStudioView);
+  selectStudioMuscle(currentStudioMuscle);
+  setupStudioSvgInteractivity();
+}
+
+function populateStudioAthleteDropdown() {
+  const select = document.getElementById('studio-athlete-select');
+  if (!select) return;
+
+  const prevVal = currentStudioTargetAthleteId || select.value;
+  let html = `<option value="">-- وضع الاستكشاف العام / مسودة حرة --</option>`;
+
+  if (athletes && athletes.length > 0) {
+    html += athletes.map(ath => {
+      const routineCount = (ath.workoutPlan || []).length;
+      return `<option value="${ath.id}" ${ath.id === prevVal ? 'selected' : ''}>${ath.name} (${routineCount} تمارين)</option>`;
+    }).join('');
+  } else {
+    html += `<option value="" disabled>لا يوجد متدربون مسجلون حالياً (أضف متدرباً أولاً)</option>`;
+  }
+
+  select.innerHTML = html;
+  currentStudioTargetAthleteId = select.value || '';
+  updateStudioAthleteRoutineBadge();
+}
+
+function onStudioAthleteSelectChange() {
+  const select = document.getElementById('studio-athlete-select');
+  if (!select) return;
+
+  currentStudioTargetAthleteId = select.value || '';
+  updateStudioAthleteRoutineBadge();
+  renderStudioExerciseList();
+}
+
+function updateStudioAthleteRoutineBadge() {
+  const countBadge = document.getElementById('studio-athlete-routine-count');
+  const pill = document.getElementById('studio-athlete-pill');
+  const editBtn = document.getElementById('btn-open-athlete-routine') || document.getElementById('studio-btn-edit-athlete-routine');
+  
+  if (!currentStudioTargetAthleteId) {
+    if (pill) pill.style.display = 'none';
+    if (editBtn) editBtn.style.display = 'none';
+    return;
+  }
+
+  const athlete = athletes.find(a => a.id === currentStudioTargetAthleteId);
+  if (athlete) {
+    const count = (athlete.workoutPlan || []).length;
+    if (countBadge) countBadge.textContent = count;
+    if (pill) pill.style.display = 'inline-flex';
+    if (editBtn) {
+      editBtn.style.display = 'inline-flex';
+      editBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>تعديل جدول ${athlete.name.split(' ')[0]}</span>
+      `;
+    }
+  } else {
+    if (pill) pill.style.display = 'none';
+    if (editBtn) editBtn.style.display = 'none';
+  }
+}
+
+function openSelectedAthleteRoutineModal() {
+  if (currentStudioTargetAthleteId) {
+    openWorkoutModal(currentStudioTargetAthleteId);
+  }
+}
+
+function switchStudioBodyView(view) {
+  currentStudioView = view;
+
+  const btnFront = document.getElementById('studio-btn-front');
+  const btnBack = document.getElementById('studio-btn-back');
+  const svgFront = document.getElementById('studio-svg-front');
+  const svgBack = document.getElementById('studio-svg-back');
+
+  if (btnFront) btnFront.classList.toggle('active', view === 'front');
+  if (btnBack) btnBack.classList.toggle('active', view === 'back');
+
+  if (svgFront) svgFront.style.display = view === 'front' ? 'block' : 'none';
+  if (svgBack) svgBack.style.display = view === 'back' ? 'block' : 'none';
+
+  renderStudioMuscleChips();
+
+  // If currently selected muscle is not visible in current view, default to first available
+  const frontMuscles = ['chest', 'front_delts', 'biceps', 'forearms', 'abs', 'quads', 'calves', 'neck'];
+  const backMuscles = ['traps', 'rear_delts', 'lats', 'lower_back', 'triceps', 'glutes', 'hamstrings', 'calves', 'neck'];
+  const activeList = view === 'front' ? frontMuscles : backMuscles;
+
+  if (!activeList.includes(currentStudioMuscle)) {
+    selectStudioMuscle(activeList[0]);
+  } else {
+    highlightStudioSvgMuscle(currentStudioMuscle);
+  }
+}
+
+function renderStudioMuscleChips() {
+  const container = document.getElementById('studio-muscle-chip-container');
   if (!container) return;
 
-  const categories = Object.keys(EXERCISE_DATABASE);
+  const frontMuscles = [
+    { key: 'chest', label: 'الصدر' },
+    { key: 'front_delts', label: 'الأكتاف' },
+    { key: 'biceps', label: 'البايسبس' },
+    { key: 'forearms', label: 'الساعد' },
+    { key: 'abs', label: 'البطن والكور' },
+    { key: 'quads', label: 'الفخذ الأمامي' },
+    { key: 'calves', label: 'السمانة' },
+    { key: 'neck', label: 'الرقبة' }
+  ];
 
-  container.innerHTML = categories.map(catKey => {
-    const list = EXERCISE_DATABASE[catKey] || [];
+  const backMuscles = [
+    { key: 'traps', label: 'الترابيس' },
+    { key: 'rear_delts', label: 'الأكتاف الخلفية' },
+    { key: 'lats', label: 'المجنص / الظهر' },
+    { key: 'lower_back', label: 'أسفل الظهر' },
+    { key: 'triceps', label: 'الترايسبس' },
+    { key: 'glutes', label: 'الأرداف' },
+    { key: 'hamstrings', label: 'الفخذ الخلفي' },
+    { key: 'calves', label: 'السمانة' },
+    { key: 'neck', label: 'الرقبة' }
+  ];
+
+  const list = currentStudioView === 'front' ? frontMuscles : backMuscles;
+
+  container.innerHTML = list.map(item => `
+    <button type="button" 
+      class="studio-muscle-chip ${item.key === currentStudioMuscle ? 'active' : ''}" 
+      onclick="selectStudioMuscle('${item.key}')">
+      ${item.label}
+    </button>
+  `).join('');
+}
+
+function selectStudioMuscle(muscleKey) {
+  if (!muscleKey) return;
+  // Normalize alias
+  if (muscleKey === 'shoulders') muscleKey = 'front_delts';
+  if (muscleKey === 'reardelts') muscleKey = 'rear_delts';
+
+  currentStudioMuscle = muscleKey;
+
+  // Highlight in SVGs
+  highlightStudioSvgMuscle(muscleKey);
+
+  // Update chips
+  document.querySelectorAll('.studio-muscle-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(`'${muscleKey}'`));
+  });
+
+  // Update Header title & subtitle
+  const titleEl = document.getElementById('studio-active-muscle-title');
+  const subEl = document.getElementById('studio-active-muscle-sub');
+  const label = MUSCLE_LABELS[muscleKey] || muscleKey;
+  if (titleEl) titleEl.textContent = label;
+
+  const exercises = EXERCISE_DATABASE[muscleKey] || [];
+  if (subEl) subEl.textContent = `${exercises.length} تمارين معتمدة حسب الميكانيكا الحيوية`;
+
+  // Update Info Card
+  const focusData = ANATOMICAL_FOCUS_DATA[muscleKey] || {
+    title: label,
+    focus: 'استهداف الألياف العضلية الرئيسية والتحفيز الميكانيكي',
+    biomech: 'مدى حركي كامل مع التحكم في مرحلة النزول السلبي'
+  };
+
+  const infoCard = document.getElementById('studio-anatomical-info-card');
+  if (infoCard) {
+    infoCard.innerHTML = `
+      <div style="font-size: 0.88rem; font-weight: 800; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+        <span style="color: var(--primary);">🔬</span>
+        <span>التركيز الميكانيكي: ${focusData.title}</span>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 4px;">
+        <strong style="color: #e2e8f0;">الألياف المستهدفة:</strong> ${focusData.focus}
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.5;">
+        <strong style="color: #e2e8f0;">التوجيه الحركي:</strong> ${focusData.biomech}
+      </div>
+    `;
+  }
+
+  renderStudioExerciseList();
+}
+
+function highlightStudioSvgMuscle(muscleKey) {
+  document.querySelectorAll('#studio-svg-front .m-shape, #studio-svg-front .muscle-node, #studio-svg-back .m-shape, #studio-svg-back .muscle-node').forEach(node => {
+    const key = node.dataset.muscle || node.dataset.key;
+    const isMatch = (key === muscleKey) || 
+                    (muscleKey === 'front_delts' && key === 'shoulders') ||
+                    (muscleKey === 'rear_delts' && key === 'reardelts');
+    node.classList.toggle('selected', !!isMatch);
+  });
+}
+
+function setStudioEquipmentFilter(filter) {
+  currentStudioEquipmentFilter = filter;
+  document.querySelectorAll('.equipment-filter-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderStudioExerciseList();
+}
+
+function filterStudioExercises() {
+  const searchInput = document.getElementById('studio-exercise-search');
+  currentStudioSearchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  renderStudioExerciseList();
+}
+
+function renderStudioExerciseList() {
+  const container = document.getElementById('studio-exercise-list-container');
+  const countTag = document.getElementById('studio-exercise-count-tag');
+  if (!container) return;
+
+  const rawList = EXERCISE_DATABASE[currentStudioMuscle] || [];
+
+  const filtered = rawList.filter(ex => {
+    // Equipment filter
+    if (currentStudioEquipmentFilter !== 'all') {
+      if (ex.equipment !== currentStudioEquipmentFilter) return false;
+    }
+
+    // Search query
+    if (currentStudioSearchQuery) {
+      const matchName = (ex.name || '').toLowerCase().includes(currentStudioSearchQuery);
+      const matchAr = (ex.nameAr || '').toLowerCase().includes(currentStudioSearchQuery);
+      const matchHead = (ex.targetHead || '').toLowerCase().includes(currentStudioSearchQuery);
+      if (!matchName && !matchAr && !matchHead) return false;
+    }
+
+    return true;
+  });
+
+  if (countTag) {
+    countTag.textContent = `${filtered.length} تمرين متاح`;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; background: rgba(22, 31, 48, 0.5); border-radius: 12px; border: 1px dashed var(--border);">
+        <div style="font-size: 1.8rem; margin-bottom: 8px;">🔍</div>
+        <p style="color: #fff; font-weight: 700; margin-bottom: 4px;">لم يتم العثور على تمارين تطابق هذا الفلتر</p>
+        <p style="font-size: 0.8rem; color: var(--text-dim);">جرّب تغيير فئة الأداة أو مسح نص البحث</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Check target athlete name
+  let targetAthleteName = '';
+  if (currentStudioTargetAthleteId) {
+    const ath = athletes.find(a => a.id === currentStudioTargetAthleteId);
+    if (ath) targetAthleteName = ath.name.split(' ')[0];
+  }
+
+  const equipmentBadgeMap = {
+    dumbbell: { label: 'دمبلز', bg: 'rgba(56, 178, 172, 0.15)', color: 'var(--primary)' },
+    barbell: { label: 'بار أولمبي', bg: 'rgba(237, 137, 54, 0.15)', color: '#ed8936' },
+    cable: { label: 'كابل', bg: 'rgba(66, 153, 225, 0.15)', color: '#4299e1' },
+    machine: { label: 'جهاز', bg: 'rgba(159, 122, 234, 0.15)', color: '#9f7aea' },
+    bodyweight: { label: 'وزن الجسم', bg: 'rgba(72, 187, 120, 0.15)', color: '#48bb78' }
+  };
+
+  container.innerHTML = filtered.map(ex => {
+    const eq = equipmentBadgeMap[ex.equipment] || { label: ex.equipment || 'عام', bg: 'rgba(255,255,255,0.08)', color: '#fff' };
+    const btnLabel = targetAthleteName ? `+ إضافة لجدول ${targetAthleteName}` : `+ إضافة للخطة`;
+
     return `
-      <div class="athlete-card">
-        <h3 style="color: var(--primary); font-size: 1.05rem; font-weight: 800; margin-bottom: 8px;">
-          ${MUSCLE_LABELS[catKey] || catKey} (${list.length} تمارين)
-        </h3>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          ${list.slice(0, 3).map(ex => `
-            <div style="font-size: 0.8rem; color: #fff; background: var(--bg-elevated); padding: 6px 10px; border-radius: 6px;">
-              <strong>${ex.nameAr}</strong>
-              <div style="font-size: 0.72rem; color: var(--text-muted);">${ex.targetHead}</div>
+      <div class="studio-exercise-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px;">
+          <div>
+            <h4 style="color: #fff; font-weight: 800; font-size: 0.95rem; margin: 0 0 2px 0;">${ex.nameAr}</h4>
+            <div style="color: var(--text-dim); font-size: 0.76rem; font-family: monospace;">${ex.name}</div>
+          </div>
+          <span style="font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; font-weight: 700; background: ${eq.bg}; color: ${eq.color}; white-space: nowrap;">
+            ${eq.label}
+          </span>
+        </div>
+
+        <div style="margin: 8px 0; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 0.78rem; color: #cbd5e1; display: flex; align-items: center; gap: 4px;">
+            <span style="color: var(--primary);">🎯</span>
+            <span><strong>الرأس/الألياف:</strong> ${ex.targetHead}</span>
+          </div>
+          <div style="font-size: 0.78rem; color: #cbd5e1; display: flex; align-items: center; gap: 4px;">
+            <span style="color: #ed8936;">⚡</span>
+            <span><strong>الحجم الموصى به:</strong> ${ex.volume}</span>
+          </div>
+          ${ex.biomech ? `
+            <div style="font-size: 0.74rem; color: var(--text-dim); background: rgba(0,0,0,0.25); padding: 5px 8px; border-radius: 6px; margin-top: 4px; border-right: 2px solid var(--primary);">
+              💡 ${ex.biomech}
             </div>
-          `).join('')}
+          ` : ''}
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button type="button" 
+            class="btn btn-primary" 
+            style="padding: 6px 14px; font-size: 0.78rem; border-radius: 6px;"
+            onclick="addExerciseFromStudio('${ex.id}', '${currentStudioMuscle}')">
+            ${btnLabel}
+          </button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function addExerciseFromStudio(exerciseId, muscleKey) {
+  const list = EXERCISE_DATABASE[muscleKey] || [];
+  const ex = list.find(item => item.id === exerciseId);
+  if (!ex) return;
+
+  if (currentStudioTargetAthleteId) {
+    const athlete = athletes.find(a => a.id === currentStudioTargetAthleteId);
+    if (!athlete) return;
+
+    if (!athlete.workoutPlan) athlete.workoutPlan = [];
+
+    athlete.workoutPlan.push({
+      id: 'plan_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+      exerciseId: ex.id,
+      name: ex.name,
+      nameAr: ex.nameAr,
+      targetHead: ex.targetHead,
+      volume: ex.volume,
+      equipment: ex.equipment,
+      biomech: ex.biomech,
+      addedAt: new Date().toISOString()
+    });
+
+    saveAthletesToStorage();
+    renderAthletesView();
+    populateStudioAthleteDropdown();
+    updateStudioAthleteRoutineBadge();
+
+    showToast(`تمت إضافة "${ex.nameAr}" لجدول ${athlete.name} بنجاح!`);
+
+    // Sync to webhook in background if configured
+    sendToWebhook({
+      dataType: 'workout_update',
+      athleteId: athlete.id,
+      athleteName: athlete.name,
+      exerciseAdded: ex.nameAr,
+      totalExercises: athlete.workoutPlan.length,
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    // Add to activeBuilderRoutine (draft)
+    activeBuilderRoutine.push({
+      id: 'draft_' + Date.now(),
+      exerciseId: ex.id,
+      name: ex.name,
+      nameAr: ex.nameAr,
+      targetHead: ex.targetHead,
+      volume: ex.volume,
+      equipment: ex.equipment
+    });
+
+    renderBuilderRoutine();
+    showToast(`تمت إضافة "${ex.nameAr}" للمسودة. اختر متدرباً لحفظها في حسابه.`);
+  }
+}
+
+function setupStudioSvgInteractivity() {
+  document.querySelectorAll('#studio-svg-front .m-shape, #studio-svg-front .muscle-node, #studio-svg-back .m-shape, #studio-svg-back .muscle-node').forEach(node => {
+    node.style.cursor = 'pointer';
+    node.onclick = (e) => {
+      e.stopPropagation();
+      const muscleKey = node.dataset.muscle || node.dataset.key;
+      if (muscleKey) {
+        selectStudioMuscle(muscleKey);
+      }
+    };
+  });
 }
 
 /**
@@ -1177,7 +1672,7 @@ function switchTab(tabId) {
   });
 
   if (tabId === 'training') {
-    renderTrainingLibraryPreview();
+    initTrainingStudio();
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1210,6 +1705,16 @@ window.switchTab = switchTab;
 window.testWebhookConnection = testWebhookConnection;
 window.exportBackupJson = exportBackupJson;
 
+// Studio global bindings
+window.switchStudioBodyView = switchStudioBodyView;
+window.selectStudioMuscle = selectStudioMuscle;
+window.setStudioEquipmentFilter = setStudioEquipmentFilter;
+window.filterStudioExercises = filterStudioExercises;
+window.onStudioAthleteSelectChange = onStudioAthleteSelectChange;
+window.openSelectedAthleteRoutineModal = openSelectedAthleteRoutineModal;
+window.addExerciseFromStudio = addExerciseFromStudio;
+window.initTrainingStudio = initTrainingStudio;
+
 /**
  * ============================================================================
  * 14. INITIALIZATION ON DOM CONTENT LOADED
@@ -1224,6 +1729,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render Athletes View
   renderAthletesView();
+
+  // Initialize Anatomical Training Studio
+  initTrainingStudio();
 
   // Search input live filter
   const searchInput = document.getElementById('athlete-search-input');
@@ -1249,13 +1757,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // SVG Muscle Node Click Handlers
-  document.querySelectorAll('.muscle-node').forEach(node => {
-    node.addEventListener('click', () => {
-      const muscleKey = node.dataset.muscle;
-      if (muscleKey) selectMuscleGroup(muscleKey);
-    });
-  });
+  // SVG Muscle Node Click Handlers (Workout Modal & Studio)
+  setupModalSvgInteractivity();
+  setupStudioSvgInteractivity();
 
-  console.log('[THE RUSH WAY] Core Coach Engine initialized with zero mock data leakage and PIN security.');
+  console.log('[THE RUSH WAY] Core Coach Engine and Anatomical Training Studio initialized.');
 });

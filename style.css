@@ -113,17 +113,22 @@ body {
 }
 
 .pin-brand-icon {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   margin: 0 auto 16px;
-  background: var(--primary-light);
-  border: 1px solid var(--primary);
+  background: linear-gradient(145deg, #10182b 0%, #080c16 100%);
+  border: 1.5px solid rgba(110, 53, 168, 0.55);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
-  box-shadow: 0 0 25px var(--primary-glow);
+  box-shadow: 0 0 28px rgba(110, 53, 168, 0.4);
+}
+
+.pin-brand-icon svg {
+  width: 44px;
+  height: 44px;
+  display: block;
 }
 
 .pin-brand-title {
@@ -241,21 +246,39 @@ body {
 }
 
 .brand-logo {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
-  border: 1px solid var(--border-highlight);
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(145deg, #10182b 0%, #080c16 100%);
+  border: 1.5px solid rgba(110, 53, 168, 0.5);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 0 0 16px rgba(110, 53, 168, 0.25);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.brand-logo:hover {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 22px rgba(147, 72, 219, 0.45);
+  border-color: rgba(147, 72, 219, 0.8);
 }
 
 .brand-logo svg {
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+#main-brand-logo .rush-emblem-svg {
+  transition: filter var(--transition-fast);
+}
+
+#main-brand-logo:hover .rush-emblem-svg,
+#main-brand-logo .rush-emblem-svg:hover,
+.brand-section:hover #main-brand-logo .rush-emblem-svg {
+  filter: drop-shadow(0 0 10px rgba(56, 178, 172, 0.6));
 }
 
 .brand-titles {
@@ -1036,37 +1059,58 @@ body {
 
 .anatomical-svg-container {
   width: 100%;
-  max-width: 240px;
-  height: 380px;
+  max-width: 280px;
+  height: 400px;
+  background: radial-gradient(circle at center, #1b273d 0%, #101726 80%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .muscle-svg {
   width: 100%;
   height: 100%;
+  max-height: 380px;
+  display: block;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
 }
 
 /* Muscle Node Interactive Styling */
-.muscle-node {
-  fill: #1a263c;
-  stroke: #2e4366;
-  stroke-width: 1.5;
+.muscle-node, .muscle-part, .m-shape {
+  fill: #1e293b;
+  stroke: #334155;
+  stroke-width: 1.35;
+  stroke-linejoin: round;
+  stroke-linecap: round;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
 }
 
-.muscle-node:hover {
-  fill: #2d456b;
+.muscle-node:hover, .muscle-part:hover, .m-shape:hover {
+  fill: #2d405e;
   stroke: var(--primary);
+  filter: drop-shadow(0 0 8px rgba(56, 178, 172, 0.6));
 }
 
-.muscle-node.selected {
+.muscle-node.selected, .muscle-node.active,
+.muscle-part.selected, .muscle-part.active,
+.m-shape.selected, .m-shape.active {
   fill: var(--primary) !important;
   stroke: #e6fffa !important;
-  filter: drop-shadow(0 0 8px var(--primary-glow));
+  stroke-width: 1.8 !important;
+  filter: drop-shadow(0 0 12px rgba(56, 178, 172, 0.95)) !important;
+}
+
+.body-silhouette, .body-silhouette-bg {
+  fill: #131b2c !important;
+  stroke: #2a3d5e !important;
+  stroke-width: 1.5 !important;
 }
 
 .muscle-label-chip-group {
@@ -1354,4 +1398,407 @@ body {
   padding: 8px;
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+/* ==========================================================================
+   INTEGRATED ANATOMICAL TRAINING STUDIO (THE RUSH WAY)
+   ========================================================================== */
+.training-studio-container {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+@media (max-width: 960px) {
+  .training-studio-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.anatomy-console-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.anatomy-console-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+}
+
+.anatomy-console-header h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anatomy-console-header .sub-badge {
+  font-size: 0.72rem;
+  color: var(--primary);
+  background: rgba(56, 178, 172, 0.12);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 178, 172, 0.25);
+  font-weight: 700;
+}
+
+.studio-view-toggle-bar {
+  display: flex;
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 4px;
+}
+
+.studio-toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+}
+
+.studio-toggle-btn.active {
+  background: var(--primary);
+  color: #06111a;
+  box-shadow: 0 2px 8px rgba(56, 178, 172, 0.35);
+}
+
+.studio-svg-stage {
+  width: 100%;
+  max-width: 290px;
+  height: 420px;
+  background: radial-gradient(circle at center, #1b273d 0%, #101726 80%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  user-select: none;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.studio-anatomical-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 400px;
+  display: block;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+}
+
+.anatomy-quick-banner {
+  background: linear-gradient(135deg, rgba(22, 31, 48, 0.92), rgba(15, 23, 42, 0.98));
+  border: 1px solid rgba(56, 178, 172, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 15px rgba(56, 178, 172, 0.08);
+}
+
+.anatomy-quick-banner:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 178, 172, 0.22);
+}
+
+.anatomy-quick-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.anatomy-banner-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(56, 178, 172, 0.15);
+  border: 1px solid rgba(56, 178, 172, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.pulse-tag {
+  font-size: 0.7rem;
+  background: rgba(56, 178, 172, 0.2);
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-weight: 800;
+  border: 1px solid rgba(56, 178, 172, 0.4);
+}
+
+.studio-muscle-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
+}
+
+.studio-info-card {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.studio-info-card strong {
+  color: #fff;
+}
+
+/* Right Engine Card */
+.training-engine-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Athlete Program Selector Integration Bar */
+.studio-athlete-bar {
+  background: linear-gradient(135deg, rgba(56, 178, 172, 0.12) 0%, rgba(22, 31, 48, 0.8) 100%);
+  border: 1px solid rgba(56, 178, 172, 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.studio-athlete-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.studio-athlete-selector-group label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.studio-athlete-select {
+  background: var(--bg-main);
+  border: 1px solid var(--border-highlight);
+  color: #fff;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+}
+
+.studio-engine-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.studio-engine-title-group h2 {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.studio-engine-title-group p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.studio-filter-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.studio-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.studio-search-box input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: #fff;
+  padding: 8px 34px 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.82rem;
+}
+
+.studio-search-box svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-dim);
+}
+
+.equipment-filter-pill {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 5px 10px;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.equipment-filter-pill.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.studio-exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.studio-exercise-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-inline-start: 4px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: var(--transition-fast);
+}
+
+.studio-exercise-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-highlight);
+  transform: translateY(-1px);
+}
+
+.studio-ex-info {
+  flex: 1;
+}
+
+.studio-ex-name-ar {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.studio-ex-name-en {
+  font-size: 0.78rem;
+  font-family: inherit;
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.studio-ex-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.studio-ex-tag {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-add-to-plan {
+  background: var(--primary);
+  color: #06111a;
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-add-to-plan:hover {
+  background: #319795;
+  box-shadow: 0 4px 12px rgba(56, 178, 172, 0.4);
+}
+
+.btn-add-to-plan:active {
+  transform: scale(0.97);
 }

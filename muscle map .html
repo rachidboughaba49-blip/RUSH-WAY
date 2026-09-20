@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>خريطة العضلات التفاعلية - THE RUSH WAY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & THEME CONFIGURATION
+       ========================================================================== */
+    :root {
+      --bg-base: #0b0f19;
+      --bg-surface: #161f30;
+      --bg-surface-hover: #1e2c44;
+      --bg-card: #141c2c;
+      --border-color: #23324a;
+      --border-focus: #38b2ac;
+      --accent-teal: #38b2ac;
+      --accent-teal-glow: rgba(56, 178, 172, 0.45);
+      --accent-teal-strong: rgba(56, 178, 172, 0.85);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Cairo', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       TOP NAVIGATION & HEADER
+       ========================================================================== */
+    .top-navbar {
+      background: rgba(22, 31, 48, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #1f2d47, #131b2e);
+      border: 1px solid rgba(56, 178, 172, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-teal);
+      box-shadow: 0 0 16px rgba(56, 178, 172, 0.2);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .brand-text h1 span {
+      color: var(--accent-teal);
+    }
+
+    .brand-text p {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .header-badge {
+      font-size: 0.76rem;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(56, 178, 172, 0.12);
+      border: 1px solid rgba(56, 178, 172, 0.3);
+      color: var(--accent-teal);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse-circle {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-teal);
+      box-shadow: 0 0 8px var(--accent-teal);
+      animation: pulseAnim 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ==========================================================================
+       MAIN WORKSPACE LAYOUT (RESPONSIVE SPLIT)
+       ========================================================================== */
+    .container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .app-headline {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .app-headline h2 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .app-headline p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .split-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+      .split-layout {
+        grid-template-columns: 340px 1fr;
+      }
+      .routine-summary-column {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .split-layout {
+        grid-template-columns: 1fr;
+      }
+      .routine-summary-column {
+        grid-column: span 1;
+      }
+      .container {
+        padding: 16px;
+      }
+    }
+
+    /* ==========================================================================
+       RIGHT PANEL: SVG ANATOMICAL BODY
+       ========================================================================== */
+    .body-panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: sticky;
+      top: 90px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-header-title {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .panel-header-title h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Dual View Toggle Buttons */
+    .view-toggle-bar {
+      width: 100%;
+      display: flex;
+      background: #0d1424;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .toggle-btn.active {
+      background: var(--accent-teal);
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 2px 10px rgba(56, 178, 172, 0.35);
+    }
+
+    /* SVG Body Wrapper */
+    .svg-wrapper {
+      width: 100%;
+      max-width: 290px;
+      height: 420px;
+      background: radial-gradient(circle at center, #1b273d 0%, #101726 80%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      user-select: none;
+    }
+
+    .anatomical-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 400px;
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+    }
+
+    /* SVG Muscles Styling & Glow */
+    .body-silhouette {
+      fill: #131b2c;
+      stroke: #223249;
+      stroke-width: 1.5;
+    }
+
+    .muscle-part {
+      fill: #1e293b;
+      stroke: #334155;
+      stroke-width: 1.25;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      cursor: pointer;
+      transition: fill 0.25s ease, stroke 0.25s ease, filter 0.25s ease, transform 0.25s ease;
+      transform-origin: center;
+    }
+
+    .muscle-part:hover {
+      fill: #2d405e;
+      stroke: #38b2ac;
+      filter: drop-shadow(0 0 6px rgba(56, 178, 172, 0.5));
+    }
+
+    .muscle-part.active {
+      fill: #38b2ac !important;
+      stroke: #81e6d9 !important;
+      stroke-width: 1.5;
+      filter: drop-shadow(0 0 8px rgba(56, 178, 172, 0.85)) !important;
+    }
+
+    /* Muscle Quick Chips */
+    .muscle-quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .quick-chip {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: #0f1827;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .quick-chip:hover {
+      border-color: var(--accent-teal);
+      color: #fff;
+    }
+
+    .quick-chip.active {
+      background: rgba(56, 178, 172, 0.15);
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+    }
+
+    /* ==========================================================================
+       MIDDLE PANEL: FILTERED EXERCISE LIST
+       ========================================================================== */
+    .exercise-panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      min-height: 540px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .exercise-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .current-muscle-badge {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .current-muscle-badge .label {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .current-muscle-badge .title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--accent-teal);
+      margin-top: 2px;
+    }
+
+    .exercise-count-pill {
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: rgba(56, 178, 172, 0.12);
+      border: 1px solid rgba(56, 178, 172, 0.3);
+      color: var(--accent-teal);
+      padding: 5px 12px;
+      border-radius: 9999px;
+    }
+
+    /* Exercise Cards List */
+    .exercise-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .exercise-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .exercise-card:hover {
+      border-color: rgba(56, 178, 172, 0.5);
+      background: #172135;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .exercise-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .exercise-name-box h4 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .exercise-name-box .en-name {
+      font-size: 0.78rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .fiber-tag {
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      padding: 3px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .exercise-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      background: rgba(11, 15, 25, 0.5);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-item strong {
+      color: #ffffff;
+    }
+
+    .btn-add-workout {
+      width: 100%;
+      background: linear-gradient(135deg, #1e2c44, #182337);
+      border: 1px solid rgba(56, 178, 172, 0.35);
+      color: var(--accent-teal);
+      border-radius: var(--radius-sm);
+      padding: 9px 16px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all var(--transition-fast);
+      margin-top: 4px;
+    }
+
+    .btn-add-workout:hover {
+      background: var(--accent-teal);
+      color: #0b0f19;
+      border-color: var(--accent-teal);
+      box-shadow: 0 4px 14px rgba(56, 178, 172, 0.4);
+    }
+
+    .btn-add-workout:active {
+      transform: scale(0.98);
+    }
+
+    /* Empty State */
+    .empty-state-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+      background: rgba(11, 15, 25, 0.4);
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      margin: auto 0;
+    }
+
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(56, 178, 172, 0.1);
+      border: 1px solid rgba(56, 178, 172, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-teal);
+      margin-bottom: 16px;
+    }
+
+    .empty-state-box h4 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .empty-state-box p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      max-width: 320px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       LEFT PANEL: ASSEMBLED ROUTINE SUMMARY
+       ========================================================================== */
+    .routine-summary-column {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .routine-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .routine-header h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .btn-clear-routine {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-clear-routine:hover {
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .routine-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 200px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .routine-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      animation: slideIn 0.25s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .routine-item-info {
+      flex: 1;
+    }
+
+    .routine-item-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .routine-item-sub {
+      font-size: 0.72rem;
+      color: var(--accent-teal);
+      margin-top: 2px;
+    }
+
+    .btn-remove-item {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-remove-item:hover {
+      color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .routine-empty-label {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      padding: 40px 10px;
+    }
+
+    .routine-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .routine-stats-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #0d1424;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+    }
+
+    .routine-stats-bar strong {
+      color: var(--accent-teal);
+    }
+
+    .btn-primary-action {
+      background: var(--accent-teal);
+      color: #0b0f19;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 16px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-primary-action:hover {
+      box-shadow: 0 4px 16px var(--accent-teal-glow);
+      filter: brightness(1.08);
+    }
+
+    /* Toast Notification */
+    .toast-notice {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1b263b;
+      border: 1px solid var(--accent-teal);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px var(--accent-teal-glow);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast-notice.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== -->
+  <header class="top-navbar">
+    <a href="#" class="brand-group">
+      <div class="brand-icon-box">
+        <svg viewBox="0 0 100 100" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 1. Outer Dark Silhouette Base -->
+          <path d="M 50 97 L 24 57 L 15 45 L 7 28 L 16 23 L 11 8 L 30 19 L 35 14 L 44 23 L 50 29 L 56 23 L 65 14 L 70 19 L 89 8 L 84 23 L 93 28 L 85 45 L 76 57 Z" fill="#0b101d" stroke="#1e293b" stroke-width="1.2" stroke-linejoin="round" />
+          <!-- 2. Purple Upper Ear / Horn Panels -->
+          <polygon points="12,12 28,21 21,34 14,26" fill="#4f2479" />
+          <polygon points="13,27 8,30 15,44 19,37" fill="#66309b" />
+          <polygon points="88,12 72,21 79,34 86,26" fill="#4f2479" />
+          <polygon points="87,27 92,30 85,44 81,37" fill="#66309b" />
+          <!-- 3. Forehead / Brow Crest -->
+          <path d="M 42 24 L 50 31 L 58 24" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          <!-- 4. Angular Eyes / Visor -->
+          <polygon points="27,31 46,34 46,49 33,52 23,43" fill="#431c6d" stroke="#ffffff" stroke-width="2.8" stroke-linejoin="round" />
+          <polygon points="29,35 43,37 43,46 34,48 26,42" fill="#6e33a5" />
+          <polygon points="73,31 54,34 54,49 67,52 77,43" fill="#431c6d" stroke="#ffffff" stroke-width="2.8" stroke-linejoin="round" />
+          <polygon points="71,35 57,37 57,46 66,48 74,42" fill="#6e33a5" />
+          <!-- 5. Lower Mask / 6-Pack Abdominal Grille Plate -->
+          <polygon points="26,54 50,93 74,54" fill="#0d1424" />
+          <path d="M 26 54 L 50 93 L 74 54" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          <line x1="50" y1="52" x2="50" y2="89" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+          <line x1="31" y1="63" x2="69" y2="63" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" />
+          <line x1="37" y1="73" x2="63" y2="73" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" />
+          <line x1="43" y1="83" x2="57" y2="83" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" />
+          <!-- 6. Sharp Horn White Highlights -->
+          <line x1="12" y1="10" x2="28" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+          <line x1="88" y1="10" x2="72" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>THE RUSH <span>WAY</span></h1>
+        <p>الخريطة التشريحية التفاعلية للتمارين الرياضية</p>
+      </div>
+    </a>
+
+    <div class="header-badge">
+      <span class="pulse-circle"></span>
+      <span>محرك التشريح الحركي المباشر</span>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN WORKSPACE CONTENT
+       ========================================================================== -->
+  <main class="container">
+    <div class="app-headline">
+      <div>
+        <h2>المجسم العضلي التفاعلي 2D (Interactive Muscle Map)</h2>
+        <p>انقر على أي عضلة في المجسم لتسليط الضوء النيوني عليها واستخراج التمارين الموجهة لأليافها بدقة علمية.</p>
+      </div>
+    </div>
+
+    <div class="split-layout">
+      <!-- ====================================================================
+           RIGHT COLUMN (RTL): SVG BODY DIAGRAM & VIEW CONTROLS
+           ==================================================================== -->
+      <section class="body-panel-card">
+        <div class="panel-header-title">
+          <h3>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z" />
+              <path d="M16 10H8a4 4 0 0 0-4 4v7h16v-7a4 4 0 0 0-4-4z" />
+            </svg>
+            <span>المجسم البشري</span>
+          </h3>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">انقر لتحديد العضلة</span>
+        </div>
+
+        <!-- Front / Back Toggle Buttons -->
+        <div class="view-toggle-bar">
+          <button type="button" class="toggle-btn active" id="btn-toggle-front" onclick="switchView('front')">
+            الجهة الأمامية (Front)
+          </button>
+          <button type="button" class="toggle-btn" id="btn-toggle-back" onclick="switchView('back')">
+            الجهة الخلفية (Back)
+          </button>
+        </div>
+
+        <!-- SVG Visual Container -->
+        <div class="svg-wrapper">
+          <!-- FRONT VIEW SVG (viewBox: 0 0 200 360) -->
+          <svg id="svg-front-view" class="anatomical-svg" viewBox="0 0 200 360" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#38b2ac" flood-opacity="0.9" />
+              </filter>
+            </defs>
+
+            <!-- Silhouette Background (Non-clickable) -->
+            <!-- Head & Neck -->
+            <path class="body-silhouette" d="M92 18 Q100 8 108 18 Q114 36 108 46 Q100 50 92 46 Z" />
+            <!-- Clavicle / Neck baseline -->
+            <path class="body-silhouette" d="M88 47 L100 52 L112 47 L100 56 Z" />
+
+            <!-- MUSCLE 1: CHEST (Upper / Lower) -->
+            <g id="muscle-chest" class="muscle-part" data-muscle="chest" data-name="عضلات الصدر (Chest)">
+              <!-- Upper Chest (Clavicular fibers) -->
+              <path d="M78 68 Q100 70 100 84 Q82 86 73 80 Z" />
+              <path d="M122 68 Q100 70 100 84 Q118 86 127 80 Z" />
+              <!-- Lower / Sternal Chest -->
+              <path d="M73 81 Q100 85 100 102 Q84 105 73 95 Z" />
+              <path d="M127 81 Q100 85 100 102 Q116 105 127 95 Z" />
+            </g>
+
+            <!-- MUSCLE 2: SHOULDERS (Front & Lateral Delts) -->
+            <g id="muscle-shoulders" class="muscle-part" data-muscle="shoulders" data-name="الأكتاف الأمامية والجانبية (Deltoids)">
+              <!-- Right Shoulder -->
+              <path d="M72 67 Q78 76 70 92 Q62 86 66 72 Z" />
+              <!-- Left Shoulder -->
+              <path d="M128 67 Q122 76 130 92 Q138 86 134 72 Z" />
+            </g>
+
+            <!-- MUSCLE 3: BICEPS -->
+            <g id="muscle-biceps" class="muscle-part" data-muscle="biceps" data-name="عضلة البايسبس (Biceps)">
+              <!-- Right Bicep -->
+              <path d="M68 94 Q72 112 65 127 Q58 116 63 96 Z" />
+              <!-- Left Bicep -->
+              <path d="M132 94 Q128 112 135 127 Q142 116 137 96 Z" />
+            </g>
+
+            <!-- MUSCLE 4: FOREARMS -->
+            <g id="muscle-forearms" class="muscle-part" data-muscle="forearms" data-name="السواعد والقبضة (Forearms)">
+              <!-- Right Forearm -->
+              <path d="M64 129 Q67 150 58 174 Q52 160 58 132 Z" />
+              <!-- Left Forearm -->
+              <path d="M136 129 Q133 150 142 174 Q148 160 142 132 Z" />
+            </g>
+
+            <!-- MUSCLE 5: ABS (Rectus Abdominis) -->
+            <g id="muscle-abs" class="muscle-part" data-muscle="abs" data-name="عضلات البطن (Rectus Abdominis)">
+              <rect x="87" y="104" width="26" height="13" rx="3" />
+              <rect x="88" y="119" width="24" height="13" rx="3" />
+              <rect x="89" y="134" width="22" height="14" rx="3" />
+            </g>
+
+            <!-- MUSCLE 6: OBLIQUES -->
+            <g id="muscle-obliques" class="muscle-part" data-muscle="obliques" data-name="عضلات الخواصر (Obliques)">
+              <!-- Right Oblique -->
+              <path d="M74 103 L85 104 L87 148 L75 142 Z" />
+              <!-- Left Oblique -->
+              <path d="M126 103 L115 104 L113 148 L125 142 Z" />
+            </g>
+
+            <!-- Pelvis / Hip Silhouette -->
+            <path class="body-silhouette" d="M86 150 L114 150 L108 165 L92 165 Z" />
+
+            <!-- MUSCLE 7: QUADRICEPS -->
+            <g id="muscle-quads" class="muscle-part" data-muscle="quads" data-name="عضلة الفخذ الأمامية (Quadriceps)">
+              <!-- Right Quad (Vastus Medialis, Lateralis, Rectus Femoris) -->
+              <path d="M72 165 Q96 166 96 198 Q96 230 84 250 Q70 228 70 180 Z" />
+              <!-- Left Quad -->
+              <path d="M128 165 Q104 166 104 198 Q104 230 116 250 Q130 228 130 180 Z" />
+            </g>
+
+            <!-- Knees Silhouette -->
+            <circle class="body-silhouette" cx="84" cy="256" r="4.5" />
+            <circle class="body-silhouette" cx="116" cy="256" r="4.5" />
+
+            <!-- MUSCLE 8: CALVES (Front / Tibialis) -->
+            <g id="muscle-calves" class="muscle-part" data-muscle="calves" data-name="عضلات الساق والسمانة (Calves)">
+              <!-- Right Calf -->
+              <path d="M77 263 Q87 278 84 324 Q74 310 74 272 Z" />
+              <!-- Left Calf -->
+              <path d="M123 263 Q113 278 116 324 Q126 310 126 272 Z" />
+            </g>
+          </svg>
+
+          <!-- BACK VIEW SVG (viewBox: 0 0 200 360) -->
+          <svg id="svg-back-view" class="anatomical-svg" viewBox="0 0 200 360" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <!-- Silhouette Head & Neck -->
+            <path class="body-silhouette" d="M92 18 Q100 8 108 18 Q114 36 108 46 Q100 50 92 46 Z" />
+
+            <!-- MUSCLE 9: TRAPEZIUS (Upper / Mid / Lower) -->
+            <g id="muscle-traps" class="muscle-part" data-muscle="traps" data-name="عضلات الترابيس (Trapezius)">
+              <!-- Diamond shape: Upper neck down to mid thoracic -->
+              <path d="M80 54 L100 48 L120 54 L128 72 L100 106 L72 72 Z" />
+            </g>
+
+            <!-- MUSCLE 10: REAR DELTOIDS -->
+            <g id="muscle-rear-delts" class="muscle-part" data-muscle="rear_delts" data-name="الأكتاف الخلفية (Rear Deltoids)">
+              <!-- Right Rear Delt -->
+              <path d="M70 69 Q76 79 67 92 Q60 85 65 72 Z" />
+              <!-- Left Rear Delt -->
+              <path d="M130 69 Q124 79 133 92 Q140 85 135 72 Z" />
+            </g>
+
+            <!-- MUSCLE 11: TRICEPS -->
+            <g id="muscle-triceps" class="muscle-part" data-muscle="triceps" data-name="عضلة الترايسبس (Triceps)">
+              <!-- Right Tricep -->
+              <path d="M66 94 Q72 114 63 129 Q56 116 62 96 Z" />
+              <!-- Left Tricep -->
+              <path d="M134 94 Q128 114 137 129 Q144 116 138 96 Z" />
+            </g>
+
+            <!-- MUSCLE 12: LATS (Latissimus Dorsi) -->
+            <g id="muscle-lats" class="muscle-part" data-muscle="lats" data-name="عضلات الظهر والمجنص (Lats)">
+              <!-- Right Lat -->
+              <path d="M72 82 Q90 102 88 138 Q70 120 68 94 Z" />
+              <!-- Left Lat -->
+              <path d="M128 82 Q110 102 112 138 Q130 120 132 94 Z" />
+            </g>
+
+            <!-- MUSCLE 13: LOWER BACK (Erector Spinae) -->
+            <g id="muscle-lower-back" class="muscle-part" data-muscle="lower_back" data-name="أسفل الظهر والقطنية (Lower Back)">
+              <path d="M88 134 L112 134 L110 162 L90 162 Z" />
+            </g>
+
+            <!-- MUSCLE 14: GLUTES -->
+            <g id="muscle-glutes" class="muscle-part" data-muscle="glutes" data-name="عضلات المؤخرة والألوية (Glutes)">
+              <!-- Right Glute -->
+              <path d="M71 164 Q100 165 99 200 Q83 210 69 194 Z" />
+              <!-- Left Glute -->
+              <path d="M129 164 Q100 165 101 200 Q117 210 131 194 Z" />
+            </g>
+
+            <!-- MUSCLE 15: HAMSTRINGS -->
+            <g id="muscle-hamstrings" class="muscle-part" data-muscle="hamstrings" data-name="عضلة الفخذ الخلفية (Hamstrings)">
+              <!-- Right Hamstring -->
+              <path d="M71 206 Q95 208 93 252 Q80 255 71 222 Z" />
+              <!-- Left Hamstring -->
+              <path d="M129 206 Q105 208 107 252 Q120 255 129 222 Z" />
+            </g>
+
+            <!-- Knee Joint Hollows -->
+            <circle class="body-silhouette" cx="83" cy="257" r="4.5" />
+            <circle class="body-silhouette" cx="117" cy="257" r="4.5" />
+
+            <!-- MUSCLE 16: CALVES BACK (Gastrocnemius / Soleus) -->
+            <g id="muscle-calves-back" class="muscle-part" data-muscle="calves" data-name="السمانة الخلفية (Gastrocnemius)">
+              <!-- Right Gastrocnemius -->
+              <path d="M73 265 Q88 271 84 322 Q71 312 71 277 Z" />
+              <!-- Left Gastrocnemius -->
+              <path d="M127 265 Q112 271 116 322 Q129 312 129 277 Z" />
+            </g>
+          </svg>
+        </div>
+
+        <!-- Muscle Quick Select Pills -->
+        <div class="muscle-quick-chips" id="quick-chips-container">
+          <!-- Injected dynamically via JS based on current front/back view -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           MIDDLE COLUMN (RTL): FILTERED EXERCISE LIST
+           ==================================================================== -->
+      <section class="exercise-panel-card">
+        <div class="exercise-panel-header">
+          <div class="current-muscle-badge">
+            <span class="label">العضلة المحددة حالياً:</span>
+            <div class="title" id="active-muscle-heading">اختر عضلة من المجسم</div>
+          </div>
+          <span class="exercise-count-pill" id="exercise-count-badge">0 تمارين معتمدة</span>
+        </div>
+
+        <!-- List Container -->
+        <div class="exercise-cards-list" id="exercise-list-container">
+          <!-- Default Empty State -->
+          <div class="empty-state-box">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6.5 6.5 11 11" />
+                <path d="m21 21-1-1" />
+                <path d="m3 3 1 1" />
+                <path d="m18 22 4-4" />
+                <path d="m2 6 4-4" />
+                <path d="m3 10 7-7" />
+                <path d="m14 21 7-7" />
+              </svg>
+            </div>
+            <h4>انقر على أي عضلة لبدء الفحص</h4>
+            <p>اختر من الرسم التخطيطي العضلي (الصدر، الظهر، الأكتاف، الأرجل...) لاستعراض التمارين المستهدفة بدقة ميكانيكية.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           LEFT COLUMN (RTL): ASSEMBLED WORKOUT ROUTINE SUMMARY
+           ==================================================================== -->
+      <section class="routine-summary-column">
+        <div class="routine-header">
+          <h3>
+            <span>الجدول المختار</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim); display: block;">التمارين المضافة للحصة</span>
+          </h3>
+          <button type="button" class="btn-clear-routine" onclick="clearWorkoutRoutine()" title="مسح الجدول الحالي">
+            تفريغ
+          </button>
+        </div>
+
+        <div class="routine-items-list" id="routine-items-container">
+          <div class="routine-empty-label">
+            لم يتم إضافة تمارين بعد.<br>انقر على <strong>+ إضافة للجدول</strong> بجانب أي تمرين لإضافته هنا.
+          </div>
+        </div>
+
+        <div class="routine-footer">
+          <div class="routine-stats-bar">
+            <span>التمارين: <strong id="routine-count">0</strong></span>
+            <span>العضلات المستهدفة: <strong id="routine-muscles">0</strong></span>
+          </div>
+
+          <button type="button" class="btn-primary-action" onclick="copyRoutinePlan()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <span>نسخ البرنامج التدريبي</span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Global Toast Notification -->
+  <div id="app-toast" class="toast-notice">تمت الإضافة بنجاح!</div>
+
+  <!-- ==========================================================================
+       VANILLA JAVASCRIPT: DATA & INTERACTION LOGIC
+       ========================================================================== -->
+  <script>
+    /**
+     * EXERCISES_DB: Scientific and mechanical exercise database mapped by muscle groups.
+     * Includes Arabic names, English terms, precise fiber targets, sets x reps, and RIR.
+     */
+    const EXERCISES_DB = {
+      chest: [
+        {
+          id: 'ex-ch-1',
+          name: 'تجميع الصدر بالدمبل على بنش مائل',
+          nameEn: 'Incline Dumbbell Press',
+          fiber: 'الألياف الترقوية العلوية (Clavicular Head)',
+          prescription: '3 - 4 مجموعات × 8 - 10 تكرار | RIR 1-2'
+        },
+        {
+          id: 'ex-ch-2',
+          name: 'الضغط بالبار على بنش مستوي',
+          nameEn: 'Flat Barbell Bench Press',
+          fiber: 'الألياف القصية الوسطى (Sternal Head)',
+          prescription: '3 مجموعات × 6 - 8 تكرار | RIR 2'
+        },
+        {
+          id: 'ex-ch-3',
+          name: 'فتحة الكابل للصدر من أسفل لأعلى',
+          nameEn: 'Low-to-High Cable Flyes',
+          fiber: 'ألياف الصدر العلوية في وضع الانقباض الكامل',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 0-1'
+        },
+        {
+          id: 'ex-ch-4',
+          name: 'المتوازي مع ميلان الجذع للأمام',
+          nameEn: 'Chest Dips (Forward Lean)',
+          fiber: 'الألياف السفلية والحد السفلي للصدر (Costal Head)',
+          prescription: '3 مجموعات × 8 - 12 تكرار | RIR 1'
+        }
+      ],
+      shoulders: [
+        {
+          id: 'ex-sh-1',
+          name: 'الرفرفة الجانبية بالكابل بارتفاع الخصر',
+          nameEn: 'Cuffed Cable Lateral Raise',
+          fiber: 'الألياف الجانبية مع ثبات المقاومة في قاع الحركة',
+          prescription: '4 مجموعات × 12 - 15 تكرار | RIR 0-1'
+        },
+        {
+          id: 'ex-sh-2',
+          name: 'الضغط بالدمبل أثناء الجلوس',
+          nameEn: 'Seated Dumbbell Overhead Press',
+          fiber: 'الدالية الأمامية (Anterior Deltoid)',
+          prescription: '3 مجموعات × 8 - 10 تكرار | RIR 1-2'
+        },
+        {
+          id: 'ex-sh-3',
+          name: 'الرفرفة الجانبية بالدمبل مع ميلان طفيف',
+          nameEn: 'Dumbbell Lateral Raise',
+          fiber: 'الألياف الجانبية للدالية (Lateral Deltoid)',
+          prescription: '3 - 4 مجموعات × 12 - 15 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-sh-4',
+          name: 'الرفع الأمامي بالكابل بحبل',
+          nameEn: 'Cable Front Raise (Rope)',
+          fiber: 'الألياف الأمامية للدالية بربط مستمر للحمل',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 1'
+        }
+      ],
+      biceps: [
+        {
+          id: 'ex-bi-1',
+          name: 'مرجحة البايسبس على بنش مائل بالدمبل',
+          nameEn: 'Incline Dumbbell Curl',
+          fiber: 'الرأس الطويل للبايسبس في وضع الاستطالة الكاملة',
+          prescription: '3 مجموعات × 10 - 12 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-bi-2',
+          name: 'مرجحة البريتشر بالبار الزجزاجي',
+          nameEn: 'EZ-Bar Preacher Curl',
+          fiber: 'الرأس القصير للبايسبس مع عزل الكتف تماماً',
+          prescription: '3 مجموعات × 8 - 10 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-bi-3',
+          name: 'مرجحة الهامر بالدمبل أو الكابل',
+          nameEn: 'Hammer Curl (Neutral Grip)',
+          fiber: 'العضلة العضدية والعضدية الكعبرية (Brachialis)',
+          prescription: '3 مجموعات × 10 - 12 تكرار | RIR 1-2'
+        },
+        {
+          id: 'ex-bi-4',
+          name: 'مرجحة الكابل بحبل خلف الظهر',
+          nameEn: 'Bayesian Cable Curl',
+          fiber: 'منحنى حمل مثالي على المدى الحركي الكامل',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 0-1'
+        }
+      ],
+      forearms: [
+        {
+          id: 'ex-fa-1',
+          name: 'ثني المعصم بالبار خلف الظهر',
+          nameEn: 'Behind-the-Back Wrist Curl',
+          fiber: 'عضلات ثني المعصم السفلية (Wrist Flexors)',
+          prescription: '3 - 4 مجموعات × 15 - 20 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-fa-2',
+          name: 'مد المعصم العكسي بالدمبل',
+          nameEn: 'Reverse Wrist Curl',
+          fiber: 'عضلات بسط المعصم العلوية (Wrist Extensors)',
+          prescription: '3 مجموعات × 15 - 20 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-fa-3',
+          name: 'تمرين مشية المزارع بقبضة سميكة',
+          nameEn: 'Fat-Grip Farmers Walk',
+          fiber: 'قوة القبضة الثابتة والتثبيت العصبي (Isometric Grip)',
+          prescription: '3 جولات × 40 - 50 متر | حتى قرب الفشل'
+        }
+      ],
+      abs: [
+        {
+          id: 'ex-ab-1',
+          name: 'طحن البطن بالكابل جاثياً',
+          nameEn: 'Kneeling Cable Crunch',
+          fiber: 'عضلات البطن المستقيمة العلوية مع تحميل تدريجي',
+          prescription: '3 - 4 مجموعات × 12 - 15 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-ab-2',
+          name: 'رفع الأرجل معلقاً على العقلة',
+          nameEn: 'Hanging Leg Raise (Posterior Pelvic Tilt)',
+          fiber: 'الجزء السفلي للبطن مع تدوير الحوض للأعلى',
+          prescription: '3 مجموعات × 10 - 15 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-ab-3',
+          name: 'عجلة البطن من الركبتين',
+          nameEn: 'Ab Wheel Rollout',
+          fiber: 'الجدار البطني الكامل بالانقباض اللامركزي الحاد',
+          prescription: '3 مجموعات × 8 - 12 تكرار | RIR 1-2'
+        }
+      ],
+      obliques: [
+        {
+          id: 'ex-ob-1',
+          name: 'تقطيع الخشب بالكابل بالزاوية الهابطة',
+          nameEn: 'High-to-Low Cable Woodchop',
+          fiber: 'الألياف المائلة الخارجية والداخلية (Rotational Power)',
+          prescription: '3 مجموعات × 12 - 15 تكرار لكل جهة | RIR 1'
+        },
+        {
+          id: 'ex-ob-2',
+          name: 'البلانك الجانبي مع رفع الحوض',
+          nameEn: 'Side Plank with Hip Dip',
+          fiber: 'تثبيت الخواصر ومكافحة الانحناء الجانبي (Anti-Lateral Flexion)',
+          prescription: '3 مجموعات × 12 - 15 تكرار لكل جهة'
+        },
+        {
+          id: 'ex-ob-3',
+          name: 'مسكات بالوف بالكابل',
+          nameEn: 'Pallof Press Hold',
+          fiber: 'مقاومة الدوران المحوري وحماية أسفل الظهر',
+          prescription: '3 مجموعات × 20-30 ثانية ثبات لكل جانب'
+        }
+      ],
+      quads: [
+        {
+          id: 'ex-qd-1',
+          name: 'السكوات بالبار الخلفي أو الهاك سكوات',
+          nameEn: 'Barbell Back Squat / Hack Squat',
+          fiber: 'العضلة الرباعية بجميع رؤوسها مع نزول عميق',
+          prescription: '3 - 4 مجموعات × 6 - 8 تكرار | RIR 2'
+        },
+        {
+          id: 'ex-qd-2',
+          name: 'دفع الأرجل على الجهاز بزاوية 45 درجة',
+          nameEn: '45-Degree Leg Press (Feet Low)',
+          fiber: 'الرؤوس الثلاثة المتسعة (Vastus Lateralis/Medialis)',
+          prescription: '3 - 4 مجموعات × 10 - 12 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-qd-3',
+          name: 'فرد الأرجل على الجهاز مع التوقف في القمة',
+          nameEn: 'Leg Extension (1s Pause at Peak)',
+          fiber: 'العضلة المستقيمة الفخذية (Rectus Femoris)',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 0-1'
+        },
+        {
+          id: 'ex-qd-4',
+          name: 'السكوات البلغاري بالدمبل',
+          nameEn: 'Bulgarian Split Squat',
+          fiber: 'تحميل أحادي عالي الشدة مع استطالة قصوى',
+          prescription: '3 مجموعات × 8 - 10 تكرار لكل ساق | RIR 1-2'
+        }
+      ],
+      traps: [
+        {
+          id: 'ex-tr-1',
+          name: 'شراغز الدمبل مع إمالة الجذع 15 درجة',
+          nameEn: 'Dumbbell Shrug (Slight Forward Lean)',
+          fiber: 'الألياف العلوية للترابيس متطابقة مع مسار الألياف',
+          prescription: '4 مجموعات × 10 - 12 تكرار مع ثانية توقف'
+        },
+        {
+          id: 'ex-tr-2',
+          name: 'سحب الصدر بالكابل بحبل على بنش مائل',
+          nameEn: 'Kelso Shrug / Incline Cable Shrug',
+          fiber: 'الترابيس الوسطى والسفلية (Scapular Retraction)',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-tr-3',
+          name: 'السحب للوجه مع تدوير الكتف الخارجي',
+          nameEn: 'Face Pull with External Rotation',
+          fiber: 'الترابيس الوسطى والأكتاف الخلفية معاً',
+          prescription: '3 - 4 مجموعات × 15 تكرار | RIR 1'
+        }
+      ],
+      lats: [
+        {
+          id: 'ex-lt-1',
+          name: 'سحب الكابل للصدر بقبضة محايدة مغلقة',
+          nameEn: 'Neutral-Grip Lat Pulldown',
+          fiber: 'ألياف المجنص الصدرية مع إبقاء الكوع ملاصقاً للجذع',
+          prescription: '3 - 4 مجموعات × 8 - 10 تكرار | RIR 1-2'
+        },
+        {
+          id: 'ex-lt-2',
+          name: 'التجديف بالدمبل بذراع واحدة مدعوماً',
+          nameEn: 'Single-Arm Chest-Supported Row',
+          fiber: 'ألياف المجنص السفلية الحرقفية (Iliac Lat Fibers)',
+          prescription: '3 مجموعات × 8 - 10 تكرار لكل جهة | RIR 1'
+        },
+        {
+          id: 'ex-lt-3',
+          name: 'سحب الكابل بذراع ممدودة',
+          nameEn: 'Straight-Arm Cable Pulldown',
+          fiber: 'عزل المجنص دون إشراك البايسبس في الحركة',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 0-1'
+        },
+        {
+          id: 'ex-lt-4',
+          name: 'تمرين العقلة بالوزن الذاتي أو المقاوم',
+          nameEn: 'Pull-Ups / Chin-Ups',
+          fiber: 'عرض الظهر وقوة السحب الرأسية العامة',
+          prescription: '3 مجموعات × أقصى تكرار منضبط | RIR 1'
+        }
+      ],
+      rear_delts: [
+        {
+          id: 'ex-rd-1',
+          name: 'الفراشة العكسية على الجهاز',
+          nameEn: 'Reverse Pec Deck Fly',
+          fiber: 'الأكتاف الخلفية مع تثبيت عظم اللوح',
+          prescription: '3 - 4 مجموعات × 12 - 15 تكرار | RIR 0-1'
+        },
+        {
+          id: 'ex-rd-2',
+          name: 'الرفرفة الخلفية بالكابل عبر الجسم',
+          nameEn: 'Cross-Body Cable Rear Delt Fly',
+          fiber: 'خط سحب متطابق تماماً مع ألياف الدالية الخلفية',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-rd-3',
+          name: 'الرفرفة الخلفية بالدمبل على بنش مائل',
+          nameEn: 'Incline Dumbbell Rear Delt Raise',
+          fiber: 'إلغاء قوة الدفع وزيادة الحمل في نهاية المدى',
+          prescription: '3 مجموعات × 15 تكرار | RIR 1'
+        }
+      ],
+      triceps: [
+        {
+          id: 'ex-tri-1',
+          name: 'مد الترايسبس فوق الرأس بالكابل',
+          nameEn: 'Overhead Cable Triceps Extension',
+          fiber: 'الرأس الطويل للترايسبس في وضع الاستطالة الكاملة',
+          prescription: '3 - 4 مجموعات × 10 - 12 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-tri-2',
+          name: 'سحب الترايسبس بالكابل لأسفل بحبل',
+          nameEn: 'Triceps Rope Pushdown',
+          fiber: 'الرأس الجانبي والأوسط في وضع الانقباض الحاد',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 0-1'
+        },
+        {
+          id: 'ex-tri-3',
+          name: 'تكسير الجمجمة بالبار الزجزاجي على بنش هابط',
+          nameEn: 'Decline EZ-Bar Skull Crusher',
+          fiber: 'حمل ميكانيكي مستمر طوال المدى دون استراحة في القمة',
+          prescription: '3 مجموعات × 8 - 10 تكرار | RIR 1-2'
+        },
+        {
+          id: 'ex-tri-4',
+          name: 'الضغط بقبضة ضيقة على البنش المستوي',
+          nameEn: 'Close-Grip Bench Press',
+          fiber: 'حمل ثقيل مركب على عضلات الترايسبس الثلاثة',
+          prescription: '3 مجموعات × 6 - 8 تكرار | RIR 2'
+        }
+      ],
+      lower_back: [
+        {
+          id: 'ex-lb-1',
+          name: 'المد الروماني للظهر على كرسي 45 درجة',
+          nameEn: '45-Degree Hyperextension',
+          fiber: 'العضلات الناصبة للفقرات (Erector Spinae)',
+          prescription: '3 مجموعات × 12 - 15 تكرار مع وزن حر | RIR 2'
+        },
+        {
+          id: 'ex-lb-2',
+          name: 'صباح الخير بالبار بحمل متحكم',
+          nameEn: 'Barbell Good Mornings',
+          fiber: 'قوة السلسلة الخلفية وتثبيت العمود الفقري',
+          prescription: '3 مجموعات × 8 - 10 تكرار | RIR 2-3'
+        },
+        {
+          id: 'ex-lb-3',
+          name: 'الرفعة الميتة التقليدية أو من البلوكات',
+          nameEn: 'Block Pull / Conventional Deadlift',
+          fiber: 'قوة السلسلة الحركية الخلفية الكاملة',
+          prescription: '3 مجموعات × 5 تكرارات تقنية نقية | RIR 2'
+        }
+      ],
+      glutes: [
+        {
+          id: 'ex-gl-1',
+          name: 'دفع الحوض بالبار أو الجهاز',
+          nameEn: 'Barbell Hip Thrust',
+          fiber: 'الألوية الكبرى في وضع أقصى تقصير وانقباض (Peak Contraction)',
+          prescription: '3 - 4 مجموعات × 8 - 12 تكرار مع ثانية توقف'
+        },
+        {
+          id: 'ex-gl-2',
+          name: 'الرفعة الرومانية بالدمبل مع التركيز على المؤخرة',
+          nameEn: 'Glute-Biased Dumbbell RDL',
+          fiber: 'الألوية الكبرى في وضع الاستطالة الكاملة',
+          prescription: '3 مجموعات × 8 - 10 تكرار | RIR 1-2'
+        },
+        {
+          id: 'ex-gl-3',
+          name: 'إبعاد الفخذين على الجهاز أثناء الجلوس',
+          nameEn: 'Seated Hip Abduction',
+          fiber: 'الألوية الوسطى والصغرى (Gluteus Medius / Minimus)',
+          prescription: '3 - 4 مجموعات × 15 - 20 تكرار | RIR 0-1'
+        }
+      ],
+      hamstrings: [
+        {
+          id: 'ex-hm-1',
+          name: 'ثني الأرجل على الجهاز أثناء الجلوس',
+          nameEn: 'Seated Leg Curl',
+          fiber: 'عضلة الفخذ الخلفية في وضع استطالة مفصل الورك',
+          prescription: '3 - 4 مجموعات × 10 - 12 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-hm-2',
+          name: 'الرفعة الرومانية بالبار مع ثني طفيف في الركبة',
+          nameEn: 'Barbell Romanian Deadlift (RDL)',
+          fiber: 'رؤوس العضلة شبه الوترية وشبه الغشائية والعضلة الفخذية',
+          prescription: '3 مجموعات × 8 - 10 تكرار | RIR 1-2'
+        },
+        {
+          id: 'ex-hm-3',
+          name: 'ثني الأرجل مستلقياً على البطن',
+          nameEn: 'Lying Leg Curl',
+          fiber: 'أقصى انقباض في قمة الحركة مع نزول بطيء',
+          prescription: '3 مجموعات × 12 - 15 تكرار | RIR 1'
+        }
+      ],
+      calves: [
+        {
+          id: 'ex-cv-1',
+          name: 'رفع السمانة واقفاً على الجهاز أو سميث',
+          nameEn: 'Standing Calf Raise',
+          fiber: 'عضلة الساق التوأمية مع تمدد كامل للركبة (Gastrocnemius)',
+          prescription: '4 مجموعات × 10 - 12 تكرار مع ثانيتين استطالة'
+        },
+        {
+          id: 'ex-cv-2',
+          name: 'رفع السمانة جالساً على الجهاز',
+          nameEn: 'Seated Calf Raise',
+          fiber: 'العضلة النعلية العميقة مع ثني الركبة 90 درجة (Soleus)',
+          prescription: '3 مجموعات × 15 - 20 تكرار | RIR 1'
+        },
+        {
+          id: 'ex-cv-3',
+          name: 'رفع أصابع القدم لعضلة القصبة الأمامية',
+          nameEn: 'Tibialis Anterior Raise',
+          fiber: 'عضلة القصبة الأمامية لحماية الكاحل والركبة',
+          prescription: '3 مجموعات × 15 - 20 تكرار'
+        }
+      ]
+    };
+
+    // State Variables
+    let currentView = 'front';
+    let selectedMuscleKey = null;
+    let workoutRoutineList = [];
+
+    // Muscle Chips Setup for Front and Back
+    const CHIPS_FRONT = [
+      { key: 'chest', label: 'الصدر' },
+      { key: 'shoulders', label: 'الأكتاف' },
+      { key: 'biceps', label: 'البايسبس' },
+      { key: 'forearms', label: 'السواعد' },
+      { key: 'abs', label: 'البطن' },
+      { key: 'obliques', label: 'الخواصر' },
+      { key: 'quads', label: 'الأفخاذ الأمامية' },
+      { key: 'calves', label: 'السمانة' }
+    ];
+
+    const CHIPS_BACK = [
+      { key: 'traps', label: 'الترابيس' },
+      { key: 'lats', label: 'المجنص (Lats)' },
+      { key: 'rear_delts', label: 'الأكتاف الخلفية' },
+      { key: 'triceps', label: 'الترايسبس' },
+      { key: 'lower_back', label: 'أسفل الظهر' },
+      { key: 'glutes', label: 'المؤخرة والألوية' },
+      { key: 'hamstrings', label: 'الأفخاذ الخلفية' },
+      { key: 'calves', label: 'السمانة الخلفية' }
+    ];
+
+    /**
+     * Switch view between Front and Back SVG
+     */
+    function switchView(view) {
+      currentView = view;
+      const frontBtn = document.getElementById('btn-toggle-front');
+      const backBtn = document.getElementById('btn-toggle-back');
+      const frontSvg = document.getElementById('svg-front-view');
+      const backSvg = document.getElementById('svg-back-view');
+
+      if (view === 'front') {
+        frontBtn.classList.add('active');
+        backBtn.classList.remove('active');
+        frontSvg.style.display = 'block';
+        backSvg.style.display = 'none';
+      } else {
+        backBtn.classList.add('active');
+        frontBtn.classList.remove('active');
+        frontSvg.style.display = 'none';
+        backSvg.style.display = 'block';
+      }
+
+      renderQuickChips();
+
+      // If the selected muscle is not visible in current view, clear selection or select first
+      const currentChips = view === 'front' ? CHIPS_FRONT : CHIPS_BACK;
+      const exists = currentChips.some(c => c.key === selectedMuscleKey);
+      if (!exists && selectedMuscleKey) {
+        // clear active highlight
+        clearActiveMuscleStyling();
+      }
+    }
+
+    /**
+     * Render quick clickable chips below the SVG
+     */
+    function renderQuickChips() {
+      const container = document.getElementById('quick-chips-container');
+      const list = currentView === 'front' ? CHIPS_FRONT : CHIPS_BACK;
+
+      container.innerHTML = list.map(c => `
+        <button type="button" class="quick-chip ${selectedMuscleKey === c.key ? 'active' : ''}" onclick="selectMuscle('${c.key}', '${c.label}')">
+          ${c.label}
+        </button>
+      `).join('');
+    }
+
+    /**
+     * Clear active SVG styling from all parts
+     */
+    function clearActiveMuscleStyling() {
+      document.querySelectorAll('.muscle-part').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.querySelectorAll('.quick-chip').forEach(el => {
+        el.classList.remove('active');
+      });
+    }
+
+    /**
+     * Highlight a muscle and render its exercises
+     */
+    function selectMuscle(muscleKey, optionalName) {
+      selectedMuscleKey = muscleKey;
+      clearActiveMuscleStyling();
+
+      // Highlight in SVG
+      const activeSvgs = document.querySelectorAll(`[data-muscle="${muscleKey}"]`);
+      activeSvgs.forEach(el => {
+        el.classList.add('active');
+      });
+
+      // Highlight Chip
+      renderQuickChips();
+
+      // Determine Display Title
+      let displayName = optionalName;
+      if (!displayName && activeSvgs.length > 0) {
+        displayName = activeSvgs[0].getAttribute('data-name');
+      }
+      if (!displayName) {
+        displayName = muscleKey;
+      }
+
+      // Update Header
+      const headingEl = document.getElementById('active-muscle-heading');
+      if (headingEl) {
+        headingEl.textContent = displayName;
+      }
+
+      // Render Exercises
+      renderExercisesForMuscle(muscleKey);
+    }
+
+    /**
+     * Render exercise cards in the middle panel
+     */
+    function renderExercisesForMuscle(muscleKey) {
+      const container = document.getElementById('exercise-list-container');
+      const countBadge = document.getElementById('exercise-count-badge');
+      const exercises = EXERCISES_DB[muscleKey] || [];
+
+      countBadge.textContent = `${exercises.length} تمارين معتمدة`;
+
+      if (exercises.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state-box">
+            <h4>لا توجد تمارين مسجلة لهذه العضلة حالياً</h4>
+            <p>يرجى اختيار مجموعة عضلية أخرى من المجسم التفاعلي.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = exercises.map(ex => `
+        <div class="exercise-card" id="card-${ex.id}">
+          <div class="exercise-top-row">
+            <div class="exercise-name-box">
+              <h4>${ex.name}</h4>
+              <div class="en-name">${ex.nameEn}</div>
+            </div>
+            <span class="fiber-tag">${ex.fiber}</span>
+          </div>
+
+          <div class="exercise-meta-row">
+            <div class="meta-item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              <span>البروتوكول: <strong>${ex.prescription}</strong></span>
+            </div>
+          </div>
+
+          <button type="button" class="btn-add-workout" onclick="addToWorkoutRoutine('${ex.id}', '${escapeHtml(ex.name)}', '${escapeHtml(ex.fiber)}', '${muscleKey}')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>+ إضافة للجدول المختار</span>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    /**
+     * Add exercise to the routine summary panel
+     */
+    function addToWorkoutRoutine(id, name, fiber, muscleKey) {
+      const exists = workoutRoutineList.some(item => item.id === id);
+      if (exists) {
+        showToast('هذا التمرين مضاف بالفعل إلى الجدول!');
+        return;
+      }
+
+      workoutRoutineList.push({
+        id,
+        name,
+        fiber,
+        muscleKey
+      });
+
+      renderWorkoutRoutine();
+      showToast(`تمت إضافة: ${name}`);
+    }
+
+    /**
+     * Remove exercise from the routine
+     */
+    function removeRoutineItem(id) {
+      workoutRoutineList = workoutRoutineList.filter(item => item.id !== id);
+      renderWorkoutRoutine();
+    }
+
+    /**
+     * Clear all exercises from routine
+     */
+    function clearWorkoutRoutine() {
+      if (workoutRoutineList.length === 0) return;
+      workoutRoutineList = [];
+      renderWorkoutRoutine();
+      showToast('تم تفريغ جدول التمارين.');
+    }
+
+    /**
+     * Render the routine items list & volume summary
+     */
+    function renderWorkoutRoutine() {
+      const container = document.getElementById('routine-items-container');
+      const countEl = document.getElementById('routine-count');
+      const musclesEl = document.getElementById('routine-muscles');
+
+      countEl.textContent = workoutRoutineList.length;
+
+      // Calculate distinct muscles
+      const distinctMuscles = new Set(workoutRoutineList.map(item => item.muscleKey));
+      musclesEl.textContent = distinctMuscles.size;
+
+      if (workoutRoutineList.length === 0) {
+        container.innerHTML = `
+          <div class="routine-empty-label">
+            لم يتم إضافة تمارين بعد.<br>انقر على <strong>+ إضافة للجدول</strong> بجانب أي تمرين لإضافته هنا.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = workoutRoutineList.map((item, index) => `
+        <div class="routine-item">
+          <div class="routine-item-info">
+            <div class="routine-item-name">${index + 1}. ${item.name}</div>
+            <div class="routine-item-sub">${item.fiber}</div>
+          </div>
+          <button type="button" class="btn-remove-item" onclick="removeRoutineItem('${item.id}')" title="حذف">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    /**
+     * Copy routine plan to clipboard
+     */
+    function copyRoutinePlan() {
+      if (workoutRoutineList.length === 0) {
+        showToast('يرجى إضافة تمرين واحد على الأقل قبل النسخ!');
+        return;
+      }
+
+      let text = `THE RUSH WAY - البرنامج التدريبي المعتمد:\n`;
+      text += `-------------------------------------------\n`;
+      workoutRoutineList.forEach((it, idx) => {
+        text += `${idx + 1}. ${it.name} (${it.fiber})\n`;
+      });
+      text += `-------------------------------------------\n`;
+      text += `إجمالي التمارين: ${workoutRoutineList.length}\n`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('تم نسخ البرنامج التدريبي للحافظة بنجاح!');
+        }).catch(() => {
+          fallbackCopyText(text);
+        });
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('تم نسخ البرنامج التدريبي للحافظة بنجاح!');
+      } catch (err) {
+        showToast('تعذر النسخ التلقائي!');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    /**
+     * Toast notice helper
+     */
+    let toastTimeout = null;
+    function showToast(msg) {
+      const toast = document.getElementById('app-toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('visible');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 2500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/'/g, '&#39;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    /**
+     * Setup Event Listeners on DOM Load
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Attach click events to all SVG muscle paths
+      const muscleParts = document.querySelectorAll('.muscle-part');
+      muscleParts.forEach(part => {
+        part.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const muscleKey = part.getAttribute('data-muscle');
+          const muscleName = part.getAttribute('data-name');
+          selectMuscle(muscleKey, muscleName);
+        });
+      });
+
+      // Initial Quick Chips
+      renderQuickChips();
+
+      // Automatically select 'chest' on startup for instant engagement
+      selectMuscle('chest', 'عضلات الصدر (Chest)');
+    });
+  </script>
+</body>
+</html>
