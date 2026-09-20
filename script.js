@@ -14,116 +14,13 @@
  */
 
 // Global Google Apps Script Webhook Endpoint (Replace with deployed Web App URL if needed)
-const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxIqTMzE1_dak-wjNBHLVqb3eSuAoHBDRhmYAZvA05AuseqAnvTpWrrJJgYJU3ybYBWDA/exec';
+var  WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxIqTMzE1_dak-wjNBHLVqb3eSuAoHBDRhmYAZvA05AuseqAnvTpWrrJJgYJU3ybYBWDA/exec';
 
 // Storage Key
 const STORAGE_KEY = 'athletes';
 
 // Default initial athlete dataset for first-time launch
-const DEFAULT_INITIAL_ATHLETES = [
-  {
-    id: 'ath_1726740001',
-    name: 'كريم منصور',
-    email: 'karim.mansour@gmail.com',
-    phone: '+213 555 123 456',
-    currentWeightKg: 83.2,
-    heightCm: 181,
-    age: 29,
-    goal: 'خسارة دهون وتنشيف',
-    level: 'متقدم',
-    status: 'active',
-    nutritionPlanId: 'ستيك فيليه بقري (220g) • أرز بسمتي (220g) • زيت زيتون (15ml)',
-    joinedDate: '2026-06-10T08:00:00.000Z',
-    measurements: [
-      { waistCm: 94.0 },
-      { waistCm: 91.5 },
-      { waistCm: 86.0 }
-    ],
-    nutritionPlan: {
-      protein: 'ستيك فيليه بقري (Beef Tenderloin Steak - 220g)',
-      carbs: 'أرز بسمتي أبيض / ياسمين (220g)',
-      fats: 'زيت زيتون بكر ممتاز (15ml)',
-      supplements: 'Whey Isolate (30g) + Creatine (5g) + Magnesium (400mg)',
-      enhancers: 'Tesamorelin (2mg SC Daily - Visceral Fat Burn)'
-    }
-  },
-  {
-    id: 'ath_1726740002',
-    name: 'سارة بن علي',
-    email: 'sarah.benali@outlook.com',
-    phone: '+33 6 12 34 56 78',
-    currentWeightKg: 61.5,
-    heightCm: 168,
-    age: 26,
-    goal: 'إعادة تشكيل الجسم (Recomp)',
-    level: 'متوسط',
-    status: 'active',
-    nutritionPlanId: 'سمك سلمون بري أطلسي (200g) • شوفان كامل • أفوكادو',
-    joinedDate: '2026-07-01T09:30:00.000Z',
-    measurements: [
-      { waistCm: 74.0 },
-      { waistCm: 71.5 },
-      { waistCm: 69.0 }
-    ],
-    nutritionPlan: {
-      protein: 'سمك سلمون بري أطلسي (Wild Atlantic Salmon - 200g)',
-      carbs: 'شوفان كامل الحبة (70g)',
-      fats: 'أفوكادو طازج (80g)',
-      supplements: 'Whey Protein Isolate (30g) + L-Glutamine (10g)',
-      enhancers: 'None'
-    }
-  },
-  {
-    id: 'ath_1726740003',
-    name: 'يوسف الهادي',
-    email: 'youssef.hadi@fitmail.com',
-    phone: '+971 50 987 6543',
-    currentWeightKg: 77.4,
-    heightCm: 176,
-    age: 33,
-    goal: 'بناء عضلي صافي',
-    level: 'متقدم',
-    status: 'active',
-    nutritionPlanId: 'لحم بقر مفروم قليل الدهن (200g) • كينوا عضوية • مكسرات لوز',
-    joinedDate: '2026-05-15T11:00:00.000Z',
-    measurements: [
-      { waistCm: 78.0 },
-      { waistCm: 79.5 },
-      { waistCm: 80.5 }
-    ],
-    nutritionPlan: {
-      protein: 'لحم بقر مفروم قليل الدهن (Lean Minced Beef 5% - 200g)',
-      carbs: 'كينوا عضوية (200g)',
-      fats: 'مكسرات لوز / جوز نيئة (30g)',
-      supplements: 'Creatine Monohydrate (5g) + Zinc Picolinate (30mg)',
-      enhancers: 'HGH (Human Growth Hormone - 2 IU Pre-bed)'
-    }
-  },
-  {
-    id: 'ath_1726740004',
-    name: 'أميرة طارق',
-    email: 'amira.tariq@gmail.com',
-    phone: '+20 100 234 5678',
-    currentWeightKg: 72.0,
-    heightCm: 162,
-    age: 31,
-    goal: 'خسارة دهون وتنشيف',
-    level: 'مبتدئ',
-    status: 'new',
-    nutritionPlanId: 'سمك قد أبيض أطلسي (250g) • بطاطا حلوة • زيت زيتون',
-    joinedDate: '2026-09-02T14:15:00.000Z',
-    measurements: [
-      { waistCm: 87.0 }
-    ],
-    nutritionPlan: {
-      protein: 'سمك قد أبيض أطلسي (White Atlantic Cod - 250g)',
-      carbs: 'بطاطا حلوة مشوية (250g)',
-      fats: 'زيت زيتون بكر ممتاز (15ml)',
-      supplements: 'Whey Isolate (30g) + Creatine (5g) + Magnesium (400mg)',
-      enhancers: 'None'
-    }
-  }
-];
+const DEFAULT_INITIAL_ATHLETES = [];
 
 // In-Memory Global State
 let athletes = [];
@@ -134,31 +31,28 @@ let athletes = [];
  * ----------------------------------------------------------------------------
  */
 function loadAthletesFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        athletes = parsed;
-        return;
-      }
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                athletes = parsed;
+                return;
+            }
+        }
+        athletes = [];
+    } catch (err) {
+        console.warn('Could not parse athletes from localStorage', err);
+        athletes = [];
     }
-  } catch (err) {
-    console.warn('Could not parse athletes from localStorage, initializing defaults:', err);
-  }
-  // Initialize with defaults if empty or invalid
-  athletes = JSON.parse(JSON.stringify(DEFAULT_INITIAL_ATHLETES));
-  saveAthletesToStorage();
 }
-
 function saveAthletesToStorage() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(athletes));
-  } catch (err) {
-    console.error('Failed saving athletes to localStorage:', err);
-  }
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(athletes));
+    } catch (err) {
+        console.error("خطأ في حفظ البيانات محلياً:", err);
+    }
 }
-
 /**
  * ----------------------------------------------------------------------------
  * 2. ASYNCHRONOUS GOOGLE APPS SCRIPT WEBHOOK SYNC
