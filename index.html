@@ -8,703 +8,599 @@
     <meta property="og:title" content="THE RUSH WAY - Coach CRM" />
     <meta property="og:description" content="Professional fitness coach CRM & PWA with Google Sheets integration and multilingual RTL/LTR support." />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#07090E" />
+    <meta name="theme-color" content="#0b0f19" />
 
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="manifest" href="/manifest.json" />
 
     <!-- Google Fonts: Cairo (Arabic) & Plus Jakarta Sans (Latin) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- Pure Standalone CSS (No build tools required) -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Pure Standalone CSS -->
+    <link rel="stylesheet" href="style.css" />
 
-    <!-- Google Identity Services (OAuth 2.0 Client) -->
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- html2pdf.js CDN for Client-Side PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   </head>
   <body>
-    <!-- شاشة القفل السري للمدرب -->
-<div id="coach-lock-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0f19; z-index: 999999; display: flex; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background: #161f30; border: 1px solid #23324a; border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
-        <div style="font-size: 2.5rem; margin-bottom: 10px;">🔐</div>
-        <h2 style="color: #38b2ac; margin-bottom: 5px; font-weight: 800;">THE RUSH WAY</h2>
-        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">لوحة تحكم المدرب • وصول مصرح فقط</p>
-        
-        <form onsubmit="verifyCoachPin(event)">
-            <input type="password" id="coach-pin-input" maxlength="4" placeholder="••••" style="width: 100%; padding: 14px; font-size: 1.8rem; text-align: center; letter-spacing: 12px; background: #0b0f19; border: 2px solid #334155; border-radius: 12px; color: #fff; outline: none; margin-bottom: 20px;" required autofocus>
-            <button type="submit" style="width: 100%; padding: 14px; background: #38b2ac; border: none; border-radius: 10px; color: #0b0f19; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s;">فتح النظام 🚀</button>
+    <!-- 1. COACH PIN AUTHENTICATION GATE -->
+    <div id="coach-pin-overlay" class="pin-auth-overlay">
+      <div class="pin-auth-card">
+        <div class="pin-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="28" height="28">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </div>
+        <h2 class="pin-brand-title">THE RUSH <span>WAY</span></h2>
+        <p class="pin-subtitle">لوحة تحكم المدرب المعتمد (Coach Portal)</p>
+
+        <form onsubmit="handleCoachPinSubmit(event)">
+          <div class="pin-display-group">
+            <input
+              type="password"
+              id="coach-pin-input"
+              class="pin-input"
+              maxlength="4"
+              placeholder="••••"
+              inputmode="numeric"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="pin-btn-submit">
+            <span>دخول لوحة التحكم</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </button>
         </form>
-    </div>
-</div>
-    <!-- Offline status notification -->
-    <div id="offline-banner" class="offline-banner">
-      ⚠️ وضع عدم الاتصال: يتم حفظ جميع التغييرات محلياً وسيتم المزامنة عند عودة الإنترنت.
+
+        <div id="coach-pin-error" style="color: var(--accent-red); font-size: 0.82rem; margin-top: 12px; display: none; font-weight: 700;">
+          رمز الـ PIN غير صحيح! يرجى إدخال الرمز المعتمد للمدرب.
+        </div>
+        <div class="pin-hint">رمز الدخول الافتراضي للمدرب: <strong>1994</strong></div>
+      </div>
     </div>
 
-    <!-- Application Top Header -->
+    <!-- 2. APPLICATION TOP HEADER -->
     <header class="app-header">
       <div class="header-container">
         <!-- Logo & Brand -->
         <a href="#" class="brand-section" onclick="switchTab('athletes'); return false;">
           <div class="brand-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
           <div class="brand-titles">
             <div class="brand-name">THE RUSH <span>WAY</span></div>
-            <div id="brand-subtitle" class="brand-tagline">نظام إدارة وتدريب الرياضيين</div>
+            <div class="brand-tagline">نظام إدارة وتدريب الرياضيين المتخصص</div>
           </div>
         </a>
 
         <!-- Header Actions -->
         <div class="header-actions">
           <!-- Google Sheets Sync Status Pill -->
-          <div id="header-sheets-pill" class="sheets-sync-pill disconnected" onclick="switchTab('sheets')" title="حالة المزامنة مع Google Sheets">
+          <div id="header-sheets-pill" class="sheets-sync-pill disconnected" onclick="switchTab('sheets')" title="حالة مزامنة Webhook">
             <span class="pulse-dot"></span>
-            <span id="header-sheets-status-txt">DISCONNECTED</span>
+            <span id="header-sheets-status-txt">WEBHOOK READY</span>
           </div>
 
-          <!-- Language Switcher (AR, EN, FR) -->
-          <div class="lang-switcher">
-            <button class="lang-btn active" data-lang="ar">AR</button>
-            <button class="lang-btn" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="fr">FR</button>
-          </div>
-
-          <!-- Coach Profile Avatar -->
+          <!-- Coach Profile Avatar & Lock Button -->
           <div class="coach-pill" title="Coach Profile">
             <div class="coach-avatar">RW</div>
             <span class="coach-name">Coach Rush</span>
           </div>
+          <button class="btn-lock" onclick="lockCoachDashboard()" title="قفل لوحة التحكم">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </button>
         </div>
       </div>
     </header>
 
-    <!-- Desktop Navigation Tabs -->
+    <!-- 3. NAVIGATION TABS -->
     <nav class="desktop-nav-bar">
       <div class="desktop-nav-container">
         <button class="nav-tab-btn active" data-tab="athletes" id="nav-btn-athletes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span id="nav-tab-athletes-txt">المتدربين</span>
+          <span>المتدربين (Athletes)</span>
         </button>
         <button class="nav-tab-btn" data-tab="training" id="nav-btn-training">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
-          <span id="nav-tab-training-txt">التمارين</span>
+          <span>التمارين (Workout Library)</span>
         </button>
         <button class="nav-tab-btn" data-tab="nutrition" id="nav-btn-nutrition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-          <span id="nav-tab-nutrition-txt">التغذية</span>
-        </button>
-        <button class="nav-tab-btn" data-tab="checkins" id="nav-btn-checkins">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          <span id="nav-tab-checkins-txt">المتابعة الأسبوعية</span>
-          <span class="badge-pill" id="badge-checkins-desktop" style="display:none">0</span>
+          <span>التغذية (Nutrition)</span>
         </button>
         <button class="nav-tab-btn" data-tab="sheets" id="nav-btn-sheets">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-          <span id="nav-tab-sheets-txt">ربط الجداول (Sheets)</span>
+          <span>ربط السحابة (Webhook)</span>
         </button>
       </div>
     </nav>
 
-    <!-- Main Content Application Views -->
+    <!-- 4. MAIN CONTENT WRAPPER -->
     <main class="main-wrapper">
-      <!-- 1. ATHLETES VIEW -->
+      <!-- VIEW 1: ATHLETES ROSTER -->
       <section id="view-athletes" class="view-section active">
         <div class="view-header">
           <div class="view-title-group">
-            <h1>سجل الرياضيين والمتدربين</h1>
-            <p>متابعة بيانات المتدربين والقياسات البدنية مع التركيز الحصري على معيار الخصر (Waist).</p>
+            <h1>إدارة الرياضيين والمتدربين</h1>
+            <p>متابعة ملفات المشتركين، الخطط الغذائية، والبرامج التدريبية التشريحية مع معيار الخصر الدقيق.</p>
           </div>
           <div class="view-controls">
-            <div class="search-input-box">
-              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              <input type="text" id="athlete-search-input" placeholder="ابحث باسم المتدرب..." />
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="athlete-search-input" placeholder="ابحث باسم أو هاتف المتدرب..." />
             </div>
-            <select class="select-filter" id="athlete-status-filter">
+            <select class="filter-select" id="athlete-status-filter">
               <option value="all">جميع الحالات</option>
-              <option value="active">نشط</option>
-              <option value="new">جديد</option>
-              <option value="paused">متوقف</option>
+              <option value="active">نشط (Active)</option>
+              <option value="new">جديد (New)</option>
+              <option value="paused">متوقف (Paused)</option>
             </select>
             <button class="btn btn-primary" onclick="openAddAthleteModal()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               <span>إضافة متدرب جديد</span>
-            </button><button onclick="exportAllAthletesToPDF()" style="background: linear-gradient(135deg, #2b6cb0 0%, #2a4365 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; transition: 0.3s;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-    طباعة السجل الشامل
-</button>
+            </button>
+            <button class="btn btn-secondary" onclick="exportAllAthletesToPDF()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>تصدير الكشف (PDF)</span>
+            </button>
           </div>
         </div>
+
+        <!-- Athlete Cards Grid -->
         <div class="card-grid" id="athletes-card-grid"></div>
       </section>
 
-      <!-- 2. TRAINING VIEW -->
+      <!-- VIEW 2: WORKOUT LIBRARY VIEW -->
       <section id="view-training" class="view-section">
         <div class="view-header">
           <div class="view-title-group">
-            <h1>البرامج التدريبية المعتمدة</h1>
-            <p>برامج متخصصة تشمل Push-Pull-Legs (PPL)، Upper-Lower Splits، وCircuit Training.</p>
+            <h1>بنك التمارين والتشريح الحركي</h1>
+            <p>قاعدة التمارين المعتمدة مقسمة تشريحياً وفقاً للعضلات المستهدفة وزوايا الحمل الميكانيكي.</p>
           </div>
         </div>
-        <div class="card-grid" id="training-card-grid"></div>
+        <div class="card-grid" id="training-library-preview-grid"></div>
       </section>
 
-      <!-- 3. NUTRITION VIEW -->
+      <!-- VIEW 3: NUTRITION GUIDES -->
       <section id="view-nutrition" class="view-section">
         <div class="view-header">
           <div class="view-title-group">
-            <h1>الخطط الغذائية والماكروز (Nutrition Plans)</h1>
-            <p>أنظمة غذائية احترافية ترتكز على خيارات البروتين الأساسية: اللحم (Meat) أو السمك (Fish).</p>
+            <h1>فلسفة التغذية المعتمدة - THE RUSH WAY</h1>
+            <p>مصادر البروتين النقي في الصدارة (اللحوم الحمراء الخالية والأسماك البرية) لتحفيز تخليق البروتين العضلي.</p>
           </div>
         </div>
-
-        <!-- ADVANCED MEAL & PROTOCOL DESIGNER -->
-        <div class="meal-designer-card">
-          <div class="meal-designer-header">
-            <h3>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
-              <span>تصميم وتخصيص وجبة جديدة (Meal & Protocol Designer)</span>
-            </h3>
-            <span style="font-size: 0.8rem; color: #A78BFA; background: rgba(139,92,246,0.12); padding: 4px 10px; border-radius: 9999px; font-weight: 700;">
-              قاعدة بيانات التغذية والمكملات
-            </span>
+        <div class="card-grid">
+          <div class="athlete-card">
+            <h3 style="color: #60a5fa; font-size: 1.1rem; font-weight: 800;">🥩 بروتوكول اللحوم الحمراء والأسماك</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+              يتم إعطاء الأولوية للستيك البقري ولحم العجل قليل الدهن لاحتوائه على الكرياتين الطبيعي والحديد والزنك لرفع الكفاءة البنائية، إضافة للأسماك الدهنية (سلمون، قد) لأحماض أوميغا 3 لتقليل الالتهاب العضلي.
+            </p>
           </div>
-
-          <form onsubmit="handleSaveDesignedMeal(event)">
-            <div class="meal-grid-form">
-              <!-- Meal Name & Plan Selection -->
-              <div class="designer-field">
-                <label>اسم الوجبة</label>
-                <input type="text" id="meal-designer-name" placeholder="مثال: وجبة ما بعد التمرين (Post-Workout)" required value="وجبة ما بعد التمرين" />
-              </div>
-
-              <div class="designer-field">
-                <label>الخطة المستهدفة</label>
-                <select id="select-target-plan">
-                  <option value="nut-meat-01">خطة اللحم البقري الدقيقة (Red Meat Precision)</option>
-                  <option value="nut-fish-01">خطة السلمون والسمك الأبيض (Salmon & Fish Recomp)</option>
-                </select>
-              </div>
-
-              <!-- 1. Protein Sources (Meat & Fish at top) -->
-              <div class="designer-field">
-                <label style="color: #60A5FA;">🥩 مصادر البروتين (لحم وسمك في المقدمة) *</label>
-                <select id="select-protein">
-                  <optgroup label="🥩 اللحوم المفضلة (Preferred Meat Sources)">
-                    <option value="لحم بقر مفروم قليل الدهن (Lean Minced Beef 5%)" selected>لحم بقر مفروم قليل الدهن (Lean Minced Beef 5%)</option>
-                    <option value="ستيك فيليه بقري (Beef Tenderloin Steak)">ستيك فيليه بقري (Beef Tenderloin Steak)</option>
-                    <option value="لحم عجل هبرة (Lean Veal Cut)">لحم عجل هبرة (Lean Veal Cut)</option>
-                    <option value="لحم بقري سيرلوين (Sirloin Steak)">لحم بقري سيرلوين (Sirloin Steak)</option>
-                  </optgroup>
-                  <optgroup label="🐟 الأسماك المفضلة (Preferred Fish Sources)">
-                    <option value="سمك سلمون بري أطلسي (Wild Atlantic Salmon)">سمك سلمون بري أطلسي (Wild Atlantic Salmon)</option>
-                    <option value="سمك قد أبيض أطلسي (White Atlantic Cod)">سمك قد أبيض أطلسي (White Atlantic Cod)</option>
-                    <option value="تونة طازجة / بالماء (Fresh Albacore Tuna)">تونة طازجة / بالماء (Fresh Albacore Tuna)</option>
-                    <option value="فيليه سمك بلطي / أبيض (White Tilapia Fillet)">فيليه سمك بلطي / أبيض (White Tilapia Fillet)</option>
-                  </optgroup>
-                  <optgroup label="🍗 مصادر بروتينية إضافية (Other Sources)">
-                    <option value="صدور دجاج مخلية (Chicken Breast)">صدور دجاج مخلية (Chicken Breast)</option>
-                    <option value="بيض بلدي عضوي كامل (Whole Eggs)">بيض بلدي عضوي كامل (Whole Eggs)</option>
-                    <option value="بياض بيض مبستر (Egg Whites)">بياض بيض مبستر (Egg Whites)</option>
-                    <option value="صدور ديك رومي (Turkey Breast)">صدور ديك رومي (Turkey Breast)</option>
-                  </optgroup>
-                </select>
-              </div>
-
-              <!-- Protein Grams -->
-              <div class="designer-field">
-                <label>كمية البروتين (جرام)</label>
-                <input type="number" id="input-protein-grams" value="200" step="10" min="50" max="500" />
-              </div>
-
-              <!-- 2. Carbohydrate Sources -->
-              <div class="designer-field">
-                <label style="color: #FBBF24;">🍚 مصادر الكربوهيدرات (Carbohydrates)</label>
-                <select id="select-carbs">
-                  <option value="أرز بسمتي أبيض / ياسمين (Basmati Rice)" selected>أرز بسمتي أبيض / ياسمين (Basmati Rice)</option>
-                  <option value="شوفان كامل الحبة (Organic Rolled Oats)">شوفان كامل الحبة (Organic Rolled Oats)</option>
-                  <option value="بطاطا حلوة مشوية (Baked Sweet Potato)">بطاطا حلوة مشوية (Baked Sweet Potato)</option>
-                  <option value="بطاطا مسلوقة (Boiled White Potato)">بطاطا مسلوقة (Boiled White Potato)</option>
-                  <option value="معكرونة حبوب كاملة (Whole Wheat Pasta)">معكرونة حبوب كاملة (Whole Wheat Pasta)</option>
-                  <option value="كينوا عضوية (Organic Quinoa)">كينوا عضوية (Organic Quinoa)</option>
-                  <option value="كريم أرز سريع الهضم (Cream of Rice)">كريم أرز سريع الهضم (Cream of Rice)</option>
-                </select>
-              </div>
-
-              <!-- Carbs Grams -->
-              <div class="designer-field">
-                <label>كمية الكربوهيدرات (جرام)</label>
-                <input type="number" id="input-carbs-grams" value="220" step="10" min="0" max="600" />
-              </div>
-
-              <!-- 3. Fat Sources -->
-              <div class="designer-field">
-                <label style="color: #F87171;">🥑 مصادر الدهون الصحية (Healthy Fats)</label>
-                <select id="select-fats">
-                  <option value="زيت زيتون بكر ممتاز (15 مل)" selected>زيت زيتون بكر ممتاز (Extra Virgin Olive Oil - 15ml)</option>
-                  <option value="مكسرات نيئة - لوز / جوز (30 جرام)">مكسرات نيئة - لوز / جوز (Raw Almonds / Walnuts - 30g)</option>
-                  <option value="أفوكادو طازج (70 جرام)">أفوكادو طازج (Fresh Avocado - 70g)</option>
-                  <option value="زبدة فول سوداني طبيعية 100% (25 جرام)">زبدة فول سوداني طبيعية 100% (Natural Peanut Butter - 25g)</option>
-                  <option value="زيت جوز هند عضوي (10 مل)">زيت جوز هند عضوي (Organic Coconut Oil - 10ml)</option>
-                </select>
-              </div>
-
-              <!-- 4. Fiber & Vegetables -->
-              <div class="designer-field">
-                <label style="color: #34D399;">🥦 الألياف والخضروات (Fiber & Veggies)</label>
-                <select id="select-veggies">
-                  <option value="بروكلي على البخار (150 جرام)" selected>بروكلي على البخار (Steamed Broccoli - 150g)</option>
-                  <option value="هليون طازج مشوي (120 جرام)">هليون طازج مشوي (Fresh Asparagus - 120g)</option>
-                  <option value="سبانخ صغيرة طازجة (80 جرام)">سبانخ صغيرة طازجة (Baby Spinach - 80g)</option>
-                  <option value="كوسة مشوية (120 جرام)">كوسة مشوية (Grilled Zucchini - 120g)</option>
-                  <option value="سلطة خضراء مشكلة بالليمون (150 جرام)">سلطة خضراء مشكلة بالليمون (Mixed Green Salad - 150g)</option>
-                </select>
-              </div>
-
-              <!-- 5. Supplements -->
-              <div class="designer-field">
-                <label style="color: #C084FC;">💊 المكملات الغذائية المخصصة (Supplements)</label>
-                <select id="select-supplements">
-                  <option value="None">بدون مكمل في هذه الوجبة</option>
-                  <option value="Whey Protein Isolate (30g)" selected>Whey Protein Isolate (واي بروتين نقي - 30g)</option>
-                  <option value="Creatine Monohydrate (5g)">Creatine Monohydrate (كرياتين مونوهيدرات - 5g)</option>
-                  <option value="L-Glutamine (10g)">L-Glutamine (جلوتامين - 10g)</option>
-                  <option value="Zinc Picolinate (30mg)">Zinc Picolinate (زنك بيكولينات - 30mg)</option>
-                  <option value="Magnesium Glycinate (400mg)">Magnesium Glycinate (مغنيسيوم جلايسينات - 400mg)</option>
-                </select>
-              </div>
-
-              <!-- 6. Performance Enhancers -->
-              <div class="designer-field">
-                <label style="color: #F472B6;">⚡ محسنات الأداء للمتقدمين (Performance Enhancers)</label>
-                <select id="select-enhancers">
-                  <option value="None">لا ينطبق (Natural Protocol)</option>
-                  <option value="HGH (Human Growth Hormone - 2 IU Pre-bed)">HGH (Human Growth Hormone - هرمون النمو)</option>
-                  <option value="Tesamorelin (2mg SC Daily Protocol)">Tesamorelin (تيساموريلين - حرق دهون الخصر والأحشاء)</option>
-                  <option value="CJC-1295 / Ipamorelin Blend">CJC-1295 / Ipamorelin Blend (ببتيد تحفيز الهرمون)</option>
-                  <option value="BPC-157 (Recovery & Joint Repair)">BPC-157 (ببتيد استشفاء المفاصل والأوتار)</option>
-                  <option value="MK-677 (Ibutamoren - Secretagogue)">MK-677 (إيبوتامورين)</option>
-                </select>
-              </div>
-
-              <!-- Submit Action Button -->
-              <div class="designer-field" style="grid-column: 1 / -1; margin-top: 6px;">
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  <span>إضافة هذه الوجبة ومكوناتها للخطة الغذائية</span>
-                </button>
-              </div>
-            </div>
-          </form>
+          <div class="athlete-card">
+            <h3 style="color: #fbbf24; font-size: 1.1rem; font-weight: 800;">🍚 توقيت الكربوهيدرات الذكي</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+              تركيز مصادر الكربوهيدرات سريعة ونقية الهضم (أرز بسمتي، كريم أرز، شوفان) حول جلسة التدريب (Pre/Post Workout) لملء مخازن الجليكوجين دون التسبب في احتباس مائي معوي.
+            </p>
+          </div>
+          <div class="athlete-card">
+            <h3 style="color: var(--primary); font-size: 1.1rem; font-weight: 800;">📏 معيار الخصر الذهبي (Waist Standard)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+              قياس الخصر عند أضيق نقطة هو المؤشر الحقيقي الوحيد لنقاء البناء العضلي وتلاشي دهون الأحشاء (Visceral Fat)، بعيداً عن أخطاء الميزان الرقمي العادي.
+            </p>
+          </div>
         </div>
-
-        <div class="card-grid" id="nutrition-card-grid"></div>
       </section>
 
-      <!-- 4. CHECK-INS VIEW -->
-      <section id="view-checkins" class="view-section">
-        <div class="view-header">
-          <div class="view-title-group">
-            <h1>المتابعة الأسبوعية والتوجيهات</h1>
-            <p>مراجعة تقارير المشتركين، تغيرات الوزن ومحيط الخصر (Waist)، وكتابة توجيهات المدرب.</p>
-          </div>
-        </div>
-        <div class="card-grid" id="checkins-card-grid"></div>
-      </section>
-
-      <!-- 5. SHEETS HUB VIEW -->
+      <!-- VIEW 4: SHEETS WEBHOOK -->
       <section id="view-sheets" class="view-section">
         <div class="view-header">
           <div class="view-title-group">
-            <h1>مركز ربط Google Sheets (قاعدة البيانات)</h1>
-            <p>إدارة وتزامن الـ 20 ورقة عمل المخصصة لنظام التدريب THE RUSH WAY.</p>
+            <h1>مزامنة السحابة (Google Sheets Webhook)</h1>
+            <p>مزامنة فورية مشفرة ومباشرة مع Google Apps Script Web App دون الحاجة لأي صلاحيات معقدة.</p>
           </div>
         </div>
-
-        <!-- Master Sheets Connection Banner -->
-        <div class="sheets-banner-card">
-          <div class="sheets-banner-info">
-            <div class="sheets-logo-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-            </div>
-            <div>
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                <h2 style="font-size: 1.25rem; font-weight: 800; color: white;">قاعدة بيانات Google Sheets CRM</h2>
-                <span id="sheets-hub-status-badge" class="sheets-sync-pill disconnected">DISCONNECTED</span>
-              </div>
-              <p style="color: var(--text-muted); font-size: 0.88rem;">
-                الربط المباشر لحفظ وتحديث المتدربين والتمارين والتغذية والقياسات داخل جدول متكامل مكوّن من 20 ورقة عمل.
-              </p>
+        <div class="athlete-card" style="max-width: 680px;">
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 8px;">إعدادات الـ Webhook النشطة</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+            يتم إرسال كافة التسجيلات الجديدة وتعديلات التغذية والتمارين عبر طلبات <code>fetch POST</code> غير المتزامنة لضمان استمرار التطبيق سواء كنت متصلاً أو غير متصل.
+          </p>
+          <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px;">
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 700;">رابط نقطة النهاية (Endpoint URL):</div>
+            <div id="sheets-endpoint-display" style="font-family: monospace; font-size: 0.82rem; color: var(--primary); word-break: break-all; margin-top: 4px;">
+              https://script.google.com/macros/s/AKfycbz_YOUR_APPS_SCRIPT_WEBHOOK_URL_HERE/exec
             </div>
           </div>
-
-          <!-- OAuth and Action Buttons -->
-          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px;">
-            <!-- Exact required button with class and onclick -->
-            <button class="btn-primary" onclick="handleAuthClick()">Connect Google</button>
-            <button class="btn btn-success" onclick="initialize20Tabs()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><polyline points="9 11 12 14 22 4"/></svg>
-              <span>تهيئة الـ 20 ورقة</span>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" onclick="testWebhookConnection()">
+              اختبار الاتصال السحابي
             </button>
-            <button class="btn btn-secondary" onclick="syncAllData()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-              <span>مزامنة الآن</span>
-            </button>
-            <button class="btn btn-secondary" onclick="exportBackupJson()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>تصدير JSON</span>
+            <button type="button" class="btn btn-secondary" onclick="exportBackupJson()">
+              تصدير نسخة احتياطية (JSON)
             </button>
           </div>
         </div>
-
-        <!-- 20 Structured Database Tabs Grid -->
-        <h3 style="font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 14px;">هيكل أوراق العمل الـ 20 (Sheets Architecture)</h3>
-        <div class="sheets-tabs-grid" id="sheets-tabs-grid"></div>
       </section>
     </main>
 
-    <!-- Mobile Bottom Navigation Bar -->
-    <nav class="bottom-nav">
-      <button class="bottom-tab-btn active" data-tab="athletes">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span id="bnav-athletes-txt">المتدربين</span>
-      </button>
-      <button class="bottom-tab-btn" data-tab="training">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
-        <span id="bnav-training-txt">التمارين</span>
-      </button>
-      <button class="bottom-tab-btn" data-tab="nutrition">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
-        <span id="bnav-nutrition-txt">التغذية</span>
-      </button>
-      <button class="bottom-tab-btn" data-tab="checkins">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span id="bnav-checkins-txt">المتابعة</span>
-        <span class="badge-pill" id="badge-checkins-mobile" style="display:none">0</span>
-      </button>
-      <button class="bottom-tab-btn" data-tab="sheets">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-        <span id="bnav-sheets-txt">الجداول</span>
-      </button>
-    </nav>
-
     <!-- =====================================================================
-         MODALS
+         MODALS ARCHITECTURE
          ===================================================================== -->
-    <!-- Modal: Add Athlete -->
+
+    <!-- MODAL 1: ADD ATHLETE -->
     <div class="modal-backdrop" id="modal-add-athlete">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title">إضافة متدرب جديد</h3>
+          <h3 class="modal-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            <span>تسجيل متدرب جديد</span>
+          </h3>
           <button class="modal-close-btn" onclick="closeModal('modal-add-athlete')">✕</button>
         </div>
         <form onsubmit="handleSaveAthlete(event)">
           <div class="modal-body">
             <div class="form-group">
-              <label>الاسم الكامل</label>
-              <input type="text" id="form-ath-name" class="form-control" required placeholder="مثال: يونس بناني" />
+              <label>الاسم الكامل *</label>
+              <input type="text" id="form-ath-name" class="form-control" required placeholder="مثال: كريم بناني" />
             </div>
+
             <div class="form-row">
+              <div class="form-group">
+                <label>رقم الهاتف (مع الرمز الدولي) *</label>
+                <input type="tel" id="form-ath-phone" class="form-control" required placeholder="+213 555 123 456" />
+              </div>
               <div class="form-group">
                 <label>البريد الإلكتروني</label>
-                <input type="email" id="form-ath-email" class="form-control" required placeholder="name@domain.com" />
-              </div>
-              <div class="form-group">
-                <label>رقم الهاتف (مع الرمز الدولي)</label>
-                <input type="tel" id="form-ath-phone" class="form-control" required placeholder="+213 555 000 000" />
+                <input type="email" id="form-ath-email" class="form-control" placeholder="client@domain.com" />
               </div>
             </div>
+
             <div class="form-row">
               <div class="form-group">
-                <label>الوزن الحالي (kg)</label>
-                <input type="number" step="0.1" id="form-ath-weight" class="form-control" required value="78.0" />
+                <label>الوزن الحالي (kg) *</label>
+                <input type="number" step="0.1" id="form-ath-weight" class="form-control" required placeholder="80.0" />
               </div>
               <div class="form-group">
-                <label style="color: #C4B5FD;">محيط الخصر (Waist cm) *</label>
-                <input type="number" step="0.5" id="form-ath-waist" class="form-control" required value="84.0" />
+                <label style="color: var(--primary);">محيط الخصر (Waist cm) - المعيار الحصري *</label>
+                <input type="number" step="0.5" id="form-ath-waist" class="form-control" required placeholder="86.0" />
               </div>
-            </div><!-- 1. الطول والعمر -->
-<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
-    <div style="flex: 1;">
-        <label>الطول (CM)</label>
-        <input type="number" id="form-ath-height" class="form-control" placeholder="مثال: 175">
-    </div>
-    <div style="flex: 1;">
-        <label>العمر</label>
-        <input type="number" id="form-ath-age" class="form-control" placeholder="مثال: 25">
-    </div>
-</div>
+            </div>
 
-<!-- 2. القوائم المنسدلة: الهدف التدريبي ومستوى المتدرب -->
-<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
-    <div style="flex: 1;">
-        <label>الهدف التدريبي</label>
-        <select id="form-ath-goal" class="form-control" style="width: 100%; padding: 8px; border-radius: 5px; background-color: #1a1e2d; color: #fff; border: 1px solid #2a2f45;">
-            <option value="">-- الهدف --</option>
-            <option value="بناء عضلات (Hypertrophy)">بناء عضلات (Hypertrophy)</option>
-            <option value="تخسيس وحرق دهون (Fat Loss)">تخسيس وحرق دهون (Fat Loss)</option>
-            <option value="إعادة تكوين الجسم (Recomp)">إعادة تكوين الجسم (Recomp)</option>
-            <option value="زيادة القوة (Strength)">زيادة القوة (Strength)</option>
-        </select>
-    </div>
-    <div style="flex: 1;">
-        <label>مستوى الخبرة</label>
-        <select id="form-ath-level" class="form-control" style="width: 100%; padding: 8px; border-radius: 5px; background-color: #1a1e2d; color: #fff; border: 1px solid #2a2f45;">
-            <option value="">-- المستوى --</option>
-            <option value="مبتدئ (أقل من 6 أشهر)">مبتدئ (أقل من 6 أشهر)</option>
-            <option value="متوسط (6 أشهر - سنتين)">متوسط (6 أشهر - سنتين)</option>
-            <option value="متقدم (أكثر من سنتين)">متقدم (أكثر من سنتين)</option>
-        </select>
-    </div>
-</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>الطول (cm)</label>
+                <input type="number" id="form-ath-height" class="form-control" placeholder="178" />
+              </div>
+              <div class="form-group">
+                <label>العمر (سنة)</label>
+                <input type="number" id="form-ath-age" class="form-control" placeholder="28" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>الهدف التدريبي (Goal)</label>
+                <select id="form-ath-goal" class="form-control">
+                  <option value="خسارة دهون وتنشيف">خسارة دهون وتنشيف (Fat Loss)</option>
+                  <option value="بناء عضلي صافي">بناء عضلي صافي (Hypertrophy)</option>
+                  <option value="إعادة تشكيل الجسم (Recomp)">إعادة تشكيل الجسم (Recomp)</option>
+                  <option value="قوة بدنية وأداء عالي">قوة بدنية وأداء عالي (Strength & Power)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>المستوى الرياضي (Level)</label>
+                <select id="form-ath-level" class="form-control">
+                  <option value="مبتدئ">مبتدئ (Beginner)</option>
+                  <option value="متوسط" selected>متوسط (Intermediate)</option>
+                  <option value="متقدم">متقدم (Advanced / Elite)</option>
+                </select>
+              </div>
+            </div>
+
             <div class="form-group">
               <label>حالة الاشتراك</label>
               <select id="form-ath-status" class="form-control">
                 <option value="active">نشط (Active)</option>
-                <option value="new">جديد (New)</option>
+                <option value="new" selected>جديد (New)</option>
                 <option value="paused">متوقف مؤقتاً (Paused)</option>
               </select>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-athlete')">إلغاء</button>
-            <button type="submit" class="btn btn-primary">حفظ المتدرب</button>
+            <button type="submit" class="btn btn-primary">حفظ وتأكيد التسجيل</button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Modal: Athlete Measurement History (Strict Waist Standard) -->
-    <div class="modal-backdrop" id="modal-athlete-details">
-      <div class="modal-content">
+    <!-- MODAL 2: INTERACTIVE ANATOMICAL WORKOUT BUILDER -->
+    <div class="modal-backdrop" id="modal-workout-builder">
+      <div class="modal-content modal-workout-lg">
         <div class="modal-header">
-          <h3 class="modal-title" id="modal-details-ath-name">سجل القياسات البدنية (Waist)</h3>
-          <button class="modal-close-btn" onclick="closeModal('modal-athlete-details')">✕</button>
+          <h3 class="modal-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+            <span>مصمم البرامج والتمارين التشريحي - <span id="builder-athlete-name" style="color: var(--primary);">المتدرب</span></span>
+          </h3>
+          <button class="modal-close-btn" onclick="closeModal('modal-workout-builder')">✕</button>
         </div>
-        <div class="modal-body">
-          <div class="measurements-table-wrapper">
-            <table class="measurements-table">
-              <thead>
-                <tr>
-                  <th>التاريخ</th>
-                  <th class="waist-col">الخصر (Waist)</th>
-                  <th>الصدر</th>
-                  <th>الأوراك</th>
-                  <th>الذراعين</th>
-                </tr>
-              </thead>
-              <tbody id="modal-details-table-body"></tbody>
-            </table>
+
+        <div class="modal-body" style="padding: 16px;">
+          <input type="hidden" id="builder-athlete-id" />
+
+          <div class="workout-builder-grid">
+            <!-- COLUMN 1: INTERACTIVE BODY MAP -->
+            <div class="body-map-panel">
+              <div class="body-view-toggle">
+                <button type="button" class="view-toggle-btn active" id="btn-view-front" onclick="switchBodyView('front')">
+                  المظهر الأمامي (Front)
+                </button>
+                <button type="button" class="view-toggle-btn" id="btn-view-back" onclick="switchBodyView('back')">
+                  المظهر الخلفي (Back)
+                </button>
+              </div>
+
+              <!-- SVG Anatomical Interactive Model -->
+              <div class="anatomical-svg-container">
+                <!-- FRONT VIEW SVG -->
+                <svg id="svg-body-front" class="muscle-svg" viewBox="0 0 200 380" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Head/Neck Silhouette -->
+                  <path d="M92 25 Q100 12 108 25 Q115 45 108 55 Q100 58 92 55 Z" fill="#141c2c" stroke="#25354e" stroke-width="1.2"/>
+                  <!-- Traps Neck -->
+                  <path class="muscle-node" data-muscle="traps" d="M85 55 L93 56 L100 62 L107 56 L115 55 L124 72 L76 72 Z" />
+                  
+                  <!-- Chest: Clavicular / Sternal -->
+                  <g class="muscle-node" data-muscle="chest">
+                    <path d="M78 74 Q100 75 100 95 Q82 108 72 90 Z" />
+                    <path d="M122 74 Q100 75 100 95 Q118 108 128 90 Z" />
+                  </g>
+
+                  <!-- Front Delts & Lateral Delts -->
+                  <g class="muscle-node" data-muscle="front_delts">
+                    <path d="M72 73 Q78 80 70 94 Q62 88 66 76 Z" />
+                    <path d="M128 73 Q122 80 130 94 Q138 88 134 76 Z" />
+                  </g>
+
+                  <!-- Biceps -->
+                  <g class="muscle-node" data-muscle="biceps">
+                    <path d="M68 96 Q72 115 65 130 Q58 118 63 98 Z" />
+                    <path d="M132 96 Q128 115 135 130 Q142 118 137 98 Z" />
+                  </g>
+
+                  <!-- Forearms -->
+                  <g class="muscle-node" data-muscle="forearms">
+                    <path d="M64 133 Q67 155 58 178 Q52 165 58 136 Z" />
+                    <path d="M136 133 Q133 155 142 178 Q148 165 142 136 Z" />
+                  </g>
+
+                  <!-- Abs & Core (Six-Pack / Obliques) -->
+                  <g class="muscle-node" data-muscle="abs">
+                    <path d="M86 98 L114 98 L112 115 L88 115 Z" />
+                    <path d="M88 117 L112 117 L110 134 L90 134 Z" />
+                    <path d="M90 136 L110 136 L108 155 L92 155 Z" />
+                    <!-- Obliques -->
+                    <path d="M76 102 L84 102 L86 150 L75 144 Z" />
+                    <path d="M124 102 L116 102 L114 150 L125 144 Z" />
+                  </g>
+
+                  <!-- Quads -->
+                  <g class="muscle-node" data-muscle="quads">
+                    <path d="M74 162 Q96 164 96 200 Q96 235 84 255 Q70 230 70 178 Z" />
+                    <path d="M126 162 Q104 164 104 200 Q104 235 116 255 Q130 230 130 178 Z" />
+                  </g>
+
+                  <!-- Calves Front / Tibialis -->
+                  <g class="muscle-node" data-muscle="calves">
+                    <path d="M78 266 Q88 280 84 330 Q74 315 74 275 Z" />
+                    <path d="M122 266 Q112 280 116 330 Q126 315 126 275 Z" />
+                  </g>
+                </svg>
+
+                <!-- BACK VIEW SVG -->
+                <svg id="svg-body-back" class="muscle-svg" viewBox="0 0 200 380" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                  <!-- Head/Neck Silhouette -->
+                  <path d="M92 25 Q100 12 108 25 Q115 45 108 55 Q100 58 92 55 Z" fill="#141c2c" stroke="#25354e" stroke-width="1.2"/>
+                  <!-- Upper & Mid Traps -->
+                  <path class="muscle-node" data-muscle="traps" d="M80 62 L100 55 L120 62 L126 78 L100 108 L74 78 Z" />
+
+                  <!-- Rear Delts -->
+                  <g class="muscle-node" data-muscle="rear_delts">
+                    <path d="M72 74 Q76 84 68 96 Q60 90 66 78 Z" />
+                    <path d="M128 74 Q124 84 132 96 Q140 90 134 78 Z" />
+                  </g>
+
+                  <!-- Triceps -->
+                  <g class="muscle-node" data-muscle="triceps">
+                    <path d="M66 98 Q72 118 63 133 Q56 120 62 100 Z" />
+                    <path d="M134 98 Q128 118 137 133 Q144 120 138 100 Z" />
+                  </g>
+
+                  <!-- Lats (Thoracic & Iliac) -->
+                  <g class="muscle-node" data-muscle="lats">
+                    <path d="M74 85 Q92 105 88 140 Q70 122 68 96 Z" />
+                    <path d="M126 85 Q108 105 112 140 Q130 122 132 96 Z" />
+                  </g>
+
+                  <!-- Lower Back (Erector Spinae) -->
+                  <path class="muscle-node" data-muscle="lower_back" d="M88 138 L112 138 L110 162 L90 162 Z" />
+
+                  <!-- Glutes -->
+                  <g class="muscle-node" data-muscle="glutes">
+                    <path d="M72 165 Q100 166 99 202 Q84 212 70 195 Z" />
+                    <path d="M128 165 Q100 166 101 202 Q116 212 130 195 Z" />
+                  </g>
+
+                  <!-- Hamstrings -->
+                  <g class="muscle-node" data-muscle="hamstrings">
+                    <path d="M72 208 Q96 210 94 255 Q80 258 72 225 Z" />
+                    <path d="M128 208 Q104 210 106 255 Q120 258 128 225 Z" />
+                  </g>
+
+                  <!-- Calves Back (Gastrocnemius / Soleus) -->
+                  <g class="muscle-node" data-muscle="calves">
+                    <path d="M73 268 Q88 274 84 325 Q71 315 71 280 Z" />
+                    <path d="M127 268 Q112 274 116 325 Q129 315 129 280 Z" />
+                  </g>
+                </svg>
+              </div>
+
+              <!-- Muscle Selection Chips -->
+              <div class="muscle-label-chip-group" id="muscle-chip-container">
+                <!-- Injected via JavaScript based on view -->
+              </div>
+            </div>
+
+            <!-- COLUMN 2: EXERCISE DATABASE LIST -->
+            <div class="exercise-library-panel">
+              <div class="library-header">
+                <div>
+                  <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">العضلة المختارة:</span>
+                  <div class="library-title" id="selected-muscle-title">الصدر (Chest)</div>
+                </div>
+                <span class="tag-badge" id="muscle-exercise-count">0 تمارين</span>
+              </div>
+
+              <div class="exercise-items-list" id="exercise-items-list">
+                <!-- Dynamically populated based on active muscle -->
+              </div>
+            </div>
+
+            <!-- COLUMN 3: ASSEMBLED WORKOUT ROUTINE -->
+            <div class="assigned-routine-panel">
+              <div class="routine-header">
+                <div>
+                  <div class="routine-title">الجدول المعتمد</div>
+                  <div style="font-size: 0.72rem; color: var(--text-dim);">برنامج المتدرب النشط</div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearAthleteWorkoutDraft()" title="تفريغ القائمة">
+                  مسح
+                </button>
+              </div>
+
+              <div class="routine-items-list" id="routine-items-list">
+                <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 20px 0;">
+                  انقر على أي عضلة ثم اضغط <strong>+ إضافة</strong> لتجميع الروتين.
+                </p>
+              </div>
+
+              <div class="routine-volume-summary" id="routine-volume-summary">
+                إجمالي التمارين: <strong>0</strong> | العضلات المستهدفة: <strong>0</strong>
+              </div>
+
+              <button type="button" class="btn btn-primary" onclick="saveAthleteWorkoutPlan()" style="width: 100%;">
+                حفظ وإسناد البرنامج التدريبي
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-athlete-details')">إغلاق</button>
         </div>
       </div>
     </div>
 
-    <!-- Modal: Add Measurement (Strict Waist Standard) -->
-    <div class="modal-backdrop" id="modal-add-measurement">
+    <!-- MODAL 3: NUTRITION ASSIGNMENT -->
+    <div class="modal-backdrop" id="modal-add-nutrition">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title" id="modal-meas-ath-name">تسجيل قياس جديد</h3>
-          <button class="modal-close-btn" onclick="closeModal('modal-add-measurement')">✕</button>
+          <h3 class="modal-title" id="modal-nutrition-athlete-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+            <span>إسناد وتخصيص الخطة الغذائية</span>
+          </h3>
+          <button class="modal-close-btn" onclick="closeModal('modal-add-nutrition')">✕</button>
         </div>
-        <form onsubmit="handleSaveMeasurement(event)">
+        <form onsubmit="handleSaveNutrition(event)">
+          <input type="hidden" id="form-nut-athlete-id" />
           <div class="modal-body">
             <div class="form-group">
-              <label style="color: #C4B5FD;">محيط الخصر (Waist cm) - المعيار الأساسي *</label>
-              <input type="number" step="0.5" id="form-meas-waist" class="form-control" required placeholder="80.5" />
+              <label>المتدرب المستهدف</label>
+              <input type="text" id="form-nut-athlete-name" class="form-control" readonly style="background: rgba(255,255,255,0.04); color: var(--primary); font-weight: 800;" />
             </div>
+
+            <div class="form-group">
+              <label style="color: #60a5fa;">🥩 مصادر البروتين الأساسية (لحم / سمك في الصدارة) *</label>
+              <select id="form-nut-protein" class="form-control">
+                <optgroup label="🥩 اللحوم المفضلة (Red Meat)">
+                  <option value="لحم بقر مفروم قليل الدهن (Lean Minced Beef 5% - 200g)">لحم بقر مفروم قليل الدهن (Lean Minced Beef 5% - 200g)</option>
+                  <option value="ستيك فيليه بقري (Beef Tenderloin Steak - 220g)" selected>ستيك فيليه بقري (Beef Tenderloin Steak - 220g)</option>
+                  <option value="لحم عجل هبرة (Lean Veal Cut - 200g)">لحم عجل هبرة (Lean Veal Cut - 200g)</option>
+                  <option value="لحم بقري سيرلوين (Sirloin Steak - 200g)">لحم بقري سيرلوين (Sirloin Steak - 200g)</option>
+                </optgroup>
+                <optgroup label="🐟 الأسماك المفضلة (Fish Sources)">
+                  <option value="سمك سلمون بري أطلسي (Wild Atlantic Salmon - 200g)">سمك سلمون بري أطلسي (Wild Atlantic Salmon - 200g)</option>
+                  <option value="سمك قد أبيض أطلسي (White Atlantic Cod - 250g)">سمك قد أبيض أطلسي (White Atlantic Cod - 250g)</option>
+                  <option value="تونة طازجة بالماء (Fresh Tuna - 200g)">تونة طازجة بالماء (Fresh Tuna - 200g)</option>
+                </optgroup>
+                <optgroup label="🍗 مصادر إضافية (Other Sources)">
+                  <option value="صدور دجاج مخلية (Chicken Breast - 220g)">صدور دجاج مخلية (Chicken Breast - 220g)</option>
+                  <option value="بيض عضوي كامل + بياض (Whole Eggs + Whites)">بيض عضوي كامل + بياض (Whole Eggs + Whites)</option>
+                </optgroup>
+              </select>
+            </div>
+
             <div class="form-row">
               <div class="form-group">
-                <label>الوزن الحالي (kg)</label>
-                <input type="number" step="0.1" id="form-meas-weight" class="form-control" placeholder="75.0" />
+                <label style="color: #fbbf24;">🍚 مصادر الكربوهيدرات (Carbohydrates)</label>
+                <select id="form-nut-carbs" class="form-control">
+                  <option value="أرز بسمتي أبيض / ياسمين (220g)" selected>أرز بسمتي أبيض / ياسمين (220g)</option>
+                  <option value="شوفان كامل الحبة (70g)">شوفان كامل الحبة (70g)</option>
+                  <option value="بطاطا حلوة مشوية (250g)">بطاطا حلوة مشوية (250g)</option>
+                  <option value="كينوا عضوية (200g)">كينوا عضوية (200g)</option>
+                  <option value="كريم أرز سريع الهضم (60g)">كريم أرز سريع الهضم (60g)</option>
+                </select>
               </div>
               <div class="form-group">
-                <label>محيط الصدر (cm)</label>
-                <input type="number" step="0.5" id="form-meas-chest" class="form-control" placeholder="102" />
+                <label style="color: #f87171;">🥑 مصادر الدهون الصحية (Healthy Fats)</label>
+                <select id="form-nut-fats" class="form-control">
+                  <option value="زيت زيتون بكر ممتاز (15ml)" selected>زيت زيتون بكر ممتاز (15ml)</option>
+                  <option value="أفوكادو طازج (80g)">أفوكادو طازج (80g)</option>
+                  <option value="مكسرات لوز / جوز نيئة (30g)">مكسرات لوز / جوز نيئة (30g)</option>
+                  <option value="زبدة فول سوداني طبيعية (25g)">زبدة فول سوداني طبيعية (25g)</option>
+                </select>
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>محيط الأوراك (cm)</label>
-                <input type="number" step="0.5" id="form-meas-hips" class="form-control" placeholder="98" />
-              </div>
-              <div class="form-group">
-                <label>محيط الذراعين (cm)</label>
-                <input type="number" step="0.5" id="form-meas-arms" class="form-control" placeholder="36" />
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-measurement')">إلغاء</button>
-            <button type="submit" class="btn btn-primary">حفظ القياسات</button>
-          </div>
-        </form>
-      </div>
-    </div>
 
-    <!-- Modal: Assign Program -->
-    <div class="modal-backdrop" id="modal-assign-program">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 class="modal-title">إسناد البرنامج التدريبي</h3>
-          <button class="modal-close-btn" onclick="closeModal('modal-assign-program')">✕</button>
-        </div>
-        <form onsubmit="handleSaveAssignProgram(event)">
-          <div class="modal-body">
-            <p style="color: #A78BFA; font-weight: 700;" id="modal-assign-prog-title"></p>
             <div class="form-group">
-              <label>اختر المتدرب</label>
-              <select id="form-assign-prog-athlete-select" class="form-control"></select>
+              <label style="color: #c084fc;">💊 المكملات الغذائية (Supplements)</label>
+              <select id="form-nut-supplements" class="form-control">
+                <option value="Whey Isolate (30g) + Creatine (5g) + Magnesium (400mg)" selected>Whey Isolate (30g) + Creatine (5g) + Magnesium (400mg)</option>
+                <option value="Creatine Monohydrate (5g) + Zinc Picolinate (30mg)">Creatine Monohydrate (5g) + Zinc Picolinate (30mg)</option>
+                <option value="Whey Protein Isolate (30g) + L-Glutamine (10g)">Whey Protein Isolate (30g) + L-Glutamine (10g)</option>
+                <option value="None">بدون مكملات</option>
+              </select>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-assign-program')">إلغاء</button>
-            <button type="submit" class="btn btn-primary">تأكيد الإسناد</button>
-          </div>
-        </form>
-      </div>
-    </div>
 
-    <!-- Modal: Assign Nutrition -->
-    <div class="modal-backdrop" id="modal-assign-nutrition">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 class="modal-title">إسناد الخطة الغذائية</h3>
-          <button class="modal-close-btn" onclick="closeModal('modal-assign-nutrition')">✕</button>
-        </div>
-        <form onsubmit="handleSaveAssignNutrition(event)">
-          <div class="modal-body">
-            <p style="color: #38BDF8; font-weight: 700;" id="modal-assign-nut-title"></p>
             <div class="form-group">
-              <label>اختر المتدرب</label>
-              <select id="form-assign-nut-athlete-select" class="form-control"></select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-assign-nutrition')">إلغاء</button>
-            <button type="submit" class="btn btn-primary">تأكيد الإسناد</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal: Checkin Feedback & Review -->
-    <div class="modal-backdrop" id="modal-checkin-details">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 class="modal-title" id="modal-chk-athlete-name">مراجعة تقرير المتابعة</h3>
-          <button class="modal-close-btn" onclick="closeModal('modal-checkin-details')">✕</button>
-        </div>
-        <form onsubmit="handleSaveCheckinFeedback(event)">
-          <div class="modal-body">
-            <div class="form-group">
-              <label>توجيهات وملاحظات المدرب (Coach Guidance)</label>
-              <textarea id="form-chk-feedback-text" rows="4" class="form-control" placeholder="اكتب ملاحظاتك وتوجيهاتك للمتدرب هنا..."></textarea>
-            </div>
-            <div class="form-group">
-              <label>حالة التقرير</label>
-              <select id="form-chk-status-select" class="form-control">
-                <option value="reviewed">تمت المراجعة (Reviewed)</option>
-                <option value="pending">قيد الانتظار (Pending)</option>
-                <option value="needs_adjustment">يحتاج تعديل في الخطة (Needs Adjustment)</option>
+              <label style="color: #f472b6;">⚡ محسنات الأداء (Performance Enhancers)</label>
+              <select id="form-nut-enhancers" class="form-control">
+                <option value="None" selected>لا ينطبق (Natural Protocol)</option>
+                <option value="Tesamorelin (2mg SC Daily - Visceral Fat Burn)">Tesamorelin (2mg SC Daily - حرق دهون الخصر والأحشاء)</option>
+                <option value="HGH (Human Growth Hormone - 2 IU Pre-bed)">HGH (Human Growth Hormone - هرمون النمو)</option>
+                <option value="CJC-1295 / Ipamorelin Blend">CJC-1295 / Ipamorelin Blend (تحفيز الهرمون)</option>
+                <option value="BPC-157 (Joint & Tissue Repair)">BPC-157 (استشفاء المفاصل والأوتار)</option>
               </select>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-checkin-details')">إلغاء</button>
-            <button type="submit" class="btn btn-primary">حفظ التوجيهات</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-nutrition')">إلغاء</button>
+            <button type="submit" class="btn btn-primary">حفظ وإسناد الخطة</button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Modal: Sheet Tab Inspector -->
-    <div class="modal-backdrop" id="modal-sheet-tab">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 class="modal-title" id="modal-sheet-tab-title">تفاصيل ورقة العمل</h3>
-          <button class="modal-close-btn" onclick="closeModal('modal-sheet-tab')">✕</button>
-        </div>
-        <div class="modal-body" id="modal-sheet-tab-desc"></div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-sheet-tab')">إغلاق</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Toast Notifications Container -->
+    <!-- TOAST NOTIFICATIONS CONTAINER -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Pure Vanilla JavaScript Application Script (Exact filename and link required) -->
+    <!-- JAVASCRIPT APPLICATION SCRIPT -->
     <script src="script.js"></script>
   </body>
-</html>
-<!-- نافذة الخطة الغذائية المنبثقة -->
-    <div class="modal-backdrop" id="modal-add-nutrition" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 99999; justify-content: center; align-items: center;">
-        <div class="modal-content" style="background: #1a202c; border: 1px solid #2d3748; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; color: #fff; max-height: 90vh; overflow-y: auto;">
-            
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d3748; padding-bottom: 10px; margin-bottom: 15px;">
-                <h3 style="margin: 0; color: #38b2ac; font-size: 1.2rem;">🥗 الخطة الغذائية والمكملات</h3>
-                <button type="button" onclick="closeNutritionModal()" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-
-            <form onsubmit="handleSaveNutrition(event)">
-                <input type="hidden" id="form-nut-athlete-id">
-                <input type="hidden" id="form-nut-athlete-name">
-
-                <div style="background: rgba(56, 178, 172, 0.12); border-right: 4px solid #38b2ac; padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: right;">
-                    المتدرب: <strong id="display-nut-athlete-name" style="color: #38b2ac;">-</strong>
-                </div>
-
-                <div style="margin-bottom: 12px; text-align: right;">
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">مصادر البروتين</label>
-                    <select id="form-nut-protein" style="width: 100%; padding: 8px; border-radius: 6px; background: #2d3748; color: #fff; border: 1px solid #4a5568;" required>
-                        <option value="لحم بقري صافي أو سمك أبيض">لحم بقري صافي أو سمك أبيض</option>
-                        <option value="تونة / بيض كامل وبياض البيض">تونة / بيض كامل وبياض البيض</option>
-                        <option value="مزيج (لحم + سمك + بيض)">مزيج (لحم + سمك + بيض)</option>
-                    </select>
-                </div>
-
-                <div style="margin-bottom: 12px; text-align: right;">
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">مصادر الكربوهيدرات</label>
-                    <select id="form-nut-carbs" style="width: 100%; padding: 8px; border-radius: 6px; background: #2d3748; color: #fff; border: 1px solid #4a5568;" required>
-                        <option value="أرز أبيض / شوفان">أرز أبيض / شوفان</option>
-                        <option value="بطاطا مسلوقة / أرز">بطاطا مسلوقة / أرز</option>
-                        <option value="كارب سايكل (Carb Cycling)">كارب سايكل (Carb Cycling)</option>
-                    </select>
-                </div>
-
-                <div style="margin-bottom: 12px; text-align: right;">
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">الدهون والألياف</label>
-                    <input type="text" id="form-nut-fats" value="زيت زيتون، سلطة خضراء" style="width: 100%; padding: 8px; border-radius: 6px; background: #2d3748; color: #fff; border: 1px solid #4a5568;" required>
-                </div>
-
-                <div style="margin-bottom: 15px; text-align: right;">
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">المكملات الرياضية</label>
-                    <select id="form-nut-supps" style="width: 100%; padding: 8px; border-radius: 6px; background: #2d3748; color: #fff; border: 1px solid #4a5568;">
-                        <option value="بدون مكملات">بدون مكملات</option>
-                        <option value="واي بروتين + كرياتين">واي بروتين + كرياتين</option>
-                        <option value="كرياتين + جلوتامين + زنك وماغنسيوم">كرياتين + جلوتامين + زنك وماغنسيوم</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #2d3748; padding-top: 15px;">
-                    <button type="button" onclick="closeNutritionModal()" style="background: transparent; color: #a0aec0; border: 1px solid #4a5568; padding: 8px 15px; border-radius: 6px; cursor: pointer;">إلغاء</button>
-                    <button type="submit" style="background: #38b2ac; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الخطة</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- استدعاء ملف الجافاسكريبت في مكانه الصحيح -->
-   <script src="script.js?v=2.0"></script>
-</body>
 </html>

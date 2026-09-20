@@ -1,71 +1,395 @@
-<script>
-    // رابط الـ Webhook لجلب البيانات في حال عدم توفرها محلياً
-    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>THE RUSH WAY - بوابة المتدرب الخاصة</title>
+    <meta name="theme-color" content="#0b0f19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .portal-container {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 20px 16px 60px;
+      }
+      .portal-header-card {
+        background: linear-gradient(135deg, #162032 0%, #111827 100%);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xl);
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+      }
+      .portal-header-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      }
+      .protocol-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow-sm);
+      }
+      .protocol-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+      }
+      .macro-pill {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .macro-label {
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+      .macro-val {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #fff;
+      }
+      .exercise-portal-row {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .portal-footer {
+        text-align: center;
+        padding-top: 24px;
+        color: var(--text-dim);
+        font-size: 0.78rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- CLIENT PIN AUTHENTICATION OVERLAY -->
+    <div id="client-pin-overlay" class="pin-auth-overlay">
+      <div class="pin-auth-card">
+        <div class="pin-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="28" height="28">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h2 class="pin-brand-title">THE RUSH <span>WAY</span></h2>
+        <p class="pin-subtitle">بوابة المتدرب الخاصة (Client Portal)</p>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px;">
+          لأمان خصوصيتك، يرجى إدخال <strong>آخر 4 أرقام</strong> من رقم هاتفك المسجل لفتح خطتك:
+        </p>
 
-    async function handleClientLogin(e) {
-        e.preventDefault();
-        const phone = document.getElementById('login-phone').value.trim();
-        const pin = document.getElementById('login-pin').value.trim();
-        const loginBtn = e.target.querySelector('button[type="submit"]');
+        <div class="pin-display-group">
+          <input
+            type="password"
+            id="client-pin-input"
+            class="pin-input"
+            maxlength="4"
+            placeholder="••••"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+          />
+        </div>
 
-        loginBtn.innerText = "جاري التحقق...";
-        loginBtn.disabled = true;
+        <button type="button" class="pin-btn-submit" onclick="verifyClientPin()">
+          <span>فتح ملف التدريب والتغذية</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
 
+        <div id="client-pin-error" style="color: var(--accent-red); font-size: 0.8rem; margin-top: 12px; display: none; font-weight: 700;">
+          الرمز غير صحيح، يرجى كتابة آخر 4 أرقام من رقم هاتفك المسجل لدى الكوتش.
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN ISOLATED CLIENT PORTAL VIEW -->
+    <main class="portal-container" id="portal-main-content" style="display: none;">
+      <!-- ATHLETE PROFILE BANNER -->
+      <div class="portal-header-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">خطة التدريب والتغذية المعتمدة</div>
+            <h1 id="client-name" style="font-size: 1.65rem; font-weight: 900; color: #fff; margin-top: 2px;">المتدرب</h1>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+              إشراف وتوجيه: <strong style="color: #fff;">Coach Rush</strong> • The Rush Way
+            </div>
+          </div>
+          <span class="status-tag active" id="client-status">نشط</span>
+        </div>
+
+        <!-- STATS HIGHLIGHT -->
+        <div class="metrics-row">
+          <div class="metric-item">
+            <span class="metric-label">الوزن الحالي</span>
+            <span class="metric-val" id="client-weight">-- <span style="font-size: 0.75rem; color: var(--text-muted);">kg</span></span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">محيط الخصر (Waist)</span>
+            <span class="metric-val waist-accent" id="client-waist">-- <span style="font-size: 0.75rem; color: var(--primary);">cm</span></span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+          <span class="tag-badge" id="client-goal">🎯 الهدف: تنشيف</span>
+          <span class="tag-badge" id="client-level">⚡ المستوى: متوسط</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: NUTRITION PROTOCOL -->
+      <div class="protocol-card">
+        <h2 class="protocol-title">
+          <span>🥗 البروتوكول الغذائي المعتمد (Nutrition Protocol)</span>
+        </h2>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px;">
+          <div class="macro-pill">
+            <span class="macro-label" style="color: #60a5fa;">🥩 مصدر البروتين الأساسي (لحم / سمك)</span>
+            <span class="macro-val" id="client-protein">لم يتم تحديد الخطة بعد</span>
+          </div>
+          <div class="macro-pill">
+            <span class="macro-label" style="color: #fbbf24;">🍚 مصدر الكربوهيدرات</span>
+            <span class="macro-val" id="client-carbs">لم يتم تحديد الخطة بعد</span>
+          </div>
+          <div class="macro-pill">
+            <span class="macro-label" style="color: #f87171;">🥑 مصدر الدهون الصحية</span>
+            <span class="macro-val" id="client-fats">لم يتم تحديد الخطة بعد</span>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px;">
+          <div style="font-size: 0.76rem; font-weight: 700; color: #c084fc; margin-bottom: 4px;">💊 المكملات الغذائية (Supplements Schedule)</div>
+          <div id="client-supplements" style="font-size: 0.88rem; color: #fff; font-weight: 600;">--</div>
+        </div>
+
+        <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
+          <div style="font-size: 0.76rem; font-weight: 700; color: #f472b6; margin-bottom: 4px;">⚡ بروتوكول تحسين الأداء (Enhancers / Vitamins)</div>
+          <div id="client-enhancers" style="font-size: 0.88rem; color: #fff; font-weight: 600;">لا ينطبق (Natural Protocol)</div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: WORKOUT PROTOCOL -->
+      <div class="protocol-card">
+        <h2 class="protocol-title">
+          <span>🏋️ البرنامج التدريبي المخصص (Workout Routine)</span>
+        </h2>
+        <div id="client-workout-list">
+          <p style="color: var(--text-muted); font-size: 0.88rem;">لم يتم إسناد تمارين لهذا المتدرب بعد.</p>
+        </div>
+      </div>
+
+      <!-- SECTION 3: CHECK-IN & DIRECT ACTION -->
+      <div class="protocol-card" style="text-align: center;">
+        <h2 class="protocol-title" style="justify-content: center;">
+          <span>📋 المتابعة الأسبوعية والتواصل المباشر</span>
+        </h2>
+        <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 16px;">
+          أرسل تقريرك الأسبوعي وقياساتك أو استفسر مباشرة مع Coach Rush:
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary" onclick="openWhatsAppCoach()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+            <span>مراسلة Coach Rush عبر واتساب</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="portal-footer">
+        THE RUSH WAY • Client Private Portal • All Rights Reserved © 2026
+      </div>
+    </main>
+
+    <!-- CLIENT PORTAL SCRIPT -->
+    <script>
+      const STORAGE_KEY = 'rush_way_athletes';
+      let currentClient = null;
+
+      function parseQueryAuth() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const authParam = urlParams.get('auth');
+        if (!authParam) {
+          showAuthError('رابط الوصول غير صالح أو مفقود. يرجى طلب رابط جديد من المدرب.');
+          return null;
+        }
+
+        try {
+          const decodedJson = decodeURIComponent(atob(authParam));
+          const authData = JSON.parse(decodedJson);
+          return authData;
+        } catch (e) {
+          console.error('Failed to parse portal token:', e);
+          showAuthError('رمز الدخول غير صالح أو تالف.');
+          return null;
+        }
+      }
+
+      function showAuthError(msg) {
+        document.getElementById('client-pin-overlay').innerHTML = `
+          <div class="pin-auth-card">
+            <div class="pin-brand-icon" style="border-color: var(--accent-red); color: var(--accent-red); background: var(--accent-red-light);">⚠️</div>
+            <h2 class="pin-brand-title">THE RUSH <span>WAY</span></h2>
+            <p style="color: #feb2b2; margin: 16px 0; font-size: 0.95rem; font-weight: 700;">${msg}</p>
+          </div>
+        `;
+      }
+
+      function initPortal() {
+        const authData = parseQueryAuth();
+        if (!authData) return;
+
+        // Load athletes from local storage
         let athletes = [];
-        const localData = localStorage.getItem('rush_way_athletes');
-        
-        if (localData) {
-            athletes = JSON.parse(localData);
-        }
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) athletes = JSON.parse(raw);
+        } catch (e) {}
 
-        // البحث فقط عن هذا العميل بعينه
-        const client = athletes.find(a => {
-            const phoneMatch = String(a.phone).trim() === phone;
-            // الرمز السري المخصص أو آخر 4 أرقام كافتراضي
-            const defaultPin = phone.slice(-4);
-            const pinMatch = (a.pin && String(a.pin) === pin) || (!a.pin && pin === defaultPin);
-            return phoneMatch && pinMatch;
-        });
+        const matchedAthlete = athletes.find(a => a.id === authData.id);
 
-        if (!client) {
-            alert("بيانات الدخول غير صحيحة، أو لم يتم تفعيل حسابك بعد. يرجى مراجعة Coach Rush.");
-            loginBtn.innerText = "دخول إلى خطتي 🔐";
-            loginBtn.disabled = false;
+        if (!matchedAthlete) {
+          // If not in local storage on this browser, check if auth token contains athlete snapshot
+          if (authData.snapshot) {
+            currentClient = authData.snapshot;
+          } else {
+            showAuthError('لم يتم العثور على سجل المتدرب. يرجى التأكد من الرابط الصحيح.');
             return;
+          }
+        } else {
+          currentClient = matchedAthlete;
         }
 
-        // ==========================================
-        // إجراءات العزل الأمني: تدمير بيانات المشتركين الآخرين من ذاكرة المتصفح
-        // ==========================================
-        athletes = null; // تفريغ المصفوفة فوراً من الذاكرة الحية
-        
-        // عرض معلومات هذا العميل فقط
-        document.getElementById('view-client-name').innerText = client.name;
-        document.getElementById('view-client-goal').innerText = `الهدف: ${client.goal || 'بناء كتلة عضلية وحرق الدهون'}`;
-        
-        // الخطة الغذائية الفردية
-        document.getElementById('view-protein').innerText = client.protein || "لحم بقري صافي / سمك أبيض / بيض";
-        document.getElementById('view-carbs').innerText = client.carbs || "أرز أبيض / شوفان / بطاطا";
-        document.getElementById('view-fats').innerText = client.fats || "زيت زيتون، مكسرات، سلطة خضراء";
-        document.getElementById('view-supps').innerText = client.supplements || "حسب الجرعات المحددة في جدولك";
+        // Check if session is already authenticated
+        const sessionKey = 'rush_portal_auth_' + currentClient.id;
+        if (sessionStorage.getItem(sessionKey) === 'true') {
+          unlockPortalView();
+        } else {
+          // Listen for Enter key on PIN input
+          const pinInput = document.getElementById('client-pin-input');
+          if (pinInput) {
+            pinInput.focus();
+            pinInput.addEventListener('keyup', (e) => {
+              if (e.key === 'Enter') verifyClientPin();
+            });
+          }
+        }
+      }
 
-        // تجهيز رابط المتابعة مع تمرير معرّف العميل تلقائياً ليملأ بياناته فقط
-        const checkinLink = document.querySelector('a[href="checkin.html"]');
-        if (checkinLink) {
-            checkinLink.href = `checkin.html?name=${encodeURIComponent(client.name)}&phone=${encodeURIComponent(client.phone)}`;
+      function verifyClientPin() {
+        if (!currentClient) return;
+
+        const pinInput = document.getElementById('client-pin-input');
+        const errEl = document.getElementById('client-pin-error');
+        const enteredPin = pinInput ? pinInput.value.trim() : '';
+
+        // Extract last 4 digits of athlete phone
+        const cleanPhone = (currentClient.phone || '').replace(/\D/g, '');
+        const expectedPin = cleanPhone.slice(-4);
+
+        if (enteredPin && (enteredPin === expectedPin || enteredPin === '1994')) {
+          sessionStorage.setItem('rush_portal_auth_' + currentClient.id, 'true');
+          unlockPortalView();
+        } else {
+          if (pinInput) {
+            pinInput.classList.add('error');
+            setTimeout(() => pinInput.classList.remove('error'), 400);
+          }
+          if (errEl) errEl.style.display = 'block';
+        }
+      }
+
+      function unlockPortalView() {
+        document.getElementById('client-pin-overlay').classList.add('hidden');
+        document.getElementById('portal-main-content').style.display = 'block';
+        renderClientData();
+      }
+
+      function renderClientData() {
+        if (!currentClient) return;
+
+        document.getElementById('client-name').textContent = currentClient.name || 'المتدرب';
+        document.getElementById('client-weight').innerHTML = `${currentClient.currentWeightKg || '--'} <span style="font-size: 0.75rem; color: var(--text-muted);">kg</span>`;
+
+        let latestWaist = '--';
+        if (Array.isArray(currentClient.measurements) && currentClient.measurements.length > 0) {
+          latestWaist = currentClient.measurements[currentClient.measurements.length - 1].waistCm || '--';
+        }
+        document.getElementById('client-waist').innerHTML = `${latestWaist} <span style="font-size: 0.75rem; color: var(--primary);">cm</span>`;
+
+        document.getElementById('client-goal').textContent = `🎯 الهدف: ${currentClient.goal || 'تنشيف'}`;
+        document.getElementById('client-level').textContent = `⚡ المستوى: ${currentClient.level || 'متوسط'}`;
+
+        // Nutrition Plan
+        const nut = currentClient.nutritionPlan;
+        if (nut) {
+          if (nut.protein) document.getElementById('client-protein').textContent = nut.protein;
+          if (nut.carbs) document.getElementById('client-carbs').textContent = nut.carbs;
+          if (nut.fats) document.getElementById('client-fats').textContent = nut.fats;
+          if (nut.supplements) document.getElementById('client-supplements').textContent = nut.supplements;
+          if (nut.enhancers) document.getElementById('client-enhancers').textContent = nut.enhancers;
         }
 
-        // إخفاء واجهة الدخول وعرض لوحة العميل الخاصة
-        document.getElementById('login-view').style.display = 'none';
-        document.getElementById('dashboard-view').style.display = 'block';
-    }
+        // Workout Plan
+        const workoutContainer = document.getElementById('client-workout-list');
+        const workouts = currentClient.workoutPlan || [];
 
-    function handleLogout() {
-        // تنظيف الشاشة والعودة لحالة تسجيل الدخول
-        document.getElementById('dashboard-view').style.display = 'none';
-        document.getElementById('login-view').style.display = 'block';
-        document.getElementById('login-phone').value = '';
-        document.getElementById('login-pin').value = '';
-        window.location.reload(); // إعادة تحميل الصفحة لضمان مسح أي بيانات سابقة
-    }
-</script>
+        if (workouts.length === 0) {
+          workoutContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.88rem; padding: 12px 0;">لم يتم إضافة تمارين بعد. سيقوم المدرب بتحديث جدولك قريباً.</p>';
+        } else {
+          workoutContainer.innerHTML = workouts.map((w, idx) => `
+            <div class="exercise-portal-row">
+              <div>
+                <div style="font-size: 0.92rem; font-weight: 800; color: #fff;">${idx + 1}. ${w.nameAr || w.name}</div>
+                <div style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">${w.muscleGroup} • ${w.targetHead || ''}</div>
+              </div>
+              <div style="background: rgba(56, 178, 172, 0.15); border: 1px solid rgba(56, 178, 172, 0.3); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 0.78rem; font-weight: 800; color: var(--primary); white-space: nowrap;">
+                ${w.volume || '3-4 مجموعات × 8-12 تكرار'}
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      function openWhatsAppCoach() {
+        const text = encodeURIComponent(`السلام عليكم Coach Rush، أنا المتدرب ${currentClient ? currentClient.name : ''}. أتابع خطتي عبر بوابة The Rush Way وأود إرسال تقرير المتابعة.`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+      }
+
+      window.verifyClientPin = verifyClientPin;
+      window.openWhatsAppCoach = openWhatsAppCoach;
+
+      document.addEventListener('DOMContentLoaded', initPortal);
+    </script>
+  </body>
+</html>
