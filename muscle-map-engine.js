@@ -1,0 +1,1573 @@
+/**
+ * ============================================================================
+ * THE RUSH WAY - INTERACTIVE MUSCLE MAP ENGINE
+ * High-performance, Accessible, Modular SVG Anatomical Engine
+ * Supports:
+ * - Front / Back SVG Vector Anatomy
+ * - Independent Left/Right Muscle Targeting
+ * - 3 Modes: Muscle Selection, Exercise Targeting, Client Assessment
+ * - Real-time Exercise Filter (Primary, Secondary, Stabilizer)
+ * - Workout Program Builder Integration (Sets, Reps, Load, RPE, Rest, Tempo)
+ * - Bilingual Support (Arabic RTL & English LTR)
+ * - Zoom & Pan Controls
+ * ============================================================================
+ */
+
+(function (root, factory) {
+  const engine = factory();
+  if (typeof define === 'function' && define.amd) {
+    define([], function () { return engine; });
+  } else if (typeof module === 'object' && module && module.exports) {
+    module.exports = engine;
+  }
+  if (typeof root !== 'undefined' && root) root.RushMuscleMap = engine;
+  if (typeof window !== 'undefined' && window) window.RushMuscleMap = engine;
+  if (typeof globalThis !== 'undefined' && globalThis) globalThis.RushMuscleMap = engine;
+  if (typeof self !== 'undefined' && self) self.RushMuscleMap = engine;
+}(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this)), function () {
+  'use strict';
+
+  function getLoadedMuscleData() {
+    if (typeof window !== 'undefined' && window.RushMuscleData) return window.RushMuscleData;
+    if (typeof globalThis !== 'undefined' && globalThis.RushMuscleData) return globalThis.RushMuscleData;
+    if (typeof self !== 'undefined' && self.RushMuscleData) return self.RushMuscleData;
+    if (typeof RushMuscleData !== 'undefined') return RushMuscleData;
+    return null;
+  }
+
+  // Dynamic resilient proxy that resolves RushMuscleData regardless of script load order
+  const MuscleData = new Proxy({}, {
+    get(target, prop) {
+      const live = getLoadedMuscleData();
+      if (live && prop in live) {
+        return live[prop];
+      }
+      return target[prop];
+    }
+  });
+
+  class MuscleMapEngine {
+    constructor(options = {}) {
+      this.containerId = options.containerId || 'rush-muscle-map-root';
+      this.lang = options.lang || 'ar';
+      this.view = options.view || 'front'; // 'front' | 'back'
+      this.mode = options.mode || options.initialMode || 'selection'; // 'selection' | 'targeting' | 'assessment'
+      this.selectedMuscleId = options.initialMuscleId || 'pectoralis_major_mid_l';
+      this.selectedExerciseId = null;
+      this.selectedAthleteId = options.athleteId || '';
+      this.zoomLevel = 1.0;
+      this.equipmentFilter = 'all';
+      this.searchQuery = '';
+      this.assessmentFilter = 'all';
+
+      // Callbacks
+      this.onMuscleSelected = options.onMuscleSelected || null;
+      this.onExerciseSelected = options.onExerciseSelected || null;
+      this.onExerciseAdd = options.onExerciseAdd || options.onWorkoutAdd || null;
+      this.onWorkoutAdd = this.onExerciseAdd;
+
+      // Local Assessment Store per athlete
+      this.assessments = this.loadAssessments();
+
+      // Guarded initialization sequence
+      this.data = options.data || getLoadedMuscleData();
+
+      if (!this.data) {
+        const waitForData = () => {
+          this.data = getLoadedMuscleData();
+          if (this.data) {
+            this.safeInit();
+          } else {
+            setTimeout(waitForData, 30);
+          }
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', waitForData);
+        } else {
+          setTimeout(waitForData, 30);
+        }
+      } else {
+        this.safeInit();
+      }
+    }
+
+    safeInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => this.init());
+      } else {
+        this.init();
+      }
+    }
+
+    init() {
+      const container = document.getElementById(this.containerId);
+      if (!container) {
+        // Container might not be in DOM yet if init was called early, wait for DOMContentLoaded
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => this.init());
+          return;
+        }
+        console.warn(`[RushMuscleMap] Container #${this.containerId} not found in DOM.`);
+        return;
+      }
+
+      this.renderFramework(container);
+      this.bindEvents();
+      this.selectMuscle(this.selectedMuscleId, false);
+      this.updateViewVisuals();
+    }
+
+    // --- ASSESSMENTS PERSISTENCE ---
+    loadAssessments() {
+      try {
+        const raw = localStorage.getItem('rush_way_muscle_assessments');
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    saveAssessments() {
+      try {
+        localStorage.setItem('rush_way_muscle_assessments', JSON.stringify(this.assessments));
+      } catch (e) {
+        console.error('Failed to persist assessments', e);
+      }
+    }
+
+    getAthleteAssessments(athleteId) {
+      if (!athleteId) return {};
+      return this.assessments[athleteId] || {};
+    }
+
+    setMuscleAssessment(athleteId, muscleId, status, note = '') {
+      if (!athleteId || !muscleId) return;
+      if (!this.assessments[athleteId]) {
+        this.assessments[athleteId] = {};
+      }
+      if (!status) {
+        delete this.assessments[athleteId][muscleId];
+      } else {
+        this.assessments[athleteId][muscleId] = {
+          status,
+          note: note.trim(),
+          updatedAt: new Date().toISOString()
+        };
+      }
+      this.saveAssessments();
+      this.updateAssessmentVisuals();
+      this.renderAssessmentPanel();
+    }
+
+    setAthlete(athleteId) {
+      this.selectedAthleteId = athleteId || '';
+      const select = document.getElementById('rmm-athlete-select') || document.getElementById('muscle-map-athlete-select');
+      if (select && select.value !== this.selectedAthleteId) {
+        select.value = this.selectedAthleteId;
+      }
+      if (this.mode === 'assessment') {
+        this.updateAssessmentVisuals();
+        this.renderAssessmentPanel();
+      }
+    }
+
+    highlightMuscles(muscleIds = []) {
+      if (!Array.isArray(muscleIds)) muscleIds = [muscleIds];
+      const root = document.getElementById(this.containerId);
+      if (!root) return;
+      this.clearAllTargetingHighlights();
+      root.querySelectorAll('.rmm-muscle').forEach(el => {
+        const id = el.dataset.muscleId;
+        const canonical = el.dataset.canonicalId;
+        if (muscleIds.includes(id) || muscleIds.includes(canonical)) {
+          el.classList.add('is-primary');
+          el.classList.remove('is-dimmed');
+        } else {
+          el.classList.add('is-dimmed');
+        }
+      });
+    }
+
+    destroy() {
+      const container = document.getElementById(this.containerId);
+      if (container) {
+        container.innerHTML = '';
+      }
+    }
+
+    // --- LANGUAGE CONTROL ---
+    setLanguage(lang) {
+      if (lang !== 'ar' && lang !== 'en') return;
+      this.lang = lang;
+      const root = document.getElementById(this.containerId);
+      if (root) {
+        root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        root.setAttribute('data-lang', lang);
+      }
+      this.renderHeader();
+      this.renderViewSwitcher();
+      this.renderLegend();
+      this.renderSidePanel();
+      this.renderExerciseList();
+    }
+
+    // --- RENDER MAIN FRAMEWORK ---
+    renderFramework(container) {
+      const isRtl = this.lang === 'ar';
+      container.innerHTML = `
+        <div class="rmm-component" dir="${isRtl ? 'rtl' : 'ltr'}" data-lang="${this.lang}">
+          <!-- 1. HEADER & MODE SWITCHER BAR -->
+          <div class="rmm-topbar" id="rmm-topbar"></div>
+
+          <!-- 2. MAIN 3-COLUMN / RESPONSIVE WORKSPACE -->
+          <div class="rmm-workspace">
+            <!-- COLUMN A: THE ANATOMICAL VECTOR STAGE -->
+            <div class="rmm-stage-card">
+              <!-- View Switcher & Zoom Controls -->
+              <div class="rmm-stage-controls">
+                <div class="rmm-view-buttons" id="rmm-view-buttons"></div>
+                <div class="rmm-zoom-tools">
+                  <button type="button" class="rmm-tool-btn" id="rmm-btn-zoom-in" title="تكبير / Zoom In" aria-label="Zoom in">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                  </button>
+                  <button type="button" class="rmm-tool-btn" id="rmm-btn-zoom-out" title="تصغير / Zoom Out" aria-label="Zoom out">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                  </button>
+                  <button type="button" class="rmm-tool-btn" id="rmm-btn-zoom-reset" title="إعادة تعيين / Reset" aria-label="Reset zoom">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- SVG Viewport Box -->
+              <div class="rmm-viewport" id="rmm-viewport">
+                <div class="rmm-canvas" id="rmm-canvas">
+                  ${this.generateFrontSvg()}
+                  ${this.generateBackSvg()}
+                </div>
+              </div>
+
+              <!-- Dynamic Legend Bar -->
+              <div class="rmm-legend-bar" id="rmm-legend-bar"></div>
+
+              <!-- Muscle Quick Filter Chips -->
+              <div class="rmm-quick-regions" id="rmm-quick-regions"></div>
+            </div>
+
+            <!-- COLUMN B: MUSCLE INFO & BIOMECHANICAL DOSSIER -->
+            <div class="rmm-dossier-card" id="rmm-dossier-card">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- COLUMN C: EXERCISE BANK & WORKOUT BUILDER SYNERGY -->
+            <div class="rmm-exercises-card">
+              <div class="rmm-exercise-header" id="rmm-exercise-header"></div>
+              <div class="rmm-exercise-search-box">
+                <div class="rmm-search-input-wrap">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="text" id="rmm-exercise-search" placeholder="${this.lang === 'ar' ? 'ابحث في بنك التمارين...' : 'Search exercises...'}" />
+                </div>
+                <div class="rmm-equip-pills" id="rmm-equip-pills"></div>
+              </div>
+              <div class="rmm-exercise-list" id="rmm-exercise-list"></div>
+            </div>
+          </div>
+
+          <!-- MODAL: ADD EXERCISE WITH BIOMECHANICAL PARAMETERS -->
+          <div class="rmm-modal-overlay" id="rmm-workout-modal" style="display: none;">
+            <div class="rmm-modal-card" id="rmm-workout-modal-card"></div>
+          </div>
+        </div>
+      `;
+
+      this.renderHeader();
+      this.renderViewSwitcher();
+      this.renderLegend();
+      this.renderQuickRegions();
+      this.renderEquipmentPills();
+    }
+
+    // --- HEADER & MODE CONTROLS ---
+    renderHeader() {
+      const topbar = document.getElementById('rmm-topbar');
+      if (!topbar) return;
+
+      const isAr = this.lang === 'ar';
+      topbar.innerHTML = `
+        <div class="rmm-brand-badge">
+          <div class="rmm-pulse-beacon"></div>
+          <span class="rmm-badge-text">${isAr ? 'محرك التشريح والميكانيكا الحيوية المباشر' : 'Live Biomechanical Muscle Map Engine'}</span>
+        </div>
+
+        <div class="rmm-modes-nav">
+          <button type="button" class="rmm-mode-tab ${this.mode === 'selection' ? 'active' : ''}" data-mode="selection">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+            <span>${isAr ? 'استكشاف العضلات' : 'Muscle Selection'}</span>
+          </button>
+          <button type="button" class="rmm-mode-tab ${this.mode === 'targeting' ? 'active' : ''}" data-mode="targeting">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>${isAr ? 'استهداف التمارين' : 'Exercise Targeting'}</span>
+          </button>
+          <button type="button" class="rmm-mode-tab ${this.mode === 'assessment' ? 'active' : ''}" data-mode="assessment">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+            <span>${isAr ? 'تقييم المتدرب' : 'Client Assessment'}</span>
+          </button>
+        </div>
+
+        <div class="rmm-header-actions">
+          <button type="button" class="rmm-lang-toggle" id="rmm-btn-lang-toggle">
+            ${this.lang === 'ar' ? 'English (LTR)' : 'العربية (RTL)'}
+          </button>
+        </div>
+      `;
+    }
+
+    renderViewSwitcher() {
+      const box = document.getElementById('rmm-view-buttons');
+      if (!box) return;
+      const isAr = this.lang === 'ar';
+      box.innerHTML = `
+        <button type="button" class="rmm-view-toggle ${this.view === 'front' ? 'active' : ''}" data-view="front">
+          <span>${isAr ? 'الجهة الأمامية (Front)' : 'Front View'}</span>
+        </button>
+        <button type="button" class="rmm-view-toggle ${this.view === 'back' ? 'active' : ''}" data-view="back">
+          <span>${isAr ? 'الجهة الخلفية (Back)' : 'Back View'}</span>
+        </button>
+      `;
+    }
+
+    renderLegend() {
+      const bar = document.getElementById('rmm-legend-bar');
+      if (!bar) return;
+      const isAr = this.lang === 'ar';
+
+      if (this.mode === 'targeting') {
+        bar.innerHTML = `
+          <div class="rmm-legend-item primary">
+            <span class="rmm-legend-dot primary"></span>
+            <span>${isAr ? 'المحرك الأساسي (Primary Target)' : 'Primary Target'}</span>
+          </div>
+          <div class="rmm-legend-item secondary">
+            <span class="rmm-legend-dot secondary"></span>
+            <span>${isAr ? 'المساعد الثانوي (Secondary)' : 'Secondary'}</span>
+          </div>
+          <div class="rmm-legend-item stabilizer">
+            <span class="rmm-legend-dot stabilizer"></span>
+            <span>${isAr ? 'المثبت الحركي (Stabilizer)' : 'Stabilizer'}</span>
+          </div>
+        `;
+      } else if (this.mode === 'assessment') {
+        bar.innerHTML = `
+          <div class="rmm-legend-item assessment-priority">
+            <span class="rmm-legend-dot" style="background:#ef4444;"></span>
+            <span>${isAr ? 'أولوية قصوى' : 'Priority Focus'}</span>
+          </div>
+          <div class="rmm-legend-item assessment-weak">
+            <span class="rmm-legend-dot" style="background:#f59e0b;"></span>
+            <span>${isAr ? 'نقطة ضعف' : 'Lagging Muscle'}</span>
+          </div>
+          <div class="rmm-legend-item assessment-balanced">
+            <span class="rmm-legend-dot" style="background:#10b981;"></span>
+            <span>${isAr ? 'متناسقة' : 'Balanced'}</span>
+          </div>
+          <div class="rmm-legend-item assessment-attention">
+            <span class="rmm-legend-dot" style="background:#8b5cf6;"></span>
+            <span>${isAr ? 'تحتاج مرونة' : 'Mobility Needed'}</span>
+          </div>
+        `;
+      } else {
+        bar.innerHTML = `
+          <div class="rmm-legend-item selected">
+            <span class="rmm-legend-dot selected"></span>
+            <span>${isAr ? 'العضلة المحددة (Selected)' : 'Selected Muscle'}</span>
+          </div>
+          <div class="rmm-legend-item default">
+            <span class="rmm-legend-dot default"></span>
+            <span>${isAr ? 'انقر على أي عضلة للتحليل' : 'Click any muscle to analyze'}</span>
+          </div>
+        `;
+      }
+    }
+
+    renderQuickRegions() {
+      const container = document.getElementById('rmm-quick-regions');
+      if (!container) return;
+
+      const isAr = this.lang === 'ar';
+      const frontRegions = ['chest', 'shoulders', 'arms', 'core', 'legs'];
+      const backRegions = ['back', 'shoulders', 'arms', 'legs'];
+      const list = this.view === 'front' ? frontRegions : backRegions;
+
+      container.innerHTML = list.map(regKey => {
+        const reg = MuscleData.REGIONS[regKey];
+        return `
+          <button type="button" class="rmm-chip-btn" data-region="${regKey}">
+            ${isAr ? reg.ar : reg.en}
+          </button>
+        `;
+      }).join('');
+    }
+
+    renderEquipmentPills() {
+      const container = document.getElementById('rmm-equip-pills');
+      if (!container) return;
+      const isAr = this.lang === 'ar';
+
+      const filters = [
+        { id: 'all', en: 'All', ar: 'الكل' },
+        { id: 'barbell', en: 'Barbell', ar: 'بار أولمبي' },
+        { id: 'dumbbell', en: 'Dumbbells', ar: 'دمبلز' },
+        { id: 'cable', en: 'Cables', ar: 'كابلات' },
+        { id: 'machine', en: 'Machines', ar: 'أجهزة' },
+        { id: 'bodyweight', en: 'Bodyweight', ar: 'وزن الجسم' }
+      ];
+
+      container.innerHTML = filters.map(f => `
+        <button type="button" class="rmm-equip-pill ${this.equipmentFilter === f.id ? 'active' : ''}" data-filter="${f.id}">
+          ${isAr ? f.ar : f.en}
+        </button>
+      `).join('');
+    }
+
+    // --- SVG GENERATION (PRECISE VECTOR PATHS) ---
+    generateFrontSvg() {
+      return `
+        <svg id="rmm-svg-front" class="rmm-anatomical-svg ${this.view === 'front' ? 'active' : 'hidden'}" viewBox="0 0 240 400" xmlns="http://www.w3.org/2000/svg" role="region" aria-label="Front Anatomical Human View">
+          <defs>
+            <linearGradient id="rmm-grad-silhouette" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#141c2c" />
+              <stop offset="100%" stop-color="#0a0f19" />
+            </linearGradient>
+            <filter id="rmm-glow-primary" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#38b2ac" flood-opacity="0.8" />
+            </filter>
+            <filter id="rmm-glow-secondary" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#8b5cf6" flood-opacity="0.8" />
+            </filter>
+            <filter id="rmm-glow-stabilizer" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#f59e0b" flood-opacity="0.8" />
+            </filter>
+          </defs>
+
+          <!-- SILHOUETTE BASE (NON-CLICKABLE) -->
+          <g class="rmm-base-silhouette" pointer-events="none">
+            <!-- Head & Skull -->
+            <path d="M110 22 C110 12 130 12 130 22 C130 35 127 45 120 48 C113 45 110 35 110 22 Z" fill="url(#rmm-grad-silhouette)" stroke="#1f2c42" stroke-width="1.2" />
+            <!-- Neck & Clavicle Frame -->
+            <path d="M106 48 L120 54 L134 48 L138 58 L102 58 Z" fill="#0f1624" stroke="#1f2c42" stroke-width="1" />
+            <!-- Sternum Centerline -->
+            <line x1="120" y1="58" x2="120" y2="162" stroke="#1c2638" stroke-width="1.2" stroke-dasharray="2,2" />
+            <!-- Pelvis Base -->
+            <path d="M102 164 L138 164 L132 178 L108 178 Z" fill="#0f1624" stroke="#1f2c42" stroke-width="1" />
+            <!-- Knees Base -->
+            <circle cx="98" cy="270" r="5" fill="#131c2c" stroke="#223147" stroke-width="1" />
+            <circle cx="142" cy="270" r="5" fill="#131c2c" stroke="#223147" stroke-width="1" />
+            <!-- Ankles & Feet Base -->
+            <path d="M92 372 L102 372 L106 384 L88 384 Z" fill="#131c2c" stroke="#223147" stroke-width="1" />
+            <path d="M148 372 L138 372 L134 384 L152 384 Z" fill="#131c2c" stroke="#223147" stroke-width="1" />
+          </g>
+
+          <!-- INTERACTIVE MUSCLE PATHS -->
+          <g class="rmm-muscles-layer">
+            <!-- UPPER CHEST (Clavicular Head) -->
+            <path id="rmm-m-pectoralis_major_upper_l" class="rmm-muscle" data-muscle-id="pectoralis_major_upper_l"
+                  d="M94 62 C108 63 118 64 119 78 C104 80 96 76 90 70 Z"
+                  role="button" tabindex="0" aria-label="Left Upper Chest" />
+            <path id="rmm-m-pectoralis_major_upper_r" class="rmm-muscle" data-muscle-id="pectoralis_major_upper_r"
+                  d="M146 62 C132 63 122 64 121 78 C136 80 144 76 150 70 Z"
+                  role="button" tabindex="0" aria-label="Right Upper Chest" />
+
+            <!-- MIDDLE CHEST (Sternal Head) -->
+            <path id="rmm-m-pectoralis_major_mid_l" class="rmm-muscle" data-muscle-id="pectoralis_major_mid_l"
+                  d="M90 71 C98 77 108 79 119 79 C119 96 106 98 92 92 Z"
+                  role="button" tabindex="0" aria-label="Left Middle Chest" />
+            <path id="rmm-m-pectoralis_major_mid_r" class="rmm-muscle" data-muscle-id="pectoralis_major_mid_r"
+                  d="M150 71 C142 77 132 79 121 79 C121 96 134 98 148 92 Z"
+                  role="button" tabindex="0" aria-label="Right Middle Chest" />
+
+            <!-- LOWER CHEST (Costal Head) -->
+            <path id="rmm-m-pectoralis_major_lower_l" class="rmm-muscle" data-muscle-id="pectoralis_major_lower_l"
+                  d="M92 93 C106 98 118 97 119 108 C108 111 96 106 90 98 Z"
+                  role="button" tabindex="0" aria-label="Left Lower Chest" />
+            <path id="rmm-m-pectoralis_major_lower_r" class="rmm-muscle" data-muscle-id="pectoralis_major_lower_r"
+                  d="M148 93 C134 98 122 97 121 108 C132 111 144 106 150 98 Z"
+                  role="button" tabindex="0" aria-label="Right Lower Chest" />
+
+            <!-- ANTERIOR DELTOID (Front Shoulders) -->
+            <path id="rmm-m-anterior_deltoid_l" class="rmm-muscle" data-muscle-id="anterior_deltoid_l"
+                  d="M86 63 C93 72 88 88 80 92 C74 86 78 72 86 63 Z"
+                  role="button" tabindex="0" aria-label="Left Anterior Deltoid" />
+            <path id="rmm-m-anterior_deltoid_r" class="rmm-muscle" data-muscle-id="anterior_deltoid_r"
+                  d="M154 63 C147 72 152 88 160 92 C166 86 162 72 154 63 Z"
+                  role="button" tabindex="0" aria-label="Right Anterior Deltoid" />
+
+            <!-- LATERAL DELTOID (Side Shoulders) -->
+            <path id="rmm-m-lateral_deltoid_l" class="rmm-muscle" data-muscle-id="lateral_deltoid_l"
+                  d="M76 66 C82 74 76 90 68 96 C62 86 68 74 76 66 Z"
+                  role="button" tabindex="0" aria-label="Left Lateral Deltoid" />
+            <path id="rmm-m-lateral_deltoid_r" class="rmm-muscle" data-muscle-id="lateral_deltoid_r"
+                  d="M164 66 C158 74 164 90 172 96 C178 86 172 74 164 66 Z"
+                  role="button" tabindex="0" aria-label="Right Lateral Deltoid" />
+
+            <!-- BICEPS BRACHII -->
+            <path id="rmm-m-biceps_brachii_l" class="rmm-muscle" data-muscle-id="biceps_brachii_l"
+                  d="M75 98 C80 114 74 130 68 136 C62 126 66 106 75 98 Z"
+                  role="button" tabindex="0" aria-label="Left Biceps" />
+            <path id="rmm-m-biceps_brachii_r" class="rmm-muscle" data-muscle-id="biceps_brachii_r"
+                  d="M165 98 C160 114 166 130 172 136 C178 126 174 106 165 98 Z"
+                  role="button" tabindex="0" aria-label="Right Biceps" />
+
+            <!-- BRACHIALIS (Deep Outer Arm) -->
+            <path id="rmm-m-brachialis_l" class="rmm-muscle" data-muscle-id="brachialis_l"
+                  d="M66 110 C70 122 66 134 60 138 C56 128 58 116 66 110 Z"
+                  role="button" tabindex="0" aria-label="Left Brachialis" />
+            <path id="rmm-m-brachialis_r" class="rmm-muscle" data-muscle-id="brachialis_r"
+                  d="M174 110 C170 122 174 134 180 138 C184 128 182 116 174 110 Z"
+                  role="button" tabindex="0" aria-label="Right Brachialis" />
+
+            <!-- FOREARMS (Anterior Flexors & Brachioradialis) -->
+            <path id="rmm-m-forearms_ant_l" class="rmm-muscle" data-muscle-id="forearms_ant_l"
+                  d="M66 138 C70 162 60 188 52 192 C46 178 52 148 66 138 Z"
+                  role="button" tabindex="0" aria-label="Left Forearm Flexors" />
+            <path id="rmm-m-forearms_ant_r" class="rmm-muscle" data-muscle-id="forearms_ant_r"
+                  d="M174 138 C170 162 180 188 188 192 C194 178 188 148 174 138 Z"
+                  role="button" tabindex="0" aria-label="Right Forearm Flexors" />
+
+            <!-- SERRATUS ANTERIOR (Boxer's Rib Muscles) -->
+            <path id="rmm-m-serratus_anterior_l" class="rmm-muscle" data-muscle-id="serratus_anterior_l"
+                  d="M84 102 C89 104 89 118 84 124 C80 120 80 106 84 102 Z"
+                  role="button" tabindex="0" aria-label="Left Serratus Anterior" />
+            <path id="rmm-m-serratus_anterior_r" class="rmm-muscle" data-muscle-id="serratus_anterior_r"
+                  d="M156 102 C151 104 151 118 156 124 C160 120 160 106 156 102 Z"
+                  role="button" tabindex="0" aria-label="Right Serratus Anterior" />
+
+            <!-- UPPER RECTUS ABDOMINIS -->
+            <path id="rmm-m-rectus_abdominis_upper" class="rmm-muscle" data-muscle-id="rectus_abdominis_upper"
+                  d="M106 112 L134 112 C134 124 133 136 133 138 L107 138 C107 136 106 124 106 112 Z"
+                  role="button" tabindex="0" aria-label="Upper Abs" />
+
+            <!-- LOWER RECTUS ABDOMINIS -->
+            <path id="rmm-m-rectus_abdominis_lower" class="rmm-muscle" data-muscle-id="rectus_abdominis_lower"
+                  d="M107 140 L133 140 C132 152 129 162 128 164 L112 164 C111 162 108 152 107 140 Z"
+                  role="button" tabindex="0" aria-label="Lower Abs" />
+
+            <!-- EXTERNAL OBLIQUES -->
+            <path id="rmm-m-external_obliques_l" class="rmm-muscle" data-muscle-id="external_obliques_l"
+                  d="M87 114 C104 114 105 158 96 162 C88 152 86 130 87 114 Z"
+                  role="button" tabindex="0" aria-label="Left Obliques" />
+            <path id="rmm-m-external_obliques_r" class="rmm-muscle" data-muscle-id="external_obliques_r"
+                  d="M153 114 C136 114 135 158 144 162 C152 152 154 130 153 114 Z"
+                  role="button" tabindex="0" aria-label="Right Obliques" />
+
+            <!-- HIP ADDUCTORS (Inner Thighs) -->
+            <path id="rmm-m-adductors_l" class="rmm-muscle" data-muscle-id="adductors_l"
+                  d="M108 178 C118 180 119 220 112 226 C106 214 104 194 108 178 Z"
+                  role="button" tabindex="0" aria-label="Left Adductors" />
+            <path id="rmm-m-adductors_r" class="rmm-muscle" data-muscle-id="adductors_r"
+                  d="M132 178 C122 180 121 220 128 226 C134 214 136 194 132 178 Z"
+                  role="button" tabindex="0" aria-label="Right Adductors" />
+
+            <!-- QUADRICEPS (Rectus Femoris, Vastus Lateralis/Medialis) -->
+            <path id="rmm-m-quadriceps_l" class="rmm-muscle" data-muscle-id="quadriceps_l"
+                  d="M88 176 C106 176 109 238 98 264 C86 244 82 208 88 176 Z"
+                  role="button" tabindex="0" aria-label="Left Quadriceps" />
+            <path id="rmm-m-quadriceps_r" class="rmm-muscle" data-muscle-id="quadriceps_r"
+                  d="M152 176 C134 176 131 238 142 264 C154 244 158 208 152 176 Z"
+                  role="button" tabindex="0" aria-label="Right Quadriceps" />
+
+            <!-- TIBIALIS ANTERIOR (Front Shins & Calves Front) -->
+            <path id="rmm-m-tibialis_anterior_l" class="rmm-muscle" data-muscle-id="tibialis_anterior_l"
+                  d="M92 276 C102 284 100 348 94 366 C86 350 86 304 92 276 Z"
+                  role="button" tabindex="0" aria-label="Left Tibialis Anterior" />
+            <path id="rmm-m-tibialis_anterior_r" class="rmm-muscle" data-muscle-id="tibialis_anterior_r"
+                  d="M148 276 C138 284 140 348 146 366 C154 350 154 304 148 276 Z"
+                  role="button" tabindex="0" aria-label="Right Tibialis Anterior" />
+          </g>
+        </svg>
+      `;
+    }
+
+    generateBackSvg() {
+      return `
+        <svg id="rmm-svg-back" class="rmm-anatomical-svg ${this.view === 'back' ? 'active' : 'hidden'}" viewBox="0 0 240 400" xmlns="http://www.w3.org/2000/svg" role="region" aria-label="Back Anatomical Human View">
+          <!-- SILHOUETTE BASE -->
+          <g class="rmm-base-silhouette" pointer-events="none">
+            <path d="M110 22 C110 12 130 12 130 22 C130 35 127 45 120 48 C113 45 110 35 110 22 Z" fill="#141c2c" stroke="#1f2c42" stroke-width="1.2" />
+            <!-- Spine Axis Line -->
+            <line x1="120" y1="48" x2="120" y2="182" stroke="#1c2638" stroke-width="1.2" stroke-dasharray="2,2" />
+            <!-- Knee Hollows -->
+            <circle cx="98" cy="272" r="5" fill="#131c2c" stroke="#223147" stroke-width="1" />
+            <circle cx="142" cy="272" r="5" fill="#131c2c" stroke="#223147" stroke-width="1" />
+            <!-- Achilles & Heels -->
+            <path d="M94 368 L102 368 L102 384 L90 384 Z" fill="#131c2c" stroke="#223147" stroke-width="1" />
+            <path d="M146 368 L138 368 L138 384 L150 384 Z" fill="#131c2c" stroke="#223147" stroke-width="1" />
+          </g>
+
+          <!-- INTERACTIVE POSTERIOR MUSCLES -->
+          <g class="rmm-muscles-layer">
+            <!-- UPPER TRAPS -->
+            <path id="rmm-m-trapezius_upper_l" class="rmm-muscle" data-muscle-id="trapezius_upper_l"
+                  d="M104 48 L120 46 L120 70 L98 64 Z"
+                  role="button" tabindex="0" aria-label="Left Upper Traps" />
+            <path id="rmm-m-trapezius_upper_r" class="rmm-muscle" data-muscle-id="trapezius_upper_r"
+                  d="M136 48 L120 46 L120 70 L142 64 Z"
+                  role="button" tabindex="0" aria-label="Right Upper Traps" />
+
+            <!-- MIDDLE TRAPS -->
+            <path id="rmm-m-trapezius_mid_l" class="rmm-muscle" data-muscle-id="trapezius_mid_l"
+                  d="M98 65 L120 70 L120 98 L96 90 Z"
+                  role="button" tabindex="0" aria-label="Left Middle Traps" />
+            <path id="rmm-m-trapezius_mid_r" class="rmm-muscle" data-muscle-id="trapezius_mid_r"
+                  d="M142 65 L120 70 L120 98 L144 90 Z"
+                  role="button" tabindex="0" aria-label="Right Middle Traps" />
+
+            <!-- LOWER TRAPS -->
+            <path id="rmm-m-trapezius_lower_l" class="rmm-muscle" data-muscle-id="trapezius_lower_l"
+                  d="M96 91 L120 98 L120 128 L104 116 Z"
+                  role="button" tabindex="0" aria-label="Left Lower Traps" />
+            <path id="rmm-m-trapezius_lower_r" class="rmm-muscle" data-muscle-id="trapezius_lower_r"
+                  d="M144 91 L120 98 L120 128 L136 116 Z"
+                  role="button" tabindex="0" aria-label="Right Lower Traps" />
+
+            <!-- POSTERIOR DELTOIDS (Rear Delts) -->
+            <path id="rmm-m-posterior_deltoid_l" class="rmm-muscle" data-muscle-id="posterior_deltoid_l"
+                  d="M84 66 C90 74 86 92 78 96 C72 88 74 74 84 66 Z"
+                  role="button" tabindex="0" aria-label="Left Posterior Deltoid" />
+            <path id="rmm-m-posterior_deltoid_r" class="rmm-muscle" data-muscle-id="posterior_deltoid_r"
+                  d="M156 66 C150 74 154 92 162 96 C168 88 166 74 156 66 Z"
+                  role="button" tabindex="0" aria-label="Right Posterior Deltoid" />
+
+            <!-- RHOMBOIDS (Between Scapula and Spine) -->
+            <path id="rmm-m-rhomboids_l" class="rmm-muscle" data-muscle-id="rhomboids_l"
+                  d="M94 76 L108 80 L106 104 L92 98 Z"
+                  role="button" tabindex="0" aria-label="Left Rhomboids" />
+            <path id="rmm-m-rhomboids_r" class="rmm-muscle" data-muscle-id="rhomboids_r"
+                  d="M146 76 L132 80 L134 104 L148 98 Z"
+                  role="button" tabindex="0" aria-label="Right Rhomboids" />
+
+            <!-- TERES MAJOR -->
+            <path id="rmm-m-teres_major_l" class="rmm-muscle" data-muscle-id="teres_major_l"
+                  d="M82 92 C92 94 92 106 82 110 C76 104 76 96 82 92 Z"
+                  role="button" tabindex="0" aria-label="Left Teres Major" />
+            <path id="rmm-m-teres_major_r" class="rmm-muscle" data-muscle-id="teres_major_r"
+                  d="M158 92 C148 94 148 106 158 110 C164 104 164 96 158 92 Z"
+                  role="button" tabindex="0" aria-label="Right Teres Major" />
+
+            <!-- LATISSIMUS DORSI (Lats) -->
+            <path id="rmm-m-latissimus_dorsi_l" class="rmm-muscle" data-muscle-id="latissimus_dorsi_l"
+                  d="M84 106 C104 108 112 148 106 164 C90 148 82 126 84 106 Z"
+                  role="button" tabindex="0" aria-label="Left Latissimus Dorsi" />
+            <path id="rmm-m-latissimus_dorsi_r" class="rmm-muscle" data-muscle-id="latissimus_dorsi_r"
+                  d="M156 106 C136 108 128 148 134 164 C150 148 158 126 156 106 Z"
+                  role="button" tabindex="0" aria-label="Right Latissimus Dorsi" />
+
+            <!-- ERECTOR SPINAE (Lower Back & Lumbar) -->
+            <path id="rmm-m-erector_spinae_l" class="rmm-muscle" data-muscle-id="erector_spinae_l"
+                  d="M106 134 L119 134 L119 174 L107 174 Z"
+                  role="button" tabindex="0" aria-label="Left Lower Back" />
+            <path id="rmm-m-erector_spinae_r" class="rmm-muscle" data-muscle-id="erector_spinae_r"
+                  d="M134 134 L121 134 L121 174 L133 174 Z"
+                  role="button" tabindex="0" aria-label="Right Lower Back" />
+
+            <!-- TRICEPS BRACHII -->
+            <path id="rmm-m-triceps_brachii_l" class="rmm-muscle" data-muscle-id="triceps_brachii_l"
+                  d="M74 98 C80 114 74 132 66 138 C60 128 64 106 74 98 Z"
+                  role="button" tabindex="0" aria-label="Left Triceps" />
+            <path id="rmm-m-triceps_brachii_r" class="rmm-muscle" data-muscle-id="triceps_brachii_r"
+                  d="M166 98 C160 114 166 132 174 138 C180 128 176 106 166 98 Z"
+                  role="button" tabindex="0" aria-label="Right Triceps" />
+
+            <!-- FOREARMS POSTERIOR (Extensors) -->
+            <path id="rmm-m-forearms_post_l" class="rmm-muscle" data-muscle-id="forearms_post_l"
+                  d="M66 138 C70 162 60 188 52 192 C46 178 52 148 66 138 Z"
+                  role="button" tabindex="0" aria-label="Left Forearm Extensors" />
+            <path id="rmm-m-forearms_post_r" class="rmm-muscle" data-muscle-id="forearms_post_r"
+                  d="M174 138 C170 162 180 188 188 192 C194 178 188 148 174 138 Z"
+                  role="button" tabindex="0" aria-label="Right Forearm Extensors" />
+
+            <!-- GLUTEUS MEDIUS (Upper Side Glutes) -->
+            <path id="rmm-m-gluteus_medius_l" class="rmm-muscle" data-muscle-id="gluteus_medius_l"
+                  d="M84 172 C104 172 102 196 90 198 C82 190 80 180 84 172 Z"
+                  role="button" tabindex="0" aria-label="Left Gluteus Medius" />
+            <path id="rmm-m-gluteus_medius_r" class="rmm-muscle" data-muscle-id="gluteus_medius_r"
+                  d="M156 172 C136 172 138 196 150 198 C158 190 160 180 156 172 Z"
+                  role="button" tabindex="0" aria-label="Right Gluteus Medius" />
+
+            <!-- GLUTEUS MAXIMUS -->
+            <path id="rmm-m-gluteus_maximus_l" class="rmm-muscle" data-muscle-id="gluteus_maximus_l"
+                  d="M88 182 C119 180 119 224 98 226 C82 216 80 198 88 182 Z"
+                  role="button" tabindex="0" aria-label="Left Gluteus Maximus" />
+            <path id="rmm-m-gluteus_maximus_r" class="rmm-muscle" data-muscle-id="gluteus_maximus_r"
+                  d="M152 182 C121 180 121 224 142 226 C158 216 160 198 152 182 Z"
+                  role="button" tabindex="0" aria-label="Right Gluteus Maximus" />
+
+            <!-- HAMSTRINGS (Biceps Femoris & Semitendinosus) -->
+            <path id="rmm-m-hamstrings_l" class="rmm-muscle" data-muscle-id="hamstrings_l"
+                  d="M88 228 C116 228 112 268 98 272 C84 262 82 244 88 228 Z"
+                  role="button" tabindex="0" aria-label="Left Hamstrings" />
+            <path id="rmm-m-hamstrings_r" class="rmm-muscle" data-muscle-id="hamstrings_r"
+                  d="M152 228 C124 228 128 268 142 272 C156 262 158 244 152 228 Z"
+                  role="button" tabindex="0" aria-label="Right Hamstrings" />
+
+            <!-- GASTROCNEMIUS (Calves Main) -->
+            <path id="rmm-m-gastrocnemius_l" class="rmm-muscle" data-muscle-id="gastrocnemius_l"
+                  d="M88 280 C110 286 106 338 98 344 C86 334 84 300 88 280 Z"
+                  role="button" tabindex="0" aria-label="Left Gastrocnemius" />
+            <path id="rmm-m-gastrocnemius_r" class="rmm-muscle" data-muscle-id="gastrocnemius_r"
+                  d="M152 280 C130 286 134 338 142 344 C154 334 156 300 152 280 Z"
+                  role="button" tabindex="0" aria-label="Right Gastrocnemius" />
+
+            <!-- SOLEUS (Deep Lower Calf) -->
+            <path id="rmm-m-soleus_l" class="rmm-muscle" data-muscle-id="soleus_l"
+                  d="M92 340 C104 344 102 366 96 368 C90 362 90 350 92 340 Z"
+                  role="button" tabindex="0" aria-label="Left Soleus" />
+            <path id="rmm-m-soleus_r" class="rmm-muscle" data-muscle-id="soleus_r"
+                  d="M148 340 C136 344 138 366 144 368 C150 362 150 350 148 340 Z"
+                  role="button" tabindex="0" aria-label="Right Soleus" />
+          </g>
+        </svg>
+      `;
+    }
+
+    // --- EVENTS BINDING ---
+    bindEvents() {
+      const root = document.getElementById(this.containerId);
+      if (!root) return;
+
+      // Mode tabs
+      root.querySelectorAll('.rmm-mode-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const m = btn.dataset.mode;
+          this.setMode(m);
+        });
+      });
+
+      // View toggle
+      root.querySelectorAll('.rmm-view-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this.switchView(btn.dataset.view);
+        });
+      });
+
+      // Zoom controls
+      const btnZoomIn = document.getElementById('rmm-btn-zoom-in');
+      const btnZoomOut = document.getElementById('rmm-btn-zoom-out');
+      const btnZoomReset = document.getElementById('rmm-btn-zoom-reset');
+
+      if (btnZoomIn) btnZoomIn.onclick = () => this.adjustZoom(0.2);
+      if (btnZoomOut) btnZoomOut.onclick = () => this.adjustZoom(-0.2);
+      if (btnZoomReset) btnZoomReset.onclick = () => this.resetZoom();
+
+      // Language toggle
+      const btnLang = document.getElementById('rmm-btn-lang-toggle');
+      if (btnLang) {
+        btnLang.onclick = () => {
+          this.setLanguage(this.lang === 'ar' ? 'en' : 'ar');
+        };
+      }
+
+      // Region quick chips
+      root.querySelectorAll('.rmm-chip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const region = btn.dataset.region;
+          const muscles = MuscleData.getMusclesByRegion(region);
+          if (muscles && muscles.length > 0) {
+            const firstInView = muscles.find(m => m.view === this.view) || muscles[0];
+            if (firstInView.view !== this.view) {
+              this.switchView(firstInView.view);
+            }
+            this.selectMuscle(firstInView.id);
+          }
+        });
+      });
+
+      // Equipment filter pills
+      root.querySelectorAll('.rmm-equip-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          root.querySelectorAll('.rmm-equip-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          this.equipmentFilter = pill.dataset.filter;
+          this.renderExerciseList();
+        });
+      });
+
+      // Live search input
+      const searchInput = document.getElementById('rmm-exercise-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          this.searchQuery = (e.target.value || '').trim().toLowerCase();
+          this.renderExerciseList();
+        });
+      }
+
+      // Muscle SVG hover & click events (Delegated)
+      root.querySelectorAll('.rmm-muscle').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const muscleId = el.dataset.muscleId;
+          if (muscleId) {
+            if (this.mode === 'targeting') {
+              this.setMode('selection');
+            }
+            this.selectMuscle(muscleId);
+          }
+        });
+
+        // Accessibility keydown (Enter / Space)
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const muscleId = el.dataset.muscleId;
+            if (muscleId) this.selectMuscle(muscleId);
+          }
+        });
+      });
+    }
+
+    // --- ZOOM LOGIC ---
+    adjustZoom(delta) {
+      this.zoomLevel = Math.min(Math.max(0.8, this.zoomLevel + delta), 2.2);
+      this.applyZoom();
+    }
+
+    resetZoom() {
+      this.zoomLevel = 1.0;
+      this.applyZoom();
+    }
+
+    applyZoom() {
+      const canvas = document.getElementById('rmm-canvas');
+      if (canvas) {
+        canvas.style.transform = `scale(${this.zoomLevel})`;
+      }
+    }
+
+    // --- VIEW & MODE SWITCHING ---
+    switchView(targetView) {
+      if (targetView !== 'front' && targetView !== 'back') return;
+      this.view = targetView;
+
+      const root = document.getElementById(this.containerId);
+      if (root) {
+        root.querySelectorAll('.rmm-view-toggle').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.view === targetView);
+        });
+
+        const svgFront = document.getElementById('rmm-svg-front');
+        const svgBack = document.getElementById('rmm-svg-back');
+        if (svgFront) {
+          svgFront.classList.toggle('active', targetView === 'front');
+          svgFront.classList.toggle('hidden', targetView !== 'front');
+        }
+        if (svgBack) {
+          svgBack.classList.toggle('active', targetView === 'back');
+          svgBack.classList.toggle('hidden', targetView !== 'back');
+        }
+      }
+
+      this.renderQuickRegions();
+      this.bindQuickRegions();
+      this.updateViewVisuals();
+    }
+
+    bindQuickRegions() {
+      const root = document.getElementById(this.containerId);
+      if (!root) return;
+      root.querySelectorAll('.rmm-chip-btn').forEach(btn => {
+        btn.onclick = () => {
+          const region = btn.dataset.region;
+          const muscles = MuscleData.getMusclesByRegion(region);
+          if (muscles && muscles.length > 0) {
+            const firstInView = muscles.find(m => m.view === this.view) || muscles[0];
+            if (firstInView.view !== this.view) {
+              this.switchView(firstInView.view);
+            }
+            this.selectMuscle(firstInView.id);
+          }
+        };
+      });
+    }
+
+    setMode(newMode) {
+      if (!['selection', 'targeting', 'assessment'].includes(newMode)) return;
+      this.mode = newMode;
+
+      const root = document.getElementById(this.containerId);
+      if (root) {
+        root.querySelectorAll('.rmm-mode-tab').forEach(t => {
+          t.classList.toggle('active', t.dataset.mode === newMode);
+        });
+      }
+
+      this.renderLegend();
+
+      if (newMode === 'targeting') {
+        if (!this.selectedExerciseId) {
+          const firstEx = MuscleData.EXERCISES[0];
+          if (firstEx) this.selectExercise(firstEx.id);
+        } else {
+          this.applyExerciseTargeting(this.selectedExerciseId);
+        }
+      } else if (newMode === 'assessment') {
+        this.updateAssessmentVisuals();
+        this.renderAssessmentPanel();
+      } else {
+        // Selection mode
+        this.clearAllTargetingHighlights();
+        this.selectMuscle(this.selectedMuscleId, false);
+      }
+    }
+
+    // --- MUSCLE SELECTION ---
+    selectMuscle(muscleId, triggerCallback = true) {
+      const muscle = MuscleData.getMuscleById(muscleId);
+      if (!muscle) return;
+
+      this.selectedMuscleId = muscleId;
+
+      // Auto-switch view if muscle is in opposite view
+      if (muscle.view !== this.view) {
+        this.switchView(muscle.view);
+      }
+
+      // Highlight selected muscle (and pair if desired)
+      this.updateMuscleHighlight(muscleId);
+
+      // Render side dossier and filtered exercises
+      this.renderSidePanel();
+      this.renderExerciseList();
+
+      if (triggerCallback && typeof this.onMuscleSelected === 'function') {
+        this.onMuscleSelected(muscle);
+      }
+    }
+
+        updateMuscleHighlight(activeId) {
+      const root = document.getElementById(this.containerId);
+      if (!root) return;
+
+      const activeMuscle = MuscleData.getMuscleById(activeId);
+      const pairedId = activeMuscle ? activeMuscle.pairedWith : null;
+
+      root.querySelectorAll('.rmm-muscle').forEach(el => {
+        const id = el.dataset.muscleId;
+        const isSelected = (id === activeId || (pairedId && id === pairedId));
+        el.classList.toggle('selected', isSelected);
+      });
+
+      if (activeMuscle && activeMuscle.region) {
+        root.querySelectorAll('.rmm-chip-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.region === activeMuscle.region);
+        });
+      }
+    }
+
+    // --- EXERCISE TARGETING MODE ---
+    selectExercise(exerciseId) {
+      const ex = MuscleData.getExerciseById(exerciseId);
+      if (!ex) return;
+
+      this.selectedExerciseId = exerciseId;
+      this.mode = 'targeting';
+
+      const root = document.getElementById(this.containerId);
+      if (root) {
+        root.querySelectorAll('.rmm-mode-tab').forEach(t => {
+          t.classList.toggle('active', t.dataset.mode === 'targeting');
+        });
+      }
+
+      this.renderLegend();
+      this.applyExerciseTargeting(exerciseId);
+      this.renderSidePanel();
+      this.renderExerciseList();
+
+      if (typeof this.onExerciseSelected === 'function') {
+        this.onExerciseSelected(ex);
+      }
+    }
+
+    applyExerciseTargeting(exerciseId) {
+      const ex = MuscleData.getExerciseById(exerciseId);
+      if (!ex) return;
+
+      const root = document.getElementById(this.containerId);
+      if (!root) return;
+
+      // Check if primary muscles are mainly in the other view
+      const firstPrimary = ex.primaryMuscles[0] ? MuscleData.getMuscleById(ex.primaryMuscles[0]) : null;
+      if (firstPrimary && firstPrimary.view !== this.view) {
+        this.switchView(firstPrimary.view);
+      }
+
+      root.querySelectorAll('.rmm-muscle').forEach(el => {
+        const id = el.dataset.muscleId;
+        el.classList.remove('selected', 'is-primary', 'is-secondary', 'is-stabilizer', 'is-dimmed');
+
+        if (ex.primaryMuscles.includes(id)) {
+          el.classList.add('is-primary');
+        } else if (ex.secondaryMuscles.includes(id)) {
+          el.classList.add('is-secondary');
+        } else if (ex.stabilizingMuscles.includes(id)) {
+          el.classList.add('is-stabilizer');
+        } else {
+          el.classList.add('is-dimmed');
+        }
+      });
+    }
+
+    clearAllTargetingHighlights() {
+      const root = document.getElementById(this.containerId);
+      if (!root) return;
+      root.querySelectorAll('.rmm-muscle').forEach(el => {
+        el.classList.remove('is-primary', 'is-secondary', 'is-stabilizer', 'is-dimmed');
+      });
+    }
+
+    updateViewVisuals() {
+      if (this.mode === 'targeting' && this.selectedExerciseId) {
+        this.applyExerciseTargeting(this.selectedExerciseId);
+      } else if (this.mode === 'assessment') {
+        this.updateAssessmentVisuals();
+      } else {
+        this.updateMuscleHighlight(this.selectedMuscleId);
+      }
+    }
+
+    updateAssessmentVisuals() {
+      const root = document.getElementById(this.containerId);
+      if (!root) return;
+
+      const athleteAssessments = this.getAthleteAssessments(this.selectedAthleteId);
+
+      root.querySelectorAll('.rmm-muscle').forEach(el => {
+        const id = el.dataset.muscleId;
+        el.classList.remove('assessment-priority', 'assessment-weak', 'assessment-balanced', 'assessment-attention');
+
+        const record = athleteAssessments[id];
+        if (record && record.status) {
+          el.classList.add(`assessment-${record.status}`);
+        }
+      });
+    }
+
+    // --- DOSSIER / INFORMATION PANEL RENDERING ---
+    renderSidePanel() {
+      const panel = document.getElementById('rmm-dossier-card');
+      if (!panel) return;
+
+      const isAr = this.lang === 'ar';
+
+      if (this.mode === 'assessment') {
+        this.renderAssessmentPanel();
+        return;
+      }
+
+      if (this.mode === 'targeting' && this.selectedExerciseId) {
+        const ex = MuscleData.getExerciseById(this.selectedExerciseId);
+        if (!ex) return;
+
+        panel.innerHTML = `
+          <div class="rmm-dossier-header">
+            <span class="rmm-region-tag">${isAr ? 'تحليل مسار التمرين' : 'Exercise Targeting Analysis'}</span>
+            <h3 class="rmm-dossier-title">${isAr ? ex.nameAr : ex.name}</h3>
+            <div class="rmm-dossier-sub">${ex.equipment ? `Equip: ${ex.equipment.toUpperCase()}` : ''} • ${ex.difficulty}</div>
+          </div>
+
+          <div class="rmm-targeting-breakdown">
+            <div class="rmm-breakdown-group primary">
+              <h4>🎯 ${isAr ? 'العضلات المستهدفة أساساً (Primary)' : 'Primary Movers'}</h4>
+              <div class="rmm-tag-cloud">
+                ${ex.primaryMuscles.map(id => {
+                  const m = MuscleData.getMuscleById(id);
+                  return `<button type="button" class="rmm-muscle-tag primary" data-mid="${id}">${m ? (isAr ? m.displayNameAr : m.displayName) : id}</button>`;
+                }).join('')}
+              </div>
+            </div>
+
+            ${ex.secondaryMuscles.length > 0 ? `
+              <div class="rmm-breakdown-group secondary">
+                <h4>⚡ ${isAr ? 'العضلات المساعدة (Secondary)' : 'Synergists / Secondary'}</h4>
+                <div class="rmm-tag-cloud">
+                  ${ex.secondaryMuscles.map(id => {
+                    const m = MuscleData.getMuscleById(id);
+                    return `<button type="button" class="rmm-muscle-tag secondary" data-mid="${id}">${m ? (isAr ? m.displayNameAr : m.displayName) : id}</button>`;
+                  }).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            ${ex.stabilizingMuscles.length > 0 ? `
+              <div class="rmm-breakdown-group stabilizer">
+                <h4>🛡️ ${isAr ? 'المثبتات والموازنات (Stabilizers)' : 'Stabilizers'}</h4>
+                <div class="rmm-tag-cloud">
+                  ${ex.stabilizingMuscles.map(id => {
+                    const m = MuscleData.getMuscleById(id);
+                    return `<button type="button" class="rmm-muscle-tag stabilizer" data-mid="${id}">${m ? (isAr ? m.displayNameAr : m.displayName) : id}</button>`;
+                  }).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="rmm-biomech-box">
+            <div class="label">🔬 ${isAr ? 'المسار البيوميكانيكي الموصى به:' : 'Biomechanical Rationale:'}</div>
+            <p>${ex.biomech}</p>
+          </div>
+
+          <div class="rmm-dossier-actions">
+            <button type="button" class="rmm-btn-primary" id="rmm-btn-open-add-dialog">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+              <span>${isAr ? 'إدراج في البرنامج التدريبي' : 'Add to Workout Program'}</span>
+            </button>
+          </div>
+        `;
+
+        this.bindDossierEvents(panel);
+        return;
+      }
+
+      // Default: Muscle Selection Mode
+      const muscle = MuscleData.getMuscleById(this.selectedMuscleId);
+      if (!muscle) return;
+
+      const regionObj = MuscleData.REGIONS[muscle.region];
+      const rels = MuscleData.getExercisesForMuscle(muscle.id);
+
+      panel.innerHTML = `
+        <div class="rmm-dossier-header">
+          <span class="rmm-region-tag">${isAr ? regionObj.ar : regionObj.en}</span>
+          <h3 class="rmm-dossier-title">${isAr ? muscle.displayNameAr : muscle.displayName}</h3>
+          <div class="rmm-dossier-sub">${isAr ? muscle.nameAr : muscle.name}</div>
+        </div>
+
+        <div class="rmm-biomech-box">
+          <div class="label">⚙️ ${isAr ? 'الوظيفة الحركية والميكانيكية الحيوية:' : 'Anatomical Function & Joint Actions:'}</div>
+          <p>${isAr ? muscle.functionAr : muscle.functionEn}</p>
+          <div class="rmm-actions-list">
+            ${muscle.jointActions.map(action => `<span class="rmm-action-pill">• ${action}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="rmm-stats-summary">
+          <div class="rmm-stat-item">
+            <span class="num">${rels.primary.length}</span>
+            <span class="lbl">${isAr ? 'تمارين أساسية' : 'Primary'}</span>
+          </div>
+          <div class="rmm-stat-item">
+            <span class="num">${rels.secondary.length}</span>
+            <span class="lbl">${isAr ? 'تمارين مساعدة' : 'Secondary'}</span>
+          </div>
+          <div class="rmm-stat-item">
+            <span class="num">${rels.stabilizer.length}</span>
+            <span class="lbl">${isAr ? 'تمارين تثبيت' : 'Stabilizers'}</span>
+          </div>
+        </div>
+
+        <div class="rmm-dossier-actions">
+          <button type="button" class="rmm-btn-secondary" id="rmm-btn-switch-targeting-mode">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>${isAr ? 'استعراض التمارين المستهدفة' : 'View Targeting Exercises'}</span>
+          </button>
+        </div>
+      `;
+
+      this.bindDossierEvents(panel);
+    }
+
+    bindDossierEvents(panel) {
+      const isAr = this.lang === 'ar';
+      panel.querySelectorAll('.rmm-muscle-tag').forEach(tag => {
+        tag.onclick = () => {
+          const mid = tag.dataset.mid;
+          if (mid) this.selectMuscle(mid);
+        };
+      });
+
+      const btnAdd = panel.querySelector('#rmm-btn-open-add-dialog');
+      if (btnAdd && this.selectedExerciseId) {
+        btnAdd.onclick = () => {
+          this.openWorkoutAddModal(this.selectedExerciseId);
+        };
+      }
+
+      const btnSwitchTarget = panel.querySelector('#rmm-btn-switch-targeting-mode');
+      if (btnSwitchTarget) {
+        btnSwitchTarget.onclick = () => {
+          const rels = MuscleData.getExercisesForMuscle(this.selectedMuscleId);
+          if (rels.primary.length > 0) {
+            this.selectExercise(rels.primary[0].id);
+          } else if (rels.total > 0) {
+            const anyEx = rels.secondary[0] || rels.stabilizer[0];
+            this.selectExercise(anyEx.id);
+          }
+        };
+      }
+    }
+
+    // --- ASSESSMENT MODE PANEL ---
+    renderAssessmentPanel() {
+      const panel = document.getElementById('rmm-dossier-card');
+      if (!panel) return;
+
+      const isAr = this.lang === 'ar';
+      const muscle = MuscleData.getMuscleById(this.selectedMuscleId) || MuscleData.MUSCLES[0];
+      const athleteAssessments = this.getAthleteAssessments(this.selectedAthleteId);
+      const currentRecord = athleteAssessments[muscle.id] || { status: '', note: '' };
+
+      panel.innerHTML = `
+        <div class="rmm-dossier-header">
+          <span class="rmm-region-tag" style="color: #f59e0b; border-color: rgba(245,158,11,0.4);">${isAr ? 'تقييم المتدرب البدني' : 'Client Assessment Console'}</span>
+          <h3 class="rmm-dossier-title">${isAr ? muscle.displayNameAr : muscle.displayName}</h3>
+          <div class="rmm-dossier-sub">${isAr ? 'تحديد نقاط الضعف والأولويات العضلية' : 'Flag priority, lagging, or mobility points'}</div>
+        </div>
+
+        <div class="rmm-assessment-form">
+          <label class="rmm-form-label">${isAr ? 'الحالة التدريبية للعضلة:' : 'Muscle Development Status:'}</label>
+          <div class="rmm-status-options">
+            <button type="button" class="rmm-status-btn priority ${currentRecord.status === 'priority' ? 'active' : ''}" data-status="priority">
+              🔴 ${isAr ? 'أولوية قصوى' : 'Priority Focus'}
+            </button>
+            <button type="button" class="rmm-status-btn weak ${currentRecord.status === 'weak' ? 'active' : ''}" data-status="weak">
+              🟠 ${isAr ? 'نقطة ضعف / متأخرة' : 'Lagging / Weak'}
+            </button>
+            <button type="button" class="rmm-status-btn balanced ${currentRecord.status === 'balanced' ? 'active' : ''}" data-status="balanced">
+              🟢 ${isAr ? 'متناسقة ومثالية' : 'Balanced / Good'}
+            </button>
+            <button type="button" class="rmm-status-btn attention ${currentRecord.status === 'attention' ? 'active' : ''}" data-status="attention">
+              🟣 ${isAr ? 'تحتاج مرونة وتأهيل' : 'Mobility / Attention'}
+            </button>
+          </div>
+
+          <label class="rmm-form-label" style="margin-top: 14px;">${isAr ? 'ملاحظة المدرب وتوصيات الحجم التدريبي:' : 'Coach Observation & Volume Prescription:'}</label>
+          <textarea id="rmm-assessment-note" class="rmm-textarea" rows="3" placeholder="${isAr ? 'مثال: تحتاج إلى مجموعتين إضافيتين أسبوعياً مع التركيز على الإطالة تحت الحمل...' : 'e.g., Needs 2 extra direct sets weekly with loaded stretch emphasis...'}">${currentRecord.note || ''}</textarea>
+
+          <div class="rmm-dossier-actions" style="margin-top: 16px;">
+            <button type="button" class="rmm-btn-primary" id="rmm-btn-save-assessment">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              <span>${isAr ? 'حفظ التقييم للمتدرب' : 'Save Observation'}</span>
+            </button>
+            ${currentRecord.status ? `
+              <button type="button" class="rmm-btn-secondary" id="rmm-btn-clear-assessment" style="color: #ef4444;">
+                <span>${isAr ? 'مسح التقييم' : 'Clear'}</span>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      let selectedStatus = currentRecord.status;
+      panel.querySelectorAll('.rmm-status-btn').forEach(btn => {
+        btn.onclick = () => {
+          panel.querySelectorAll('.rmm-status-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedStatus = btn.dataset.status;
+        };
+      });
+
+      const btnSave = panel.querySelector('#rmm-btn-save-assessment');
+      if (btnSave) {
+        btnSave.onclick = () => {
+          const note = (panel.querySelector('#rmm-assessment-note')?.value || '').trim();
+          this.setMuscleAssessment(this.selectedAthleteId || 'global_athlete', muscle.id, selectedStatus, note);
+          this.showToast(isAr ? `تم حفظ تقييم "${muscle.displayNameAr}" بنجاح!` : `Saved observation for ${muscle.displayName}`);
+        };
+      }
+
+      const btnClear = panel.querySelector('#rmm-btn-clear-assessment');
+      if (btnClear) {
+        btnClear.onclick = () => {
+          this.setMuscleAssessment(this.selectedAthleteId || 'global_athlete', muscle.id, null);
+          this.showToast(isAr ? 'تم مسح التقييم.' : 'Assessment cleared.');
+        };
+      }
+    }
+
+    // --- EXERCISE LIST RENDERING & FILTERING ---
+    renderExerciseList() {
+      const header = document.getElementById('rmm-exercise-header');
+      const listContainer = document.getElementById('rmm-exercise-list');
+      if (!header || !listContainer) return;
+
+      const isAr = this.lang === 'ar';
+      const muscle = MuscleData.getMuscleById(this.selectedMuscleId);
+      const rels = muscle ? MuscleData.getExercisesForMuscle(muscle.id) : { primary: [], secondary: [], stabilizer: [] };
+
+      // Determine candidate exercises
+      let candidates = [];
+      if (this.mode === 'targeting' && this.selectedExerciseId) {
+        // Show all exercises with selected one highlighted at top
+        candidates = [...MuscleData.EXERCISES];
+      } else {
+        // Exercises that have any relationship with the selected muscle
+        const rawCandidates = [...rels.primary, ...rels.secondary, ...rels.stabilizer];
+        const seenCandidateIds = new Set();
+        candidates = rawCandidates.filter(c => {
+          if (seenCandidateIds.has(c.id)) return false;
+          seenCandidateIds.add(c.id);
+          return true;
+        });
+        // If query is present and no relationship, search entire database
+        if (this.searchQuery && candidates.length === 0) {
+          candidates = [...MuscleData.EXERCISES];
+        }
+      }
+
+      // Filter by equipment
+      if (this.equipmentFilter !== 'all') {
+        candidates = candidates.filter(ex => ex.equipment === this.equipmentFilter);
+      }
+
+      // Filter by search query
+      if (this.searchQuery) {
+        candidates = candidates.filter(ex => {
+          return ex.name.toLowerCase().includes(this.searchQuery) ||
+                 (ex.nameAr && ex.nameAr.includes(this.searchQuery)) ||
+                 ex.equipment.toLowerCase().includes(this.searchQuery);
+        });
+      }
+
+      header.innerHTML = `
+        <div class="rmm-ex-title-wrap">
+          <h3>${isAr ? 'التمارين المستهدفة' : 'Targeted Exercises'}</h3>
+          <p>${muscle ? (isAr ? `تمارين موجهة لعضلة: ${muscle.displayNameAr}` : `Focus: ${muscle.displayName}`) : ''}</p>
+        </div>
+        <span class="rmm-count-badge">${candidates.length} ${isAr ? 'تمرين' : 'Exercises'}</span>
+      `;
+
+      if (candidates.length === 0) {
+        listContainer.innerHTML = `
+          <div class="rmm-empty-state">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <p>${isAr ? 'لا توجد تمارين مطابقة للتصفية الحالية.' : 'No exercises match current filters.'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = candidates.map(ex => {
+        const isPrimary = ex.primaryMuscles.includes(this.selectedMuscleId);
+        const isSecondary = ex.secondaryMuscles.includes(this.selectedMuscleId);
+        const isStabilizer = ex.stabilizingMuscles.includes(this.selectedMuscleId);
+        const isTargetActive = (this.selectedExerciseId === ex.id && this.mode === 'targeting');
+
+        let tierBadge = '';
+        if (isPrimary) {
+          tierBadge = `<span class="rmm-tier-tag primary">${isAr ? '🎯 محرك أساسي' : 'Primary'}</span>`;
+        } else if (isSecondary) {
+          tierBadge = `<span class="rmm-tier-tag secondary">${isAr ? '⚡ مساعد ثانوي' : 'Secondary'}</span>`;
+        } else if (isStabilizer) {
+          tierBadge = `<span class="rmm-tier-tag stabilizer">${isAr ? '🛡️ مثبت' : 'Stabilizer'}</span>`;
+        }
+
+        return `
+          <div class="rmm-ex-card ${isTargetActive ? 'active' : ''}" data-eid="${ex.id}">
+            <div class="rmm-ex-card-main">
+              <div class="rmm-ex-meta-row">
+                <span class="rmm-equip-badge">${ex.equipment.toUpperCase()}</span>
+                ${tierBadge}
+              </div>
+              <h4 class="rmm-ex-title">${isAr ? ex.nameAr : ex.name}</h4>
+              <div class="rmm-ex-sub">${isAr ? ex.name : ex.nameAr}</div>
+              <div class="rmm-ex-details">
+                <span>⚙️ ${ex.defaultSets} × ${ex.defaultReps}</span>
+                <span>⏱️ ${ex.defaultRestSec}s</span>
+                <span>🔥 RPE ${ex.defaultRpe}</span>
+              </div>
+            </div>
+
+            <div class="rmm-ex-card-actions">
+              <button type="button" class="rmm-btn-target-preview" data-eid="${ex.id}" title="${isAr ? 'عرض الاستهداف على المجسم' : 'Preview targeting on Muscle Map'}">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                <span>${isAr ? 'استهداف' : 'Target'}</span>
+              </button>
+              <button type="button" class="rmm-btn-add-routine" data-eid="${ex.id}">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+                <span>${isAr ? 'إضافة' : 'Add'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Bind card interactions
+      listContainer.querySelectorAll('.rmm-btn-target-preview').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const eid = btn.dataset.eid;
+          if (eid) this.selectExercise(eid);
+        };
+      });
+
+      listContainer.querySelectorAll('.rmm-btn-add-routine').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const eid = btn.dataset.eid;
+          if (eid) this.openWorkoutAddModal(eid);
+        };
+      });
+
+      listContainer.querySelectorAll('.rmm-ex-card').forEach(card => {
+        card.onclick = () => {
+          const eid = card.dataset.eid;
+          if (eid) this.selectExercise(eid);
+        };
+      });
+    }
+
+    // --- WORKOUT BUILDER INTEGRATION MODAL ---
+    openWorkoutAddModal(exerciseId) {
+      const ex = MuscleData.getExerciseById(exerciseId);
+      if (!ex) return;
+
+      const modal = document.getElementById('rmm-workout-modal');
+      const card = document.getElementById('rmm-workout-modal-card');
+      if (!modal || !card) return;
+
+      const isAr = this.lang === 'ar';
+
+      card.innerHTML = `
+        <div class="rmm-modal-header">
+          <div>
+            <span class="rmm-region-tag">${ex.equipment.toUpperCase()} • ${ex.difficulty}</span>
+            <h3>${isAr ? ex.nameAr : ex.name}</h3>
+            <p>${isAr ? ex.name : ex.nameAr}</p>
+          </div>
+          <button type="button" class="rmm-modal-close" id="rmm-modal-btn-close">✕</button>
+        </div>
+
+        <form id="rmm-add-workout-form" class="rmm-modal-form">
+          <div class="rmm-form-grid">
+            <div class="rmm-form-field">
+              <label>${isAr ? 'المجموعات (Sets):' : 'Sets:'}</label>
+              <input type="number" id="rmm-input-sets" min="1" max="10" value="${ex.defaultSets || 3}" required />
+            </div>
+            <div class="rmm-form-field">
+              <label>${isAr ? 'التكرارات (Reps):' : 'Reps:'}</label>
+              <input type="text" id="rmm-input-reps" value="${ex.defaultReps || '8-10'}" required />
+            </div>
+            <div class="rmm-form-field">
+              <label>${isAr ? 'الوزن المبدئي (Load kg):' : 'Initial Load (kg):'}</label>
+              <input type="number" id="rmm-input-load" min="0" step="0.5" placeholder="e.g. 50" />
+            </div>
+            <div class="rmm-form-field">
+              <label>${isAr ? 'معدل الجهد (RPE / RIR):' : 'RPE / RIR Target:'}</label>
+              <input type="text" id="rmm-input-rpe" value="${ex.defaultRpe ? `RPE ${ex.defaultRpe}` : 'RIR 1-2'}" />
+            </div>
+            <div class="rmm-form-field">
+              <label>${isAr ? 'فترة الراحة (Rest Sec):' : 'Rest (seconds):'}</label>
+              <input type="number" id="rmm-input-rest" min="15" max="300" step="15" value="${ex.defaultRestSec || 90}" />
+            </div>
+            <div class="rmm-form-field">
+              <label>${isAr ? 'الإيقاع الحركي (Tempo):' : 'Cadence / Tempo:'}</label>
+              <input type="text" id="rmm-input-tempo" value="${ex.defaultTempo || '3-0-1-0'}" placeholder="e.g. 3-0-1-0" />
+            </div>
+          </div>
+
+          <div class="rmm-form-field" style="margin-top: 12px;">
+            <label>${isAr ? 'توجيهات التدريب والتكنيك:' : 'Coaching Cues & Notes:'}</label>
+            <textarea id="rmm-input-cues" class="rmm-textarea" rows="2">${ex.biomech || ''}</textarea>
+          </div>
+
+          <div class="rmm-modal-footer">
+            <button type="button" class="rmm-btn-secondary" id="rmm-modal-btn-cancel">${isAr ? 'إلغاء' : 'Cancel'}</button>
+            <button type="submit" class="rmm-btn-primary">${isAr ? 'تأكيد الإضافة للجدول' : 'Confirm Add to Routine'}</button>
+          </div>
+        </form>
+      `;
+
+      modal.style.display = 'flex';
+
+      const closeHandler = () => {
+        modal.style.display = 'none';
+      };
+
+      const btnClose = card.querySelector('#rmm-modal-btn-close');
+      const btnCancel = card.querySelector('#rmm-modal-btn-cancel');
+      if (btnClose) btnClose.onclick = closeHandler;
+      if (btnCancel) btnCancel.onclick = closeHandler;
+
+      const form = card.querySelector('#rmm-add-workout-form');
+      if (form) {
+        form.onsubmit = (e) => {
+          e.preventDefault();
+          const item = {
+            id: 'ex_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+            exerciseId: ex.id,
+            name: ex.name,
+            nameAr: ex.nameAr,
+            equipment: ex.equipment,
+            sets: Number(card.querySelector('#rmm-input-sets').value) || 3,
+            reps: card.querySelector('#rmm-input-reps').value || '8-10',
+            loadKg: Number(card.querySelector('#rmm-input-load').value) || null,
+            rpe: card.querySelector('#rmm-input-rpe').value || '8',
+            restSec: Number(card.querySelector('#rmm-input-rest').value) || 90,
+            tempo: card.querySelector('#rmm-input-tempo').value || '3-0-1-0',
+            notes: card.querySelector('#rmm-input-cues').value || ''
+          };
+
+          if (typeof this.onWorkoutAdd === 'function') {
+            this.onWorkoutAdd(item, ex);
+          } else {
+            // Default global handler
+            if (typeof window.addExerciseFromStudio === 'function') {
+              window.addExerciseFromStudio(ex.id, this.selectedMuscleId);
+            }
+          }
+
+          modal.style.display = 'none';
+          this.showToast(isAr ? `تمت إضافة "${ex.nameAr}" لجدول التدريب بنجاح!` : `Added "${ex.name}" to workout program!`);
+        };
+      }
+    }
+
+    showToast(message) {
+      if (typeof window.showToast === 'function') {
+        window.showToast(message);
+        return;
+      }
+      let toast = document.getElementById('rmm-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'rmm-toast';
+        toast.className = 'rmm-toast-popup';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 3200);
+    }
+  }
+
+  // --- GLOBAL INTEGRATION APIS (Workout Builder & Application Interop) ---
+  if (typeof window !== 'undefined') {
+    window.openMuscleMap = function (opts = {}) {
+      if (typeof window.switchTab === 'function') {
+        window.switchTab('muscle-map');
+      }
+      setTimeout(() => {
+        if (window.mainMuscleMap) {
+          if (opts.athleteId) window.mainMuscleMap.setAthlete(opts.athleteId);
+          if (opts.view) window.mainMuscleMap.switchView(opts.view);
+          if (opts.muscleId) window.mainMuscleMap.selectMuscle(opts.muscleId);
+          if (opts.exerciseId) window.mainMuscleMap.selectExercise(opts.exerciseId);
+          if (opts.muscles) window.mainMuscleMap.highlightMuscles(opts.muscles);
+        }
+      }, 50);
+    };
+
+    window.highlightMuscles = function (muscles) {
+      if (window.mainMuscleMap) {
+        window.mainMuscleMap.highlightMuscles(muscles);
+      }
+    };
+
+    window.selectMuscleMapExercise = function (exerciseId) {
+      if (window.mainMuscleMap) {
+        window.mainMuscleMap.selectExercise(exerciseId);
+      }
+    };
+  }
+
+  return MuscleMapEngine;
+}));

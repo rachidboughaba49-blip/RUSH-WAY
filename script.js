@@ -1278,9 +1278,96 @@ let currentStudioTargetAthleteId = '';
 
 function initTrainingStudio() {
   populateStudioAthleteDropdown();
-  switchStudioBodyView(currentStudioView);
-  selectStudioMuscle(currentStudioMuscle);
-  setupStudioSvgInteractivity();
+
+  const root = document.getElementById('rush-muscle-map-root');
+  if (root && typeof RushMuscleMap !== 'undefined') {
+    if (!window.mainMuscleMap) {
+      window.mainMuscleMap = new RushMuscleMap({
+        containerId: 'rush-muscle-map-root',
+        lang: (typeof currentLanguage !== 'undefined' && currentLanguage) ? currentLanguage : 'ar',
+        initialMode: 'selection',
+        athleteId: currentStudioTargetAthleteId || null,
+        onExerciseAdd: (exercise, routineParams) => {
+          handleStudioAddExerciseToPlan(exercise, routineParams);
+        }
+      });
+    } else {
+      window.mainMuscleMap.setAthlete(currentStudioTargetAthleteId || null);
+    }
+  }
+}
+
+function handleStudioAddExerciseToPlan(exercise, routineParams) {
+  if (!exercise) return;
+
+  if (currentStudioTargetAthleteId) {
+    const athlete = athletes.find(a => a.id === currentStudioTargetAthleteId);
+    if (!athlete) {
+      showToast('لم يتم العثور على المتدرب المحدد', 'danger');
+      return;
+    }
+
+    if (!athlete.workoutPlan) athlete.workoutPlan = [];
+
+    const planItem = {
+      id: 'plan_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+      exerciseId: exercise.id,
+      name: exercise.name,
+      nameAr: exercise.nameAr,
+      sets: routineParams?.sets || 3,
+      reps: routineParams?.reps || '8-12',
+      load: routineParams?.load || '',
+      rpe: routineParams?.rpe || 8,
+      rest: routineParams?.rest || '90s',
+      tempo: routineParams?.tempo || '3-0-1-0',
+      targetHead: exercise.targetHead || '',
+      volume: exercise.volume || '',
+      equipment: exercise.equipment || '',
+      biomech: exercise.biomech || '',
+      primaryMuscles: exercise.primaryMuscles || [],
+      secondaryMuscles: exercise.secondaryMuscles || [],
+      addedAt: new Date().toISOString()
+    };
+
+    athlete.workoutPlan.push(planItem);
+
+    saveAthletesToStorage();
+    renderAthletesView();
+    populateStudioAthleteDropdown();
+    updateStudioAthleteRoutineBadge();
+
+    showToast(`تمت إضافة "${exercise.nameAr || exercise.name}" (${planItem.sets}×${planItem.reps}) لجدول ${athlete.name} بنجاح!`);
+
+    // Sync to Google Sheets webhook if configured
+    sendToWebhook({
+      dataType: 'workout_update',
+      athleteId: athlete.id,
+      athleteName: athlete.name,
+      exerciseAdded: exercise.nameAr || exercise.name,
+      totalExercises: athlete.workoutPlan.length,
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    // Save to global active routine draft
+    if (!activeBuilderRoutine) activeBuilderRoutine = [];
+    activeBuilderRoutine.push({
+      id: 'draft_' + Date.now(),
+      exerciseId: exercise.id,
+      name: exercise.name,
+      nameAr: exercise.nameAr,
+      sets: routineParams?.sets || 3,
+      reps: routineParams?.reps || '8-12',
+      load: routineParams?.load || '',
+      rpe: routineParams?.rpe || 8,
+      rest: routineParams?.rest || '90s',
+      tempo: routineParams?.tempo || '3-0-1-0',
+      targetHead: exercise.targetHead || '',
+      volume: exercise.volume || '',
+      equipment: exercise.equipment || ''
+    });
+
+    showToast(`تمت إضافة "${exercise.nameAr || exercise.name}" إلى مسودة التمارين العامة!`);
+  }
 }
 
 function populateStudioAthleteDropdown() {
@@ -1302,6 +1389,9 @@ function populateStudioAthleteDropdown() {
   select.innerHTML = html;
   currentStudioTargetAthleteId = select.value || '';
   updateStudioAthleteRoutineBadge();
+  if (window.mainMuscleMap) {
+    window.mainMuscleMap.setAthlete(currentStudioTargetAthleteId || null);
+  }
 }
 
 function onStudioAthleteSelectChange() {
@@ -1310,7 +1400,9 @@ function onStudioAthleteSelectChange() {
 
   currentStudioTargetAthleteId = select.value || '';
   updateStudioAthleteRoutineBadge();
-  renderStudioExerciseList();
+  if (window.mainMuscleMap) {
+    window.mainMuscleMap.setAthlete(currentStudioTargetAthleteId || null);
+  }
 }
 
 function updateStudioAthleteRoutineBadge() {

@@ -1,0 +1,1040 @@
+/* ==========================================================================
+   THE RUSH WAY - INTERACTIVE MUSCLE MAP STYLESHEET
+   Aesthetic: Dark Navy, Black, Deep Purple, Electric Blue/Teal accents.
+   Minimalist, high contrast, production-ready fitness technology.
+   ========================================================================== */
+
+.rmm-component {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  color: #f8fafc;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+/* 1. TOPBAR & NAVIGATION */
+.rmm-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #141c2c;
+  border: 1px solid #23324a;
+  border-radius: 14px;
+}
+
+.rmm-brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rmm-pulse-beacon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #38b2ac;
+  box-shadow: 0 0 0 0 rgba(56, 178, 172, 0.7);
+  animation: rmm-pulse 2s infinite;
+}
+
+@keyframes rmm-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 178, 172, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(56, 178, 172, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 178, 172, 0); }
+}
+
+.rmm-badge-text {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #38b2ac;
+  letter-spacing: 0.3px;
+}
+
+.rmm-modes-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0b0f19;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid #1f2c42;
+}
+
+.rmm-mode-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.rmm-mode-tab:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rmm-mode-tab.active {
+  background: #1e2b42;
+  color: #38b2ac;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(56, 178, 172, 0.3);
+}
+
+.rmm-lang-toggle {
+  background: #1e2b42;
+  border: 1px solid #2d3e5a;
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rmm-lang-toggle:hover {
+  color: #38b2ac;
+  border-color: #38b2ac;
+}
+
+/* 2. MAIN 3-COLUMN WORKSPACE */
+.rmm-workspace {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1.35fr;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .rmm-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- COLUMN 1: STAGE CARD (THE SVG MAP) --- */
+.rmm-stage-card {
+  background: #161f30;
+  border: 1px solid #23324a;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.rmm-stage-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.rmm-view-buttons {
+  display: flex;
+  gap: 6px;
+  background: #0b0f19;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid #23324a;
+}
+
+.rmm-view-toggle {
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.rmm-view-toggle:hover {
+  color: #f8fafc;
+}
+
+.rmm-view-toggle.active {
+  background: #38b2ac;
+  color: #0b0f19;
+}
+
+.rmm-zoom-tools {
+  display: flex;
+  gap: 4px;
+}
+
+.rmm-tool-btn {
+  background: #1e2b42;
+  border: 1px solid #2d3e5a;
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rmm-tool-btn:hover {
+  color: #38b2ac;
+  border-color: #38b2ac;
+  background: #253652;
+}
+
+.rmm-viewport {
+  width: 100%;
+  height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 45%, #18243a 0%, #0c121e 100%);
+  border: 1px solid #202d44;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.rmm-canvas {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center center;
+}
+
+.rmm-anatomical-svg {
+  width: auto;
+  height: 94%;
+  max-width: 90%;
+  user-select: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.rmm-anatomical-svg.hidden {
+  display: none;
+  opacity: 0;
+}
+
+.rmm-anatomical-svg.active {
+  display: block;
+  opacity: 1;
+}
+
+/* SVG MUSCLE PATH INTERACTION STATES */
+.rmm-muscle {
+  fill: #1e2a3e;
+  stroke: #2e415e;
+  stroke-width: 1px;
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.rmm-muscle:hover {
+  fill: #2c3e5c;
+  stroke: #38b2ac;
+  stroke-width: 1.5px;
+  filter: drop-shadow(0 0 5px rgba(56, 178, 172, 0.6));
+}
+
+.rmm-muscle:focus-visible {
+  stroke: #38b2ac;
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 8px rgba(56, 178, 172, 0.9));
+}
+
+.rmm-muscle.selected {
+  fill: #38b2ac !important;
+  stroke: #e6fffa !important;
+  stroke-width: 1.8px !important;
+  filter: drop-shadow(0 0 10px rgba(56, 178, 172, 0.95)) !important;
+}
+
+/* TARGETING HIGHLIGHT STATES */
+.rmm-muscle.is-primary {
+  fill: #0ea5e9 !important;
+  stroke: #e0f2fe !important;
+  stroke-width: 1.8px !important;
+  filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.95)) !important;
+}
+
+.rmm-muscle.is-secondary {
+  fill: #8b5cf6 !important;
+  stroke: #ede9fe !important;
+  stroke-width: 1.6px !important;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.9)) !important;
+}
+
+.rmm-muscle.is-stabilizer {
+  fill: #f59e0b !important;
+  stroke: #fef3c7 !important;
+  stroke-width: 1.5px !important;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.85)) !important;
+}
+
+.rmm-muscle.is-dimmed {
+  opacity: 0.28;
+  filter: grayscale(85%);
+}
+
+/* ASSESSMENT HIGHLIGHT STATES */
+.rmm-muscle.assessment-priority {
+  fill: #ef4444 !important;
+  stroke: #fecaca !important;
+  stroke-width: 1.8px !important;
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.9)) !important;
+}
+
+.rmm-muscle.assessment-weak {
+  fill: #f59e0b !important;
+  stroke: #fef08a !important;
+  stroke-width: 1.8px !important;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.9)) !important;
+}
+
+.rmm-muscle.assessment-balanced {
+  fill: #10b981 !important;
+  stroke: #d1fae5 !important;
+  stroke-width: 1.6px !important;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9)) !important;
+}
+
+.rmm-muscle.assessment-attention {
+  fill: #8b5cf6 !important;
+  stroke: #ede9fe !important;
+  stroke-width: 1.8px !important;
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.9)) !important;
+}
+
+/* LEGEND & QUICK REGIONS */
+.rmm-legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  margin-top: 10px;
+  background: #0f1624;
+  border-radius: 10px;
+  border: 1px solid #1f2c42;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.rmm-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rmm-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.rmm-legend-dot.primary { background: #0ea5e9; box-shadow: 0 0 6px #0ea5e9; }
+.rmm-legend-dot.secondary { background: #8b5cf6; box-shadow: 0 0 6px #8b5cf6; }
+.rmm-legend-dot.stabilizer { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+.rmm-legend-dot.selected { background: #38b2ac; box-shadow: 0 0 6px #38b2ac; }
+.rmm-legend-dot.default { background: #2e415e; }
+
+.rmm-quick-regions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.rmm-chip-btn {
+  background: #141d2d;
+  border: 1px solid #23324a;
+  color: #94a3b8;
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.rmm-chip-btn:hover {
+  background: #1e2b42;
+  color: #38b2ac;
+  border-color: #38b2ac;
+}
+
+/* --- COLUMN 2: DOSSIER CARD (MUSCLE / TARGETING INFO) --- */
+.rmm-dossier-card {
+  background: #161f30;
+  border: 1px solid #23324a;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.rmm-dossier-header {
+  border-bottom: 1px solid #22314a;
+  padding-bottom: 14px;
+}
+
+.rmm-region-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38b2ac;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(56, 178, 172, 0.12);
+  border: 1px solid rgba(56, 178, 172, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.rmm-dossier-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.3;
+}
+
+.rmm-dossier-sub {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+.rmm-biomech-box {
+  background: #0f1624;
+  border: 1px solid #1f2c42;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.rmm-biomech-box .label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.rmm-biomech-box p {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.rmm-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #1e2b42;
+}
+
+.rmm-action-pill {
+  font-size: 0.78rem;
+  color: #38b2ac;
+}
+
+.rmm-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.rmm-stat-item {
+  background: #111827;
+  border: 1px solid #1f2c42;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.rmm-stat-item .num {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #38b2ac;
+}
+
+.rmm-stat-item .lbl {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.rmm-targeting-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rmm-breakdown-group h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.rmm-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rmm-muscle-tag {
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.rmm-muscle-tag.primary {
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+}
+
+.rmm-muscle-tag.secondary {
+  background: rgba(139, 92, 246, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.rmm-muscle-tag.stabilizer {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.rmm-muscle-tag:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.2);
+}
+
+.rmm-dossier-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.rmm-btn-primary {
+  flex: 1;
+  background: #38b2ac;
+  color: #0b0f19;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rmm-btn-primary:hover {
+  background: #319795;
+  box-shadow: 0 4px 12px rgba(56, 178, 172, 0.35);
+}
+
+.rmm-btn-secondary {
+  flex: 1;
+  background: #1e2b42;
+  color: #cbd5e1;
+  border: 1px solid #2e415e;
+  padding: 10px 18px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rmm-btn-secondary:hover {
+  background: #253652;
+  color: #38b2ac;
+  border-color: #38b2ac;
+}
+
+/* ASSESSMENT CONSOLE */
+.rmm-status-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.rmm-status-btn {
+  background: #0f1624;
+  border: 1px solid #1f2c42;
+  color: #94a3b8;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: start;
+  transition: all 0.18s ease;
+}
+
+.rmm-status-btn:hover {
+  border-color: #38b2ac;
+  color: #f8fafc;
+}
+
+.rmm-status-btn.active.priority { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5; }
+.rmm-status-btn.active.weak { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fde047; }
+.rmm-status-btn.active.balanced { background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #86efac; }
+.rmm-status-btn.active.attention { background: rgba(139, 92, 246, 0.2); border-color: #8b5cf6; color: #c4b5fd; }
+
+.rmm-form-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  display: block;
+}
+
+.rmm-textarea {
+  width: 100%;
+  background: #0f1624;
+  border: 1px solid #23324a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.82rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.rmm-textarea:focus {
+  outline: none;
+  border-color: #38b2ac;
+  box-shadow: 0 0 0 1px #38b2ac;
+}
+
+/* --- COLUMN 3: EXERCISES CARD --- */
+.rmm-exercises-card {
+  background: #161f30;
+  border: 1px solid #23324a;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.rmm-exercise-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #22314a;
+  padding-bottom: 12px;
+}
+
+.rmm-ex-title-wrap h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.rmm-ex-title-wrap p {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.rmm-count-badge {
+  background: #1e2b42;
+  border: 1px solid #2e415e;
+  color: #38b2ac;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.rmm-exercise-search-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rmm-search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0f1624;
+  border: 1px solid #23324a;
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #94a3b8;
+}
+
+.rmm-search-input-wrap input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.rmm-equip-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rmm-equip-pill {
+  background: #141d2d;
+  border: 1px solid #1f2c42;
+  color: #94a3b8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.rmm-equip-pill:hover {
+  color: #f8fafc;
+  background: #1e2b42;
+}
+
+.rmm-equip-pill.active {
+  background: #38b2ac;
+  color: #0b0f19;
+  border-color: #38b2ac;
+}
+
+.rmm-exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.rmm-exercise-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.rmm-exercise-list::-webkit-scrollbar-thumb {
+  background: #23324a;
+  border-radius: 4px;
+}
+
+.rmm-ex-card {
+  background: #111827;
+  border: 1px solid #1f2c42;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rmm-ex-card:hover {
+  background: #182338;
+  border-color: #2d4160;
+  transform: translateY(-1px);
+}
+
+.rmm-ex-card.active {
+  background: #14283c;
+  border-color: #38b2ac;
+  box-shadow: 0 4px 14px rgba(56, 178, 172, 0.2);
+}
+
+.rmm-ex-card-main {
+  flex: 1;
+}
+
+.rmm-ex-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.rmm-equip-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #1e2b42;
+  color: #94a3b8;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rmm-tier-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rmm-tier-tag.primary { background: rgba(14, 165, 233, 0.2); color: #38bdf8; }
+.rmm-tier-tag.secondary { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
+.rmm-tier-tag.stabilizer { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+.rmm-ex-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.rmm-ex-sub {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.rmm-ex-details {
+  display: flex;
+  gap: 10px;
+  font-size: 0.74rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.rmm-ex-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rmm-btn-target-preview {
+  background: #1e2b42;
+  border: 1px solid #2e415e;
+  color: #38bdf8;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.rmm-btn-target-preview:hover {
+  background: #0284c7;
+  color: #fff;
+  border-color: #0284c7;
+}
+
+.rmm-btn-add-routine {
+  background: rgba(56, 178, 172, 0.15);
+  border: 1px solid rgba(56, 178, 172, 0.4);
+  color: #38b2ac;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.rmm-btn-add-routine:hover {
+  background: #38b2ac;
+  color: #0b0f19;
+}
+
+.rmm-empty-state {
+  padding: 36px 16px;
+  text-align: center;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 3. MODAL: ADD TO ROUTINE WITH FULL PARAMETERS */
+.rmm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(11, 15, 25, 0.8);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.rmm-modal-card {
+  background: #161f30;
+  border: 1px solid #283952;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(56, 178, 172, 0.2);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 520px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rmm-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid #22314a;
+  padding-bottom: 12px;
+}
+
+.rmm-modal-header h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.rmm-modal-header p {
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.rmm-modal-close {
+  background: #1e2b42;
+  border: 1px solid #2e415e;
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.rmm-modal-close:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.rmm-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rmm-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.rmm-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rmm-form-field label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.rmm-form-field input {
+  background: #0f1624;
+  border: 1px solid #23324a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.rmm-form-field input:focus {
+  outline: none;
+  border-color: #38b2ac;
+}
+
+.rmm-modal-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  border-top: 1px solid #22314a;
+  padding-top: 14px;
+}
+
+/* POPUP TOAST */
+.rmm-toast-popup {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  background: #141f32;
+  border: 1px solid #38b2ac;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 178, 172, 0.4);
+  color: #f8fafc;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rmm-toast-popup.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

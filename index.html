@@ -20,6 +20,7 @@
 
     <!-- Pure Standalone CSS -->
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="muscle-map.css" />
 
     <!-- html2pdf.js CDN for Client-Side PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -278,205 +279,8 @@
           </div>
         </div>
 
-        <!-- 2-COLUMN INTERACTIVE STUDIO CONTAINER -->
-        <div class="training-studio-container">
-          <!-- COLUMN 1: REALISTIC ANATOMICAL BODY CONSOLE -->
-          <div class="anatomy-console-card">
-            <div class="anatomy-console-header">
-              <h3>
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z" />
-                  <path d="M16 10H8a4 4 0 0 0-4 4v7h16v-7a4 4 0 0 0-4-4z" />
-                </svg>
-                <span>المجسم التشريحي 2D</span>
-              </h3>
-              <span class="sub-badge">تفاعل مباشر</span>
-            </div>
-
-            <!-- View Toggle Buttons -->
-            <div class="studio-view-toggle-bar">
-              <button type="button" class="studio-toggle-btn active" id="studio-btn-front" onclick="switchStudioBodyView('front')">
-                الجهة الأمامية (Front)
-              </button>
-              <button type="button" class="studio-toggle-btn" id="studio-btn-back" onclick="switchStudioBodyView('back')">
-                الجهة الخلفية (Back)
-              </button>
-            </div>
-
-            <!-- SVG Graphic Stage -->
-            <div class="studio-svg-stage">
-              <!-- FRONT REALISTIC ANATOMICAL SVG -->
-              <svg id="studio-svg-front" class="studio-anatomical-svg" viewBox="0 0 200 360" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <filter id="neon-glow-studio" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#38b2ac" flood-opacity="0.9" />
-                  </filter>
-                </defs>
-
-                <!-- Silhouette Background (Non-clickable) -->
-                <path class="body-silhouette" d="M92 18 Q100 8 108 18 Q114 36 108 46 Q100 50 92 46 Z" />
-                <path class="body-silhouette" d="M88 47 L100 52 L112 47 L100 56 Z" />
-
-                <!-- MUSCLE 1: CHEST (Upper / Lower) -->
-                <g class="muscle-part m-shape muscle-node selected active" data-muscle="chest" data-key="chest" title="عضلات الصدر (Chest)">
-                  <path d="M78 68 Q100 70 100 84 Q82 86 73 80 Z" />
-                  <path d="M122 68 Q100 70 100 84 Q118 86 127 80 Z" />
-                  <path d="M73 81 Q100 85 100 102 Q84 105 73 95 Z" />
-                  <path d="M127 81 Q100 85 100 102 Q116 105 127 95 Z" />
-                </g>
-
-                <!-- MUSCLE 2: SHOULDERS (Front & Lateral Delts) -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="front_delts" data-key="shoulders" title="الأكتاف الأمامية والجانبية (Deltoids)">
-                  <path d="M72 67 Q78 76 70 92 Q62 86 66 72 Z" />
-                  <path d="M128 67 Q122 76 130 92 Q138 86 134 72 Z" />
-                </g>
-
-                <!-- MUSCLE 3: BICEPS -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="biceps" data-key="biceps" title="عضلة البايسبس (Biceps)">
-                  <path d="M68 94 Q72 112 65 127 Q58 116 63 96 Z" />
-                  <path d="M132 94 Q128 112 135 127 Q142 116 137 96 Z" />
-                </g>
-
-                <!-- MUSCLE 4: FOREARMS -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="forearms" data-key="forearms" title="السواعد والقبضة (Forearms)">
-                  <path d="M64 129 Q67 150 58 174 Q52 160 58 132 Z" />
-                  <path d="M136 129 Q133 150 142 174 Q148 160 142 132 Z" />
-                </g>
-
-                <!-- MUSCLE 5: ABS (Rectus Abdominis) -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="abs" data-key="abs" title="عضلات البطن (Rectus Abdominis)">
-                  <rect x="87" y="104" width="26" height="13" rx="3" />
-                  <rect x="88" y="119" width="24" height="13" rx="3" />
-                  <rect x="89" y="134" width="22" height="14" rx="3" />
-                </g>
-
-                <!-- MUSCLE 6: OBLIQUES -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="abs" data-key="obliques" title="عضلات الخواصر (Obliques)">
-                  <path d="M74 103 L85 104 L87 148 L75 142 Z" />
-                  <path d="M126 103 L115 104 L113 148 L125 142 Z" />
-                </g>
-
-                <!-- Pelvis / Hip Silhouette -->
-                <path class="body-silhouette" d="M86 150 L114 150 L108 165 L92 165 Z" />
-
-                <!-- MUSCLE 7: QUADRICEPS -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="quads" data-key="quads" title="عضلة الفخذ الأمامية (Quadriceps)">
-                  <path d="M72 165 Q96 166 96 198 Q96 230 84 250 Q70 228 70 180 Z" />
-                  <path d="M128 165 Q104 166 104 198 Q104 230 116 250 Q130 228 130 180 Z" />
-                </g>
-
-                <!-- Knees Silhouette -->
-                <circle class="body-silhouette" cx="84" cy="256" r="4.5" />
-                <circle class="body-silhouette" cx="116" cy="256" r="4.5" />
-
-                <!-- MUSCLE 8: CALVES (Front / Tibialis) -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="calves" data-key="calves" title="عضلات الساق والسمانة (Calves)">
-                  <path d="M77 263 Q87 278 84 324 Q74 310 74 272 Z" />
-                  <path d="M123 263 Q113 278 116 324 Q126 310 126 272 Z" />
-                </g>
-              </svg>
-
-              <!-- BACK REALISTIC ANATOMICAL SVG -->
-              <svg id="studio-svg-back" class="studio-anatomical-svg" viewBox="0 0 200 360" xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                <!-- Silhouette Head & Neck -->
-                <path class="body-silhouette" d="M92 18 Q100 8 108 18 Q114 36 108 46 Q100 50 92 46 Z" />
-
-                <!-- MUSCLE 9: TRAPEZIUS (Upper / Mid / Lower) -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="traps" data-key="traps" title="عضلات الترابيس (Trapezius)">
-                  <path d="M80 54 L100 48 L120 54 L128 72 L100 106 L72 72 Z" />
-                </g>
-
-                <!-- MUSCLE 10: REAR DELTOIDS -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="rear_delts" data-key="reardelts" title="الأكتاف الخلفية (Rear Deltoids)">
-                  <path d="M70 69 Q76 79 67 92 Q60 85 65 72 Z" />
-                  <path d="M130 69 Q124 79 133 92 Q140 85 135 72 Z" />
-                </g>
-
-                <!-- MUSCLE 11: TRICEPS -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="triceps" data-key="triceps" title="عضلة الترايسبس (Triceps)">
-                  <path d="M66 94 Q72 114 63 129 Q56 116 62 96 Z" />
-                  <path d="M134 94 Q128 114 137 129 Q144 116 138 96 Z" />
-                </g>
-
-                <!-- MUSCLE 12: LATS (Latissimus Dorsi) -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="lats" data-key="lats" title="عضلات الظهر والمجنص (Lats)">
-                  <path d="M72 82 Q90 102 88 138 Q70 120 68 94 Z" />
-                  <path d="M128 82 Q110 102 112 138 Q130 120 132 94 Z" />
-                </g>
-
-                <!-- MUSCLE 13: LOWER BACK (Erector Spinae) -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="lower_back" data-key="lower_back" title="أسفل الظهر والقطنية (Lower Back)">
-                  <path d="M88 134 L112 134 L110 162 L90 162 Z" />
-                </g>
-
-                <!-- MUSCLE 14: GLUTES -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="glutes" data-key="glutes" title="عضلات المؤخرة والألوية (Glutes)">
-                  <path d="M71 164 Q100 165 99 200 Q83 210 69 194 Z" />
-                  <path d="M129 164 Q100 165 101 200 Q117 210 131 194 Z" />
-                </g>
-
-                <!-- MUSCLE 15: HAMSTRINGS -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="hamstrings" data-key="hamstrings" title="عضلة الفخذ الخلفية (Hamstrings)">
-                  <path d="M71 206 Q95 208 93 252 Q80 255 71 222 Z" />
-                  <path d="M129 206 Q105 208 107 252 Q120 255 129 222 Z" />
-                </g>
-
-                <!-- Knee Joint Hollows -->
-                <circle class="body-silhouette" cx="83" cy="257" r="4.5" />
-                <circle class="body-silhouette" cx="117" cy="257" r="4.5" />
-
-                <!-- MUSCLE 16: CALVES BACK (Gastrocnemius / Soleus) -->
-                <g class="muscle-part m-shape muscle-node" data-muscle="calves" data-key="calves" title="السمانة الخلفية (Gastrocnemius)">
-                  <path d="M73 265 Q88 271 84 322 Q71 312 71 277 Z" />
-                  <path d="M127 265 Q112 271 116 322 Q129 312 129 277 Z" />
-                </g>
-              </svg>
-            </div>
-
-            <!-- Quick Muscle Selection Chips -->
-            <div class="studio-muscle-chips" id="studio-muscle-chip-container">
-              <!-- Dynamically populated based on view -->
-            </div>
-
-            <!-- Live Anatomical Focus Card -->
-            <div class="studio-info-card" id="studio-anatomical-info-card">
-              <div>🎯 <strong>التركيز الحركي:</strong> <span id="studio-info-focus">الألياف العلوية والوسطى</span></div>
-              <div>⚡ <strong>الزاوية الميكانيكية:</strong> <span id="studio-info-biomech">استطالة كاملة تحت الحمل مع ثبات قمي</span></div>
-            </div>
-          </div>
-
-          <!-- COLUMN 2: INTERACTIVE EXERCISE CONSOLE & PROGRAM ENGINE -->
-          <div class="training-engine-card">
-            <div class="studio-engine-top">
-              <div class="studio-engine-title-group">
-                <h2 id="studio-active-muscle-title">عضلات الصدر (Pectoralis Major & Minor)</h2>
-                <p id="studio-active-muscle-sub">بنك التمارين المعتمدة وفقاً للمسار البيوميكانيكي الأمثل</p>
-              </div>
-              <span class="status-tag active" id="studio-exercise-count-tag">5 تمارين معتمدة</span>
-            </div>
-
-            <!-- Search and Filter Bar -->
-            <div class="studio-filter-bar">
-              <div class="studio-search-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="studio-exercise-search" placeholder="ابحث باسم التمرين (مثال: Press, Squat, كابل)..." oninput="filterStudioExercises()" />
-              </div>
-
-              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button type="button" class="equipment-filter-pill active" data-filter="all" onclick="setStudioEquipmentFilter('all')">الكل</button>
-                <button type="button" class="equipment-filter-pill" data-filter="dumbbell" onclick="setStudioEquipmentFilter('dumbbell')">دمبلز</button>
-                <button type="button" class="equipment-filter-pill" data-filter="barbell" onclick="setStudioEquipmentFilter('barbell')">بار أولمبي</button>
-                <button type="button" class="equipment-filter-pill" data-filter="cable" onclick="setStudioEquipmentFilter('cable')">كابلات</button>
-                <button type="button" class="equipment-filter-pill" data-filter="machine" onclick="setStudioEquipmentFilter('machine')">أجهزة</button>
-              </div>
-            </div>
-
-            <!-- Exercise Cards Container -->
-            <div class="studio-exercise-list" id="studio-exercise-list-container">
-              <!-- Rendered dynamically -->
-            </div>
-          </div>
-        </div>
+        <!-- PRODUCTION INTERACTIVE ANATOMICAL MUSCLE MAP ENGINE ROOT -->
+        <div id="rush-muscle-map-root" class="rush-muscle-map-wrapper"></div>
       </section>
 
       <!-- VIEW 3: NUTRITION GUIDES -->
@@ -925,6 +729,10 @@
 
     <!-- TOAST NOTIFICATIONS CONTAINER -->
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- ANATOMICAL DATA & INTERACTIVE MUSCLE MAP ENGINE -->
+    <script src="muscle-data.js"></script>
+    <script src="muscle-map-engine.js"></script>
 
     <!-- JAVASCRIPT APPLICATION SCRIPT -->
     <script src="script.js"></script>
