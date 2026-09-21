@@ -230,6 +230,9 @@
           <div style="font-size: 0.76rem; font-weight: 700; color: #f472b6; margin-bottom: 4px;">⚡ بروتوكول تحسين الأداء (Enhancers / Vitamins)</div>
           <div id="client-enhancers" style="font-size: 0.88rem; color: #fff; font-weight: 600;">لا ينطبق (Natural Protocol)</div>
         </div>
+
+        <!-- Meals List Container -->
+        <div id="client-meals-list"></div>
       </div>
 
       <!-- SECTION 2: WORKOUT PROTOCOL -->
@@ -272,6 +275,11 @@
 
       function parseQueryAuth() {
         const urlParams = new URLSearchParams(window.location.search);
+        const clientParam = urlParams.get('client');
+        if (clientParam) {
+          return { id: clientParam };
+        }
+
         const authParam = urlParams.get('auth');
         if (!authParam) {
           showAuthError('رابط الوصول غير صالح أو مفقود. يرجى طلب رابط جديد من المدرب.');
@@ -392,6 +400,33 @@
           if (nut.fats) document.getElementById('client-fats').textContent = nut.fats;
           if (nut.supplements) document.getElementById('client-supplements').textContent = nut.supplements;
           if (nut.enhancers) document.getElementById('client-enhancers').textContent = nut.enhancers;
+
+          const mealsContainer = document.getElementById('client-meals-list');
+          if (mealsContainer && Array.isArray(nut.meals) && nut.meals.length > 0) {
+            mealsContainer.innerHTML = `
+              <div style="font-size: 0.88rem; font-weight: 800; color: #fff; margin-bottom: 8px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+                🍽️ جدول الوجبات اليومية المعتمد (${nut.meals.length} وجبات)
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${nut.meals.map((m, mi) => `
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <strong style="color: #67e8f9; font-size: 0.86rem;">${m.name || `وجبة ${mi + 1}`}</strong>
+                      <span style="font-size: 0.74rem; color: var(--primary); font-weight: 700; background: rgba(56,178,172,0.12); padding: 2px 8px; border-radius: 4px;">${m.timing || ''}</span>
+                    </div>
+                    <div style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.5;">${m.items || ''}</div>
+                    ${(m.protein || m.carbs || m.fats) ? `
+                      <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; display: flex; gap: 8px;">
+                        <span>P: ${m.protein || 0}g</span>
+                        <span>C: ${m.carbs || 0}g</span>
+                        <span>F: ${m.fats || 0}g</span>
+                      </div>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }
         }
 
         // Workout Plan

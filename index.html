@@ -130,13 +130,23 @@
 
         <!-- Header Actions -->
         <div class="header-actions">
+          <!-- App Language Toggle Button -->
+          <button type="button" class="btn btn-secondary app-lang-btn" id="app-lang-toggle" data-action="toggle-lang" onclick="toggleAppLanguage()" title="تبديل لغة الواجهة (Switch Language)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span id="app-lang-text">English (LTR)</span>
+          </button>
+
           <!-- Quick Anatomical Muscle Map Access Button -->
           <button type="button" class="btn btn-primary" onclick="switchTab('training')" id="header-muscle-btn" style="padding: 7px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 7px;" title="فتح المخطط والمجسم التشريحي المباشر">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z" />
               <path d="M16 10H8a4 4 0 0 0-4 4v7h16v-7a4 4 0 0 0-4-4z" />
             </svg>
-            <span>خريطة المجسم التشريحي</span>
+            <span id="header-muscle-text">خريطة المجسم التشريحي</span>
           </button>
 
           <!-- Google Sheets Sync Status Pill -->
@@ -283,32 +293,177 @@
         <div id="rush-muscle-map-root" class="rush-muscle-map-wrapper"></div>
       </section>
 
-      <!-- VIEW 3: NUTRITION GUIDES -->
-      <section id="view-nutrition" class="view-section">
-        <div class="view-header">
-          <div class="view-title-group">
-            <h1>فلسفة التغذية المعتمدة - THE RUSH WAY</h1>
-            <p>مصادر البروتين النقي في الصدارة (اللحوم الحمراء الخالية والأسماك البرية) لتحفيز تخليق البروتين العضلي.</p>
+      <!-- VIEW 3: NUTRITION STUDIO & MEAL PLANNER -->
+      <section id="view-nutrition" class="view-section tab-nutrition">
+        <div id="nutritionSection" class="nutrition-studio-root">
+          <!-- View Header & Philosophy Summary -->
+          <div class="view-header nutrition-studio-header">
+            <div class="view-title-group">
+              <h1 id="nutrition-view-title">استوديو وتخطيط الوجبات (Nutrition Studio & Meal Planner)</h1>
+              <p id="nutrition-view-subtitle">
+                تصميم وتخصيص الجداول الغذائية المعتمدة القائمة على أولوية اللحوم الحمراء والأسماك وتوقيت الكارب مع معيار الخصر الذهبي.
+              </p>
+            </div>
+            <!-- Quick Philosophy Badges -->
+            <div class="nutrition-philosophy-badges">
+              <span class="philosophy-pill pill-meat" id="pill-meat-txt" title="ستيك بقري ولحم عجل وأسماك دهنية لتحفيز تخليق البروتين العضلي">🥩 اللحوم والأسماك في الصدارة</span>
+              <span class="philosophy-pill pill-carbs" id="pill-carbs-txt" title="أرز بسمتي وشوفان وكريم أرز حول جلسة التمرين">🍚 توقيت الكارب الذكي</span>
+              <span class="philosophy-pill pill-waist" id="pill-waist-txt" title="قياس الخصر عند أضيق نقطة هو المؤشر الحقيقي الوحيد">📏 معيار الخصر الذهبي</span>
+            </div>
           </div>
-        </div>
-        <div class="card-grid">
-          <div class="athlete-card">
-            <h3 style="color: #60a5fa; font-size: 1.1rem; font-weight: 800;">🥩 بروتوكول اللحوم الحمراء والأسماك</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-              يتم إعطاء الأولوية للستيك البقري ولحم العجل قليل الدهن لاحتوائه على الكرياتين الطبيعي والحديد والزنك لرفع الكفاءة البنائية، إضافة للأسماك الدهنية (سلمون، قد) لأحماض أوميغا 3 لتقليل الالتهاب العضلي.
-            </p>
+
+          <!-- Top Toolbar: Template Management & Athlete Assignment -->
+          <div class="nutrition-topbar">
+            <div class="nutrition-template-picker">
+              <label for="select-nutrition-template" id="lbl-nutrition-template">قوالب التغذية المعتمدة:</label>
+              <div class="template-select-group">
+                <select id="select-nutrition-template" class="form-control">
+                  <!-- Populated dynamically from coachCustomDiets -->
+                </select>
+                <button type="button" class="btn btn-secondary" id="btn-load-diet-template" data-action="load-diet-template">
+                  تحميل القالب
+                </button>
+                <button type="button" class="btn btn-outline" id="btn-reset-diet-form" data-action="reset-diet-form">
+                  + خطة فارغة جديدة
+                </button>
+              </div>
+            </div>
+
+            <!-- Athlete Assignment Bar -->
+            <div class="nutrition-assign-bar">
+              <label for="diet-assign-athlete-select" id="lbl-assign-athlete">إسناد للمتدرب:</label>
+              <div class="assign-select-group">
+                <select id="diet-assign-athlete-select" class="form-control">
+                  <option value="">-- اختر متدرباً من السجل --</option>
+                  <!-- Populated dynamically with registered athletes -->
+                </select>
+                <button type="button" class="btn btn-primary" id="btn-assign-diet-athlete" data-action="assign-diet-athlete">
+                  👤 تعيين للمتدرب المختار
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="athlete-card">
-            <h3 style="color: #fbbf24; font-size: 1.1rem; font-weight: 800;">🍚 توقيت الكربوهيدرات الذكي</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-              تركيز مصادر الكربوهيدرات سريعة ونقية الهضم (أرز بسمتي، كريم أرز، شوفان) حول جلسة التدريب (Pre/Post Workout) لملء مخازن الجليكوجين دون التسبب في احتباس مائي معوي.
-            </p>
-          </div>
-          <div class="athlete-card">
-            <h3 style="color: var(--primary); font-size: 1.1rem; font-weight: 800;">📏 معيار الخصر الذهبي (Waist Standard)</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-              قياس الخصر عند أضيق نقطة هو المؤشر الحقيقي الوحيد لنقاء البناء العضلي وتلاشي دهون الأحشاء (Visceral Fat)، بعيداً عن أخطاء الميزان الرقمي العادي.
-            </p>
+
+          <!-- Main Studio Layout: 2 Columns / Cards on Desktop, Stacks on Mobile -->
+          <div class="nutrition-workspace-grid">
+            <!-- Left / Main Card: Protocol Parameters & Target Macros -->
+            <div class="athlete-card nutrition-card">
+              <div class="nutrition-card-header">
+                <div>
+                  <h3 id="txt-plan-params-title">1. معايير الخطة والأهداف البيولوجية</h3>
+                  <p class="card-subtitle" id="txt-plan-params-sub">تحديد الأهداف الحيوية وتوزيع السعرات ونقاء مصادر البروتين</p>
+                </div>
+                <span class="badge-accent">RUSH WAY STANDARD</span>
+              </div>
+
+              <div class="nutrition-form-body">
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label id="lbl-diet-title">عنوان البروتوكول الغذائي *</label>
+                    <input type="text" id="diet-plan-title" class="form-control" required placeholder="مثال: بروتوكول اللحوم الحمراء والأسماك والتنشيف" value="بروتوكول اللحوم الحمراء والأسماك والتنشيف" />
+                  </div>
+                  <div class="form-group flex-1">
+                    <label id="lbl-protein-source">مصدر البروتين الرئيسي *</label>
+                    <select id="diet-protein-type" class="form-control">
+                      <option value="meat" selected>🥩 اللحوم الحمراء (Red Meat First)</option>
+                      <option value="fish">🐟 الأسماك البرية (Wild Fish & Omega 3)</option>
+                      <option value="mixed">🥩🐟 بروتوكول هجين (Red Meat + Fish)</option>
+                      <option value="poultry">🍗 دواجن خالية + بيض (Poultry & Eggs)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 4-Macro Metric Cards & Inputs -->
+                <div class="macro-input-grid">
+                  <div class="macro-input-card macro-calories">
+                    <div class="macro-card-title" id="lbl-macro-cals">السعرات اليومية</div>
+                    <div class="macro-input-wrap">
+                      <input type="number" id="diet-target-calories" class="macro-num-input" value="2350" min="1000" max="6000" step="50" />
+                      <span class="macro-unit">kcal</span>
+                    </div>
+                    <div class="macro-card-sub" id="calc-calories-note">محسوبة: ~2350 kcal</div>
+                  </div>
+
+                  <div class="macro-input-card macro-protein">
+                    <div class="macro-card-title" id="lbl-macro-prot">البروتين الصافي</div>
+                    <div class="macro-input-wrap">
+                      <input type="number" id="diet-target-protein" class="macro-num-input" value="210" min="50" max="400" step="5" />
+                      <span class="macro-unit">g</span>
+                    </div>
+                    <div class="macro-card-sub" id="macro-prot-sub">4 kcal/g • 36%</div>
+                  </div>
+
+                  <div class="macro-input-card macro-carbs">
+                    <div class="macro-card-title" id="lbl-macro-carbs">الكربوهيدرات الذكية</div>
+                    <div class="macro-input-wrap">
+                      <input type="number" id="diet-target-carbs" class="macro-num-input" value="220" min="20" max="800" step="5" />
+                      <span class="macro-unit">g</span>
+                    </div>
+                    <div class="macro-card-sub" id="macro-carbs-sub">4 kcal/g • 37%</div>
+                  </div>
+
+                  <div class="macro-input-card macro-fats">
+                    <div class="macro-card-title" id="lbl-macro-fats">الدهون الصحية</div>
+                    <div class="macro-input-wrap">
+                      <input type="number" id="diet-target-fats" class="macro-num-input" value="55" min="15" max="200" step="5" />
+                      <span class="macro-unit">g</span>
+                    </div>
+                    <div class="macro-card-sub" id="macro-fats-sub">9 kcal/g • 21%</div>
+                  </div>
+                </div>
+
+                <!-- Visual Macro Distribution Bar -->
+                <div class="macro-distribution-bar">
+                  <div class="macro-segment seg-protein" id="macro-bar-p" style="width: 36%;" title="البروتين 36%">36% P</div>
+                  <div class="macro-segment seg-carbs" id="macro-bar-c" style="width: 37%;" title="الكارب 37%">37% C</div>
+                  <div class="macro-segment seg-fats" id="macro-bar-f" style="width: 27%;" title="الدهون 27%">27% F</div>
+                </div>
+
+                <div class="form-row" style="margin-top: 14px;">
+                  <div class="form-group flex-1">
+                    <label id="lbl-supplements">💊 المكملات الغذائية الموصى بها</label>
+                    <input type="text" id="diet-supplements" class="form-control" value="Whey Isolate (30g) + Creatine (5g) + Omega 3" placeholder="المكملات وجرعاتها" />
+                  </div>
+                  <div class="form-group flex-1">
+                    <label id="lbl-enhancers">⚡ محسنات الأداء (Enhancers)</label>
+                    <input type="text" id="diet-enhancers" class="form-control" value="Natural Protocol" placeholder="مثال: Natural Protocol أو Tesamorelin" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label id="lbl-diet-notes">📝 توجيهات وملاحظات المدرب (Coaching Notes)</label>
+                  <textarea id="diet-notes" class="form-control" rows="2" placeholder="توجيهات الهضم، شرب الماء، قياس الخصر صباحاً...">توقيت الكارب حول جلسة التدريب حصراً لضمان أعلى حساسية إنسولين، وقياس الخصر أسبوعياً عند أضيق نقطة.</textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right / Meals Builder Card -->
+            <div class="athlete-card nutrition-card">
+              <div class="nutrition-card-header">
+                <div>
+                  <h3 id="txt-meals-builder-title">2. مفكرة وجبات اليوم الرياضي</h3>
+                  <p class="card-subtitle" id="txt-meals-builder-sub">توزيع حصص اللحوم، الأسماك، الكربوهيدرات، والتوقيت</p>
+                </div>
+                <button type="button" class="btn btn-primary" id="btn-add-meal" data-action="add-meal">
+                  + إضافة وجبة (+ Add Meal)
+                </button>
+              </div>
+
+              <!-- Dynamic Meals List -->
+              <div id="meals-builder-list" class="meals-builder-list">
+                <!-- Dynamically rendered via renderMealsBuilderList() -->
+              </div>
+
+              <!-- Bottom Actions Row -->
+              <div class="nutrition-actions-bar">
+                <button type="button" class="btn btn-primary" id="btn-save-diet-template" data-action="save-diet-template">
+                  💾 حفظ كقالب معتمد (Save Template)
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-copy-diet-summary" data-action="copy-diet-summary">
+                  📋 نسخ المخطط (Copy Text)
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -720,6 +875,7 @@
             </div>
           </div>
           <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="openAthleteInNutritionStudio()" style="border-color: rgba(96,165,250,0.4); color: #93c5fd;">🎨 فتح في استوديو التغذية المتقدم</button>
             <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-nutrition')">إلغاء</button>
             <button type="submit" class="btn btn-primary">حفظ وإسناد الخطة</button>
           </div>

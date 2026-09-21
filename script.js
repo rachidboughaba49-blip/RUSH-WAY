@@ -512,9 +512,643 @@ function deleteAthlete(athleteId) {
 
 /**
  * ============================================================================
- * 7. NUTRITION PLAN ASSIGNMENT
+ * 7. NUTRITION PLAN ASSIGNMENT & INTERACTIVE NUTRITION STUDIO
  * ============================================================================
  */
+const DEFAULT_COACH_DIETS = [
+  {
+    id: 'diet_shred_beef_fish',
+    title: 'بروتوكول اللحوم الحمراء والأسماك والتنشيف',
+    titleEn: 'Rush Way Lean Red Meat & Fish Shred Protocol',
+    targetCalories: 2350,
+    targetProteinG: 210,
+    targetCarbsG: 220,
+    targetFatsG: 55,
+    primaryProteinChoice: 'meat',
+    supplements: 'Whey Isolate (30g) + Creatine (5g) + Omega 3',
+    enhancers: 'Natural Protocol',
+    notes: 'تركيز مصادر البروتين العالي الحيوية (ستيك بقري + سمك سلمون) مع توقيت الكارب حول التمرين لتقليل محيط الخصر.',
+    meals: [
+      {
+        id: 'm_1',
+        name: 'وجبة 1 - الفطور الصباحي',
+        timing: 'Morning',
+        items: '4 بيضات عضوية كاملة + 80g شوفان كامل مع توت أزرق + 15g بذور شيا',
+        protein: 36,
+        carbs: 58,
+        fats: 22
+      },
+      {
+        id: 'm_2',
+        name: 'وجبة قبل التمرين (Pre-Workout)',
+        timing: 'Pre-workout',
+        items: '200g ستيك فيليه عجل هبرة + 220g أرز بسمتي أبيض مطبوخ + خضار خضراء',
+        protein: 52,
+        carbs: 62,
+        fats: 10
+      },
+      {
+        id: 'm_3',
+        name: 'وجبة بعد التمرين (Post-Workout)',
+        timing: 'Post-workout',
+        items: '220g سمك سلمون أطلسي مشوي + 200g بطاطا حلوة مشوية + 10ml زيت زيتون',
+        protein: 50,
+        carbs: 55,
+        fats: 16
+      },
+      {
+        id: 'm_4',
+        name: 'وجبة العشاء والاستشفاء (Dinner)',
+        timing: 'Dinner',
+        items: '200g صدور دجاج مشوية أو تونة طازجة + سلطة أفوكادو غنية',
+        protein: 48,
+        carbs: 12,
+        fats: 10
+      }
+    ]
+  },
+  {
+    id: 'diet_clean_bulk_hypertrophy',
+    title: 'بروتوكول البناء العضلي الصافي وضخامة الألياف',
+    titleEn: 'Rush Way Hypertrophy & Pure Mass Protocol',
+    targetCalories: 2850,
+    targetProteinG: 225,
+    targetCarbsG: 340,
+    targetFatsG: 65,
+    primaryProteinChoice: 'meat',
+    supplements: 'Whey Isolate (40g) + Creatine Monohydrate (5g) + L-Glutamine (10g)',
+    enhancers: 'Natural Protocol',
+    notes: 'رفع مخازن الجليكوجين العضلي مع الحفاظ التام على محيط الخصر ضيقاً.',
+    meals: [
+      {
+        id: 'm_bulk_1',
+        name: 'وجبة 1 - الفطور البنائي',
+        timing: 'Morning',
+        items: '5 بيضات كاملة + 100g شوفان + موز وتمر + ملعقة زبدة فول سوداني',
+        protein: 45,
+        carbs: 85,
+        fats: 25
+      },
+      {
+        id: 'm_bulk_2',
+        name: 'وجبة 2 - قبل التمرين',
+        timing: 'Pre-workout',
+        items: '220g ستيك بقري مفروم 5% + 250g أرز بسمتي + خضار مشوية',
+        protein: 55,
+        carbs: 75,
+        fats: 12
+      },
+      {
+        id: 'm_bulk_3',
+        name: 'وجبة 3 - بعد التمرين',
+        timing: 'Post-workout',
+        items: '220g صدر دجاج متبل + 300g بطاطا بيضاء مهروسة + زيت زيتون',
+        protein: 52,
+        carbs: 80,
+        fats: 14
+      },
+      {
+        id: 'm_bulk_4',
+        name: 'وجبة 4 - العشاء الهادئ',
+        timing: 'Dinner',
+        items: '200g سمك قد أبيض أو سلمون + سلطة ورقية كاملة مع أفوكادو',
+        protein: 48,
+        carbs: 20,
+        fats: 14
+      }
+    ]
+  },
+  {
+    id: 'diet_omega_fish_mobility',
+    title: 'بروتوكول الأسماك البرية ومكافحة الالتهابات والتنشيف',
+    titleEn: 'Wild Fish Omega-3 & Anti-Inflammatory Shred',
+    targetCalories: 2150,
+    targetProteinG: 195,
+    targetCarbsG: 200,
+    targetFatsG: 50,
+    primaryProteinChoice: 'fish',
+    supplements: 'Omega-3 Fish Oil (3000mg) + Magnesium Glycinate (400mg) + Zinc (30mg)',
+    enhancers: 'Natural Protocol',
+    notes: 'أقصى درجة تقليل لالتهاب المفاصل ورفع حساسية الأنسولين عبر الأسماك البرية.',
+    meals: [
+      {
+        id: 'm_fish_1',
+        name: 'وجبة 1 - الفطور الخفيف',
+        timing: 'Morning',
+        items: '3 بيضات كاملة + 3 بياض بيض + 60g خبز أسمر حبة كاملة + أفوكادو',
+        protein: 38,
+        carbs: 35,
+        fats: 18
+      },
+      {
+        id: 'm_fish_2',
+        name: 'وجبة 2 - قبل التمرين',
+        timing: 'Pre-workout',
+        items: '220g سمك قد أبيض + 220g أرز ياسمين + هليون مشوي',
+        protein: 50,
+        carbs: 65,
+        fats: 6
+      },
+      {
+        id: 'm_fish_3',
+        name: 'وجبة 3 - بعد التمرين',
+        timing: 'Post-workout',
+        items: '220g سمك سلمون بري + 200g كينوا عضوية مطبوخة + خضار ورقية',
+        protein: 52,
+        carbs: 55,
+        fats: 16
+      },
+      {
+        id: 'm_fish_4',
+        name: 'وجبة 4 - العشاء',
+        timing: 'Dinner',
+        items: '200g تونة بيضاء طازجة بالماء + سلطة بروكلي وزيت زيتون بكر',
+        protein: 44,
+        carbs: 10,
+        fats: 10
+      }
+    ]
+  }
+];
+
+let currentStudioMeals = [];
+
+function loadCustomDietsFromStorage() {
+  try {
+    const raw = localStorage.getItem('coachCustomDiets');
+    if (!raw) {
+      localStorage.setItem('coachCustomDiets', JSON.stringify(DEFAULT_COACH_DIETS));
+      return [...DEFAULT_COACH_DIETS];
+    }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem('coachCustomDiets', JSON.stringify(DEFAULT_COACH_DIETS));
+      return [...DEFAULT_COACH_DIETS];
+    }
+    return parsed;
+  } catch (err) {
+    console.error('Failed to parse coachCustomDiets', err);
+    return [...DEFAULT_COACH_DIETS];
+  }
+}
+
+function saveCustomDietsToStorage(diets) {
+  try {
+    localStorage.setItem('coachCustomDiets', JSON.stringify(diets));
+  } catch (err) {
+    console.error('Failed to save coachCustomDiets', err);
+  }
+}
+
+function initNutritionStudio() {
+  populateNutritionTemplateSelect();
+  populateNutritionAthleteSelect();
+
+  if (currentStudioMeals.length === 0) {
+    const diets = loadCustomDietsFromStorage();
+    if (diets.length > 0) {
+      loadDietTemplateIntoForm(diets[0]);
+    }
+  } else {
+    renderMealsBuilderList();
+    updateMacroCalculations();
+  }
+
+  // Bind live calculation listeners on macro inputs
+  const inputs = ['diet-target-calories', 'diet-target-protein', 'diet-target-carbs', 'diet-target-fats'];
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.oninput = () => updateMacroCalculations();
+    }
+  });
+}
+
+function populateNutritionTemplateSelect() {
+  const select = document.getElementById('select-nutrition-template');
+  if (!select) return;
+
+  const diets = loadCustomDietsFromStorage();
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+
+  select.innerHTML = diets.map(d => {
+    const title = (isAr ? d.title : (d.titleEn || d.title));
+    return `<option value="${d.id}">${title} (${d.targetCalories || 0} kcal)</option>`;
+  }).join('');
+}
+
+function populateNutritionAthleteSelect() {
+  const select = document.getElementById('diet-assign-athlete-select');
+  if (!select) return;
+
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+  const defaultOption = `<option value="">${isAr ? '-- اختر متدرباً من السجل --' : '-- Select Athlete from Roster --'}</option>`;
+
+  if (!athletes || athletes.length === 0) {
+    select.innerHTML = defaultOption;
+    return;
+  }
+
+  select.innerHTML = defaultOption + athletes.map(a => {
+    let waist = '--';
+    if (Array.isArray(a.measurements) && a.measurements.length > 0) {
+      waist = a.measurements[a.measurements.length - 1].waistCm || '--';
+    }
+    const currentPlan = a.nutritionPlanId ? ` [${a.nutritionPlanId}]` : '';
+    return `<option value="${a.id}">${a.name} (${a.currentWeightKg}kg - خصر ${waist}cm)${currentPlan}</option>`;
+  }).join('');
+}
+
+function loadSelectedDietTemplate() {
+  const select = document.getElementById('select-nutrition-template');
+  if (!select) return;
+
+  const templateId = select.value;
+  const diets = loadCustomDietsFromStorage();
+  const diet = diets.find(d => d.id === templateId) || diets[0];
+  if (diet) {
+    loadDietTemplateIntoForm(diet);
+    showToast(`تم تحميل القالب "${diet.title}" في الاستوديو بنجاح!`);
+  }
+}
+
+function loadDietTemplateIntoForm(diet) {
+  if (!diet) return;
+
+  const titleInput = document.getElementById('diet-plan-title');
+  const typeSelect = document.getElementById('diet-protein-type');
+  const calsInput = document.getElementById('diet-target-calories');
+  const protInput = document.getElementById('diet-target-protein');
+  const carbsInput = document.getElementById('diet-target-carbs');
+  const fatsInput = document.getElementById('diet-target-fats');
+  const suppInput = document.getElementById('diet-supplements');
+  const enhInput = document.getElementById('diet-enhancers');
+  const notesInput = document.getElementById('diet-notes');
+
+  if (titleInput) titleInput.value = diet.title || '';
+  if (typeSelect && diet.primaryProteinChoice) typeSelect.value = diet.primaryProteinChoice;
+  if (calsInput) calsInput.value = diet.targetCalories || 2200;
+  if (protInput) protInput.value = diet.targetProteinG || 180;
+  if (carbsInput) carbsInput.value = diet.targetCarbsG || 200;
+  if (fatsInput) fatsInput.value = diet.targetFatsG || 55;
+  if (suppInput) suppInput.value = diet.supplements || '';
+  if (enhInput) enhInput.value = diet.enhancers || 'Natural Protocol';
+  if (notesInput) notesInput.value = diet.notes || '';
+
+  currentStudioMeals = Array.isArray(diet.meals) ? JSON.parse(JSON.stringify(diet.meals)) : [];
+
+  renderMealsBuilderList();
+  updateMacroCalculations();
+}
+
+function resetNutritionStudioForm() {
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+  const titleInput = document.getElementById('diet-plan-title');
+  const typeSelect = document.getElementById('diet-protein-type');
+  const calsInput = document.getElementById('diet-target-calories');
+  const protInput = document.getElementById('diet-target-protein');
+  const carbsInput = document.getElementById('diet-target-carbs');
+  const fatsInput = document.getElementById('diet-target-fats');
+  const suppInput = document.getElementById('diet-supplements');
+  const enhInput = document.getElementById('diet-enhancers');
+  const notesInput = document.getElementById('diet-notes');
+
+  if (titleInput) titleInput.value = isAr ? 'خطة غذائية مخصصة جديدة' : 'New Custom Nutrition Plan';
+  if (typeSelect) typeSelect.value = 'meat';
+  if (calsInput) calsInput.value = 2400;
+  if (protInput) protInput.value = 200;
+  if (carbsInput) carbsInput.value = 230;
+  if (fatsInput) fatsInput.value = 60;
+  if (suppInput) suppInput.value = 'Whey Isolate + Creatine 5g';
+  if (enhInput) enhInput.value = 'Natural Protocol';
+  if (notesInput) notesInput.value = '';
+
+  currentStudioMeals = [
+    {
+      id: 'm_' + Date.now() + '_1',
+      name: isAr ? 'وجبة 1 - الفطور' : 'Meal 1 - Breakfast',
+      timing: 'Morning',
+      items: isAr ? '4 بيضات كاملة + 80g شوفان' : '4 whole eggs + 80g oats',
+      protein: 35,
+      carbs: 55,
+      fats: 20
+    },
+    {
+      id: 'm_' + Date.now() + '_2',
+      name: isAr ? 'وجبة 2 - قبل التمرين' : 'Meal 2 - Pre-Workout',
+      timing: 'Pre-workout',
+      items: isAr ? '200g ستيك فيليه عجل + 200g أرز بسمتي' : '200g beef steak + 200g rice',
+      protein: 50,
+      carbs: 60,
+      fats: 10
+    }
+  ];
+
+  renderMealsBuilderList();
+  updateMacroCalculations();
+  showToast(isAr ? 'تم بدء خطة غذائية جديدة فارغة' : 'Initialized new blank nutrition plan');
+}
+
+function renderMealsBuilderList() {
+  const container = document.getElementById('meals-builder-list');
+  if (!container) return;
+
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+
+  if (currentStudioMeals.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px; color: var(--text-muted); background: var(--bg-elevated); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle);">
+        <div style="font-size: 1.4rem; margin-bottom: 6px;">🍽️</div>
+        <div>${isAr ? 'لم تتم إضافة وجبات بعد' : 'No meals added yet'}</div>
+        <div style="font-size: 0.76rem; margin-top: 4px;">${isAr ? 'انقر على "+ إضافة وجبة" لتوزيع الوجبات ومصادر البروتين والكارب' : 'Click "+ Add Meal" to distribute meals and nutrients'}</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = currentStudioMeals.map((meal, index) => {
+    const timingOptions = [
+      { val: 'Morning', ar: 'الصباح / الفطور', en: 'Morning / Breakfast' },
+      { val: 'Pre-workout', ar: 'قبل التمرين (Pre-Workout)', en: 'Pre-Workout' },
+      { val: 'Post-workout', ar: 'بعد التمرين (Post-Workout)', en: 'Post-Workout' },
+      { val: 'Dinner', ar: 'المساء / العشاء', en: 'Evening / Dinner' },
+      { val: 'Snack', ar: 'سناك خفيف', en: 'Snack' }
+    ];
+
+    return `
+      <div class="meal-builder-card" data-index="${index}">
+        <div class="meal-builder-header">
+          <div class="meal-title-group">
+            <span class="meal-builder-index">${index + 1}</span>
+            <input type="text" class="meal-name-input" value="${meal.name || ''}" placeholder="${isAr ? 'اسم الوجبة (مثال: وجبة 1)' : 'Meal Name'}" onchange="updateMealField(${index}, 'name', this.value)" />
+          </div>
+          <button type="button" class="btn-remove-meal" data-action="remove-meal" data-meal-index="${index}" title="${isAr ? 'حذف الوجبة' : 'Remove Meal'}">
+            🗑️ ${isAr ? 'حذف' : 'Remove'}
+          </button>
+        </div>
+
+        <div class="meal-builder-grid">
+          <div>
+            <select class="form-control meal-timing-select" onchange="updateMealField(${index}, 'timing', this.value)">
+              ${timingOptions.map(t => `<option value="${t.val}" ${meal.timing === t.val ? 'selected' : ''}>${isAr ? t.ar : t.en}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <input type="text" class="form-control meal-items-input" value="${meal.items || ''}" placeholder="${isAr ? 'الأطعمة والجرعات (مثال: 200g ستيك بقري + 220g أرز + 15ml زيت زيتون)' : 'Foods & portions (e.g. 200g steak + 220g rice + 15ml olive oil)'}" onchange="updateMealField(${index}, 'items', this.value)" />
+          </div>
+          <div class="meal-macros-inputs">
+            <div class="meal-macro-pill" title="Protein (g)">
+              <span style="color: #93c5fd; font-weight: 800; font-size: 0.7rem; margin-inline-end: 2px;">P</span>
+              <input type="number" value="${meal.protein || 0}" min="0" max="250" onchange="updateMealField(${index}, 'protein', Number(this.value))" />
+            </div>
+            <div class="meal-macro-pill" title="Carbs (g)">
+              <span style="color: #fde047; font-weight: 800; font-size: 0.7rem; margin-inline-end: 2px;">C</span>
+              <input type="number" value="${meal.carbs || 0}" min="0" max="400" onchange="updateMealField(${index}, 'carbs', Number(this.value))" />
+            </div>
+            <div class="meal-macro-pill" title="Fats (g)">
+              <span style="color: #fca5a5; font-weight: 800; font-size: 0.7rem; margin-inline-end: 2px;">F</span>
+              <input type="number" value="${meal.fats || 0}" min="0" max="150" onchange="updateMealField(${index}, 'fats', Number(this.value))" />
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateMealField(index, field, value) {
+  if (currentStudioMeals[index]) {
+    currentStudioMeals[index][field] = value;
+    if (field === 'protein' || field === 'carbs' || field === 'fats') {
+      updateMacroCalculations();
+    }
+  }
+}
+
+function addMealToNutritionStudio() {
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+  const newIndex = currentStudioMeals.length + 1;
+  const newMeal = {
+    id: 'm_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    name: isAr ? `وجبة ${newIndex}` : `Meal ${newIndex}`,
+    timing: newIndex === 1 ? 'Morning' : (newIndex === 2 ? 'Pre-workout' : (newIndex === 3 ? 'Post-workout' : 'Dinner')),
+    items: '',
+    protein: 40,
+    carbs: 50,
+    fats: 12
+  };
+  currentStudioMeals.push(newMeal);
+  renderMealsBuilderList();
+  updateMacroCalculations();
+  showToast(isAr ? `تمت إضافة "${newMeal.name}" للجدول` : `Added "${newMeal.name}" to meal list`);
+}
+
+function removeMealFromStudio(index) {
+  if (index >= 0 && index < currentStudioMeals.length) {
+    const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+    const removed = currentStudioMeals.splice(index, 1)[0];
+    renderMealsBuilderList();
+    updateMacroCalculations();
+    showToast(isAr ? `تم حذف "${removed.name}"` : `Removed "${removed.name}"`);
+  }
+}
+
+function updateMacroCalculations() {
+  const p = Number(document.getElementById('diet-target-protein')?.value) || 0;
+  const c = Number(document.getElementById('diet-target-carbs')?.value) || 0;
+  const f = Number(document.getElementById('diet-target-fats')?.value) || 0;
+
+  const calcCalories = (p * 4) + (c * 4) + (f * 9);
+  const noteEl = document.getElementById('calc-calories-note');
+  if (noteEl) {
+    noteEl.textContent = `محسوبة: ~${calcCalories} kcal`;
+  }
+
+  // Calculate percentages
+  const totalCals = calcCalories > 0 ? calcCalories : 1;
+  const pPct = Math.round(((p * 4) / totalCals) * 100) || 0;
+  const cPct = Math.round(((c * 4) / totalCals) * 100) || 0;
+  const fPct = Math.max(0, 100 - pPct - cPct);
+
+  const barP = document.getElementById('macro-bar-p');
+  const barC = document.getElementById('macro-bar-c');
+  const barF = document.getElementById('macro-bar-f');
+
+  if (barP) {
+    barP.style.width = `${pPct}%`;
+    barP.textContent = `${pPct}% P`;
+    barP.title = `البروتين: ${pPct}% (${p * 4} kcal)`;
+  }
+  if (barC) {
+    barC.style.width = `${cPct}%`;
+    barC.textContent = `${cPct}% C`;
+    barC.title = `الكارب: ${cPct}% (${c * 4} kcal)`;
+  }
+  if (barF) {
+    barF.style.width = `${fPct}%`;
+    barF.textContent = `${fPct}% F`;
+    barF.title = `الدهون: ${fPct}% (${f * 9} kcal)`;
+  }
+
+  const pSub = document.getElementById('macro-prot-sub');
+  const cSub = document.getElementById('macro-carbs-sub');
+  const fSub = document.getElementById('macro-fats-sub');
+  if (pSub) pSub.textContent = `4 kcal/g • ${pPct}%`;
+  if (cSub) cSub.textContent = `4 kcal/g • ${cPct}%`;
+  if (fSub) fSub.textContent = `9 kcal/g • ${fPct}%`;
+}
+
+function saveCustomDietTemplate() {
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+  const title = (document.getElementById('diet-plan-title')?.value || '').trim();
+  if (!title) {
+    showToast(isAr ? 'يرجى إدخال عنوان البروتوكول الغذائي' : 'Please enter a nutrition plan title', 'danger');
+    return;
+  }
+
+  const proteinChoice = document.getElementById('diet-protein-type')?.value || 'meat';
+  const calories = Number(document.getElementById('diet-target-calories')?.value) || 2400;
+  const protein = Number(document.getElementById('diet-target-protein')?.value) || 200;
+  const carbs = Number(document.getElementById('diet-target-carbs')?.value) || 220;
+  const fats = Number(document.getElementById('diet-target-fats')?.value) || 60;
+  const supplements = (document.getElementById('diet-supplements')?.value || '').trim();
+  const enhancers = (document.getElementById('diet-enhancers')?.value || 'Natural Protocol').trim();
+  const notes = (document.getElementById('diet-notes')?.value || '').trim();
+
+  const diets = loadCustomDietsFromStorage();
+  const existingIdx = diets.findIndex(d => d.title.toLowerCase() === title.toLowerCase());
+
+  const templateObj = {
+    id: existingIdx >= 0 ? diets[existingIdx].id : ('diet_' + Date.now()),
+    title: title,
+    titleEn: title,
+    targetCalories: calories,
+    targetProteinG: protein,
+    targetCarbsG: carbs,
+    targetFatsG: fats,
+    primaryProteinChoice: proteinChoice,
+    supplements: supplements,
+    enhancers: enhancers,
+    notes: notes,
+    meals: JSON.parse(JSON.stringify(currentStudioMeals)),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (existingIdx >= 0) {
+    diets[existingIdx] = templateObj;
+  } else {
+    diets.unshift(templateObj);
+  }
+
+  saveCustomDietsToStorage(diets);
+  populateNutritionTemplateSelect();
+
+  const select = document.getElementById('select-nutrition-template');
+  if (select) select.value = templateObj.id;
+
+  showToast(isAr ? `تم حفظ القالب "${title}" في مكتبة القوالب المعتمدة بنجاح!` : `Saved template "${title}" successfully!`);
+}
+
+function assignDietToSelectedAthlete() {
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+  const select = document.getElementById('diet-assign-athlete-select');
+  const athleteId = select ? select.value : '';
+
+  if (!athleteId) {
+    showToast(isAr ? 'يرجى اختيار متدرب من القائمة لإسناد الخطة إليه' : 'Please select an athlete from the dropdown', 'danger');
+    return;
+  }
+
+  const athlete = athletes.find(a => a.id === athleteId);
+  if (!athlete) {
+    showToast(isAr ? 'المتدرب غير موجود في النظام' : 'Athlete not found', 'danger');
+    return;
+  }
+
+  const title = (document.getElementById('diet-plan-title')?.value || '').trim() || (isAr ? 'خطة غذائية معتمدة' : 'Assigned Nutrition Plan');
+  const proteinChoice = document.getElementById('diet-protein-type')?.value || 'meat';
+  const calories = Number(document.getElementById('diet-target-calories')?.value) || 2400;
+  const protein = Number(document.getElementById('diet-target-protein')?.value) || 200;
+  const carbs = Number(document.getElementById('diet-target-carbs')?.value) || 220;
+  const fats = Number(document.getElementById('diet-target-fats')?.value) || 60;
+  const supplements = (document.getElementById('diet-supplements')?.value || 'Whey Isolate + Creatine').trim();
+  const enhancers = (document.getElementById('diet-enhancers')?.value || 'Natural Protocol').trim();
+  const notes = (document.getElementById('diet-notes')?.value || '').trim();
+
+  const proteinSummary = proteinChoice === 'fish' ? `سمك سلمون وقد (${protein}g)` : `ستيك بقري وعجل (${protein}g)`;
+  const carbsSummary = `أرز بسمتي وشوفان (${carbs}g)`;
+  const fatsSummary = `زيت زيتون بكر وأفوكادو (${fats}g)`;
+
+  athlete.nutritionPlan = {
+    id: 'diet_assigned_' + Date.now(),
+    title: title,
+    targetCalories: calories,
+    targetProteinG: protein,
+    targetCarbsG: carbs,
+    targetFatsG: fats,
+    primaryProteinChoice: proteinChoice,
+    protein: proteinSummary,
+    carbs: carbsSummary,
+    fats: fatsSummary,
+    supplements: supplements,
+    enhancers: enhancers,
+    notes: notes,
+    meals: JSON.parse(JSON.stringify(currentStudioMeals)),
+    assignedAt: new Date().toISOString()
+  };
+
+  athlete.nutritionPlanId = title;
+
+  saveAthletesToStorage();
+
+  sendToWebhook({
+    dataType: 'nutrition_assignment',
+    athleteId: athlete.id,
+    athleteName: athlete.name,
+    planTitle: title,
+    calories,
+    protein: proteinSummary,
+    carbs: carbsSummary,
+    fats: fatsSummary,
+    supplements,
+    enhancers,
+    mealsCount: currentStudioMeals.length
+  });
+
+  renderAthletesView();
+  populateNutritionAthleteSelect();
+
+  showToast(isAr ? `تم إسناد وحفظ "${title}" للمتدرب "${athlete.name}" بنجاح!` : `Assigned "${title}" to ${athlete.name} successfully!`);
+}
+
+function copyDietSummaryToClipboard() {
+  const isAr = (typeof currentAppLang !== 'undefined' ? currentAppLang : 'ar') === 'ar';
+  const title = document.getElementById('diet-plan-title')?.value || 'Nutrition Plan';
+  const calories = document.getElementById('diet-target-calories')?.value || '2400';
+  const p = document.getElementById('diet-target-protein')?.value || '200';
+  const c = document.getElementById('diet-target-carbs')?.value || '220';
+  const f = document.getElementById('diet-target-fats')?.value || '60';
+  const supps = document.getElementById('diet-supplements')?.value || '--';
+
+  let text = `THE RUSH WAY - ${title}\n`;
+  text += `━━━━━━━━━━━━━━━━━━━━\n`;
+  text += `🎯 السعرات اليومية: ${calories} kcal\n`;
+  text += `🥩 البروتين الصافي: ${p}g | 🍚 الكارب: ${c}g | 🥑 الدهون: ${f}g\n`;
+  text += `💊 المكملات: ${supps}\n`;
+  text += `━━━━━━━━━━━━━━━━━━━━\n`;
+  text += `🍽️ جدول الوجبات:\n`;
+
+  currentStudioMeals.forEach((m, i) => {
+    text += `${i + 1}. ${m.name} (${m.timing || ''}): ${m.items || ''} [P:${m.protein || 0}g C:${m.carbs || 0}g F:${m.fats || 0}g]\n`;
+  });
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(isAr ? 'تم نسخ ملخص الخطة إلى الحافظة بنجاح!' : 'Copied plan summary to clipboard!');
+  }).catch(() => {
+    showToast(isAr ? 'تعذر نسخ النص تلقائياً' : 'Failed to copy text', 'danger');
+  });
+}
+
 function openNutritionModal(athleteId) {
   const athlete = athletes.find(a => a.id === athleteId);
   if (!athlete) {
@@ -588,9 +1222,26 @@ function handleSaveNutrition(event) {
   });
 
   renderAthletesView();
+  populateNutritionAthleteSelect();
   closeModal('modal-add-nutrition');
   showToast(`تم إسناد وحفظ الخطة الغذائية للمتدرب "${athlete.name}" بنجاح!`);
 }
+
+function openAthleteInNutritionStudio() {
+  const idInput = document.getElementById('form-nut-athlete-id');
+  const athleteId = idInput ? idInput.value : '';
+  closeModal('modal-add-nutrition');
+  switchTab('nutrition');
+  if (athleteId) {
+    const select = document.getElementById('diet-assign-athlete-select');
+    if (select) select.value = athleteId;
+    const athlete = athletes.find(a => a.id === athleteId);
+    if (athlete && athlete.nutritionPlan && athlete.nutritionPlan.meals) {
+      loadDietTemplateIntoForm(athlete.nutritionPlan);
+    }
+  }
+}
+window.openAthleteInNutritionStudio = openAthleteInNutritionStudio;
 
 /**
  * ============================================================================
@@ -960,6 +1611,16 @@ async function exportAthleteToPDF(athleteId) {
           <div><strong>💊 المكملات:</strong> <span dir="ltr" style="display: inline-block;">${nut.supplements}</span></div>
           <div style="grid-column: 1 / -1;"><strong>⚡ محسنات الأداء:</strong> <span dir="ltr" style="display: inline-block;">${nut.enhancers}</span></div>
         </div>
+        ${nut.meals && nut.meals.length > 0 ? `
+          <div style="margin-top: 10px; border-top: 1px dashed #99f6e4; padding-top: 8px;">
+            <div style="font-weight: 800; color: #0f766e; margin-bottom: 6px; font-size: 11px;">جدول الوجبات اليومية المعتمد:</div>
+            ${nut.meals.map((m, mi) => `
+              <div style="margin-bottom: 4px; font-size: 11px;">
+                <strong>${m.name || `وجبة ${mi + 1}`} (${m.timing || ''}):</strong> ${m.items || ''}
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
       </div>
 
       <div style="margin-bottom: 20px;">
@@ -1116,6 +1777,8 @@ async function exportAllAthletesToPDF() {
 function renderAthletesView() {
   const container = document.getElementById('athletes-card-grid');
   if (!container) return;
+
+  populateNutritionAthleteSelect();
 
   const searchInput = document.getElementById('athlete-search-input');
   const statusFilter = document.getElementById('athlete-status-filter');
@@ -1751,7 +2414,531 @@ function setupStudioSvgInteractivity() {
 
 /**
  * ============================================================================
- * 12. TAB NAVIGATION
+ * 12. APP-WIDE I18N & LANGUAGE SWITCHING ENGINE (NON-DESTRUCTIVE DOM UPDATES)
+ * ============================================================================
+ */
+const I18N = {
+  ar: {
+    lang_btn_text: "English (LTR)",
+    brand_tagline: "نظام إدارة وتدريب الرياضيين المتخصص",
+    quick_muscle_btn: "خريطة المجسم التشريحي",
+    tab_athletes: "المتدربين (Athletes)",
+    tab_training: "خريطة المجسم التشريحي والتمارين",
+    tab_nutrition: "استوديو التغذية (Nutrition)",
+    tab_sheets: "ربط السحابة (Webhook)",
+    banner_btn: "عرض المجسم التشريحي ←",
+    athletes_view_title: "إدارة الرياضيين والمتدربين",
+    athletes_view_sub: "متابعة ملفات المشتركين، الخطط الغذائية، والبرامج التدريبية التشريحية مع معيار الخصر الدقيق.",
+    search_placeholder: "بحث بالاسم أو الهاتف...",
+    status_all: "جميع الحالات",
+    status_active: "نشط (Active)",
+    status_paused: "متوقف مؤقتاً (Paused)",
+    status_new: "متدرب جديد (New)",
+    btn_add_athlete: "+ إضافة متدرب جديد",
+    btn_export_pdf: "تصدير الكشف (PDF)",
+    nutrition_view_title: "استوديو وتخطيط الوجبات (Nutrition Studio & Meal Planner)",
+    nutrition_view_sub: "تصميم وتخصيص الجداول الغذائية المعتمدة القائمة على أولوية اللحوم الحمراء والأسماك وتوقيت الكارب مع معيار الخصر الذهبي.",
+    pill_meat: "🥩 اللحوم والأسماك في الصدارة",
+    pill_carbs: "🍚 توقيت الكارب الذكي",
+    pill_waist: "📏 معيار الخصر الذهبي",
+    lbl_nutrition_template: "قوالب التغذية المعتمدة:",
+    btn_load_diet: "تحميل القالب",
+    btn_reset_diet: "+ خطة فارغة جديدة",
+    lbl_assign_athlete: "إسناد للمتدرب:",
+    btn_assign_athlete: "👤 تعيين للمتدرب المختار",
+    plan_params_title: "1. معايير الخطة والأهداف البيولوجية",
+    plan_params_sub: "تحديد الأهداف الحيوية وتوزيع السعرات ونقاء مصادر البروتين",
+    lbl_diet_title: "عنوان البروتوكول الغذائي *",
+    lbl_protein_source: "مصدر البروتين الرئيسي *",
+    lbl_cals: "السعرات اليومية",
+    lbl_prot: "البروتين الصافي",
+    lbl_carbs: "الكربوهيدرات الذكية",
+    lbl_fats: "الدهون الصحية",
+    lbl_supplements: "💊 المكملات الغذائية الموصى بها",
+    lbl_enhancers: "⚡ محسنات الأداء (Enhancers)",
+    lbl_diet_notes: "📝 توجيهات وملاحظات المدرب (Coaching Notes)",
+    meals_builder_title: "2. مفكرة وجبات اليوم الرياضي",
+    meals_builder_sub: "توزيع حصص اللحوم، الأسماك، الكربوهيدرات، والتوقيت",
+    btn_add_meal: "+ إضافة وجبة (+ Add Meal)",
+    btn_save_template: "💾 حفظ كقالب معتمد (Save Template)",
+    btn_copy_summary: "📋 نسخ المخطط (Copy Text)",
+  },
+  en: {
+    lang_btn_text: "العربية (RTL)",
+    brand_tagline: "Specialized Athlete Performance & Coaching System",
+    quick_muscle_btn: "Anatomical Muscle Map",
+    tab_athletes: "Athletes Roster",
+    tab_training: "Anatomy Map & Exercises",
+    tab_nutrition: "Nutrition Studio & Meals",
+    tab_sheets: "Cloud Sync (Webhook)",
+    banner_btn: "View Muscle Map →",
+    athletes_view_title: "Athletes & Client Management",
+    athletes_view_sub: "Monitor athlete profiles, custom nutrition protocols, and biomechanical workout plans with strict waist standards.",
+    search_placeholder: "Search by name or phone...",
+    status_all: "All Statuses",
+    status_active: "Active",
+    status_paused: "Paused",
+    status_new: "New Athlete",
+    btn_add_athlete: "+ Add New Athlete",
+    btn_export_pdf: "Export Roster (PDF)",
+    nutrition_view_title: "Interactive Nutrition Studio & Meal Planner",
+    nutrition_view_sub: "Design and prescribe certified nutrition protocols prioritizing red meat, wild fish, and timed carbohydrates.",
+    pill_meat: "🥩 Beef & Fish Priority",
+    pill_carbs: "🍚 Timed Carbohydrates",
+    pill_waist: "📏 Waist Metric Standard",
+    lbl_nutrition_template: "Certified Nutrition Templates:",
+    btn_load_diet: "Load Template",
+    btn_reset_diet: "+ New Blank Plan",
+    lbl_assign_athlete: "Assign to Athlete:",
+    btn_assign_athlete: "👤 Assign to Selected Athlete",
+    plan_params_title: "1. Protocol Parameters & Biometrics",
+    plan_params_sub: "Define calorie targets, macronutrient ratio, and pure protein sources",
+    lbl_diet_title: "Nutrition Protocol Title *",
+    lbl_protein_source: "Primary Protein Source *",
+    lbl_cals: "Daily Calories",
+    lbl_prot: "Pure Protein",
+    lbl_carbs: "Smart Carbs",
+    lbl_fats: "Healthy Fats",
+    lbl_supplements: "💊 Recommended Supplements",
+    lbl_enhancers: "⚡ Performance Enhancers",
+    lbl_diet_notes: "📝 Coach Directives & Guidelines",
+    meals_builder_title: "2. Daily Athlete Meal Schedule",
+    meals_builder_sub: "Portioning beef, fish, smart carbohydrates, and timing",
+    btn_add_meal: "+ Add Meal",
+    btn_save_template: "💾 Save Template",
+    btn_copy_summary: "📋 Copy Text",
+  }
+};
+
+let currentAppLang = localStorage.getItem('rush_app_lang') || 'ar';
+
+function setAppLanguage(lang) {
+  if (lang !== 'ar' && lang !== 'en') return;
+  currentAppLang = lang;
+  localStorage.setItem('rush_app_lang', lang);
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  const t = I18N[lang];
+  if (!t) return;
+
+  // 1. Header Elements
+  const langText = document.getElementById('app-lang-text');
+  if (langText) langText.textContent = t.lang_btn_text;
+
+  const tagline = document.querySelector('.brand-tagline');
+  if (tagline) tagline.textContent = t.brand_tagline;
+
+  const muscleText = document.getElementById('header-muscle-text');
+  if (muscleText) muscleText.textContent = t.quick_muscle_btn;
+
+  // 2. Nav Tabs
+  const tabAthletes = document.querySelector('#nav-btn-athletes span');
+  if (tabAthletes) tabAthletes.textContent = t.tab_athletes;
+
+  const tabTraining = document.querySelector('#nav-btn-training span');
+  if (tabTraining) tabTraining.textContent = t.tab_training;
+
+  const tabNutrition = document.querySelector('#nav-btn-nutrition span');
+  if (tabNutrition) tabNutrition.textContent = t.tab_nutrition;
+
+  const tabSheets = document.querySelector('#nav-btn-sheets span');
+  if (tabSheets) tabSheets.textContent = t.tab_sheets;
+
+  // 3. Quick Anatomy Banner
+  const bannerBtn = document.getElementById('btn-quick-muscle-map');
+  if (bannerBtn) bannerBtn.textContent = t.banner_btn;
+
+  // 4. Athletes View
+  const athTitle = document.querySelector('#view-athletes .view-title-group h1');
+  if (athTitle) athTitle.textContent = t.athletes_view_title;
+
+  const athSub = document.querySelector('#view-athletes .view-title-group p');
+  if (athSub) athSub.textContent = t.athletes_view_sub;
+
+  const searchInput = document.getElementById('athlete-search-input');
+  if (searchInput) searchInput.placeholder = t.search_placeholder;
+
+  const statusFilter = document.getElementById('athlete-status-filter');
+  if (statusFilter && statusFilter.options.length >= 4) {
+    statusFilter.options[0].text = t.status_all;
+    statusFilter.options[1].text = t.status_active;
+    statusFilter.options[2].text = t.status_paused;
+    statusFilter.options[3].text = t.status_new;
+  }
+
+  const addAthSpan = document.querySelector('#btn-open-add-athlete span');
+  if (addAthSpan) addAthSpan.textContent = t.btn_add_athlete;
+
+  const exportPdfSpan = document.querySelector('#btn-export-pdf span');
+  if (exportPdfSpan) exportPdfSpan.textContent = t.btn_export_pdf;
+
+  // 5. Nutrition Studio
+  const nutTitle = document.getElementById('nutrition-view-title');
+  if (nutTitle) nutTitle.textContent = t.nutrition_view_title;
+
+  const nutSub = document.getElementById('nutrition-view-subtitle');
+  if (nutSub) nutSub.textContent = t.nutrition_view_sub;
+
+  const pillMeat = document.getElementById('pill-meat-txt');
+  if (pillMeat) pillMeat.textContent = t.pill_meat;
+
+  const pillCarbs = document.getElementById('pill-carbs-txt');
+  if (pillCarbs) pillCarbs.textContent = t.pill_carbs;
+
+  const pillWaist = document.getElementById('pill-waist-txt');
+  if (pillWaist) pillWaist.textContent = t.pill_waist;
+
+  const lblTemplate = document.getElementById('lbl-nutrition-template');
+  if (lblTemplate) lblTemplate.textContent = t.lbl_nutrition_template;
+
+  const btnLoadDiet = document.getElementById('btn-load-diet-template');
+  if (btnLoadDiet) btnLoadDiet.textContent = t.btn_load_diet;
+
+  const btnResetDiet = document.getElementById('btn-reset-diet-form');
+  if (btnResetDiet) btnResetDiet.textContent = t.btn_reset_diet;
+
+  const lblAssign = document.getElementById('lbl-assign-athlete');
+  if (lblAssign) lblAssign.textContent = t.lbl_assign_athlete;
+
+  const btnAssign = document.getElementById('btn-assign-diet-athlete');
+  if (btnAssign) btnAssign.textContent = t.btn_assign_athlete;
+
+  const txtParamsTitle = document.getElementById('txt-plan-params-title');
+  if (txtParamsTitle) txtParamsTitle.textContent = t.plan_params_title;
+
+  const txtParamsSub = document.getElementById('txt-plan-params-sub');
+  if (txtParamsSub) txtParamsSub.textContent = t.plan_params_sub;
+
+  const lblDietTitle = document.getElementById('lbl-diet-title');
+  if (lblDietTitle) lblDietTitle.textContent = t.lbl_diet_title;
+
+  const lblProteinSource = document.getElementById('lbl-protein-source');
+  if (lblProteinSource) lblProteinSource.textContent = t.lbl_protein_source;
+
+  const lblMacroCals = document.getElementById('lbl-macro-cals');
+  if (lblMacroCals) lblMacroCals.textContent = t.lbl_cals;
+
+  const lblMacroProt = document.getElementById('lbl-macro-prot');
+  if (lblMacroProt) lblMacroProt.textContent = t.lbl_prot;
+
+  const lblMacroCarbs = document.getElementById('lbl-macro-carbs');
+  if (lblMacroCarbs) lblMacroCarbs.textContent = t.lbl_carbs;
+
+  const lblMacroFats = document.getElementById('lbl-macro-fats');
+  if (lblMacroFats) lblMacroFats.textContent = t.lbl_fats;
+
+  const lblSupps = document.getElementById('lbl-supplements');
+  if (lblSupps) lblSupps.textContent = t.lbl_supplements;
+
+  const lblEnhancers = document.getElementById('lbl-enhancers');
+  if (lblEnhancers) lblEnhancers.textContent = t.lbl_enhancers;
+
+  const lblNotes = document.getElementById('lbl-diet-notes');
+  if (lblNotes) lblNotes.textContent = t.lbl_diet_notes;
+
+  const txtMealsTitle = document.getElementById('txt-meals-builder-title');
+  if (txtMealsTitle) txtMealsTitle.textContent = t.meals_builder_title;
+
+  const txtMealsSub = document.getElementById('txt-meals-builder-sub');
+  if (txtMealsSub) txtMealsSub.textContent = t.meals_builder_sub;
+
+  const btnAddMeal = document.getElementById('btn-add-meal');
+  if (btnAddMeal) btnAddMeal.textContent = t.btn_add_meal;
+
+  const btnSaveTemplate = document.getElementById('btn-save-diet-template');
+  if (btnSaveTemplate) btnSaveTemplate.textContent = t.btn_save_template;
+
+  const btnCopySummary = document.getElementById('btn-copy-diet-summary');
+  if (btnCopySummary) btnCopySummary.textContent = t.btn_copy_summary;
+
+  // 6. Sync with Interactive Muscle Map Engine
+  if (window.mainMuscleMap) {
+    if (typeof window.mainMuscleMap.setLanguage === 'function') {
+      window.mainMuscleMap.setLanguage(lang);
+    } else if (typeof window.mainMuscleMap.switchLanguage === 'function') {
+      window.mainMuscleMap.switchLanguage(lang);
+    }
+  }
+
+  // 7. Update Dynamic Lists
+  renderAthletesView();
+  populateNutritionTemplateSelect();
+  populateNutritionAthleteSelect();
+  renderMealsBuilderList();
+
+  // 8. Rebind all action listeners immediately
+  rebindAllActionListeners();
+}
+
+function toggleAppLanguage() {
+  const newLang = currentAppLang === 'ar' ? 'en' : 'ar';
+  setAppLanguage(newLang);
+  showToast(newLang === 'ar' ? 'تم تحويل لغة الواجهة إلى العربية (RTL)' : 'Switched interface to English (LTR)');
+}
+
+/**
+ * ============================================================================
+ * 13. GLOBAL EVENT DELEGATION & ACTION REBINDING
+ * ============================================================================
+ */
+function setupGlobalEventDelegation() {
+  document.addEventListener('click', (e) => {
+    // 1. Navigation tab clicks
+    const navBtn = e.target.closest('.nav-tab-btn');
+    if (navBtn) {
+      e.preventDefault();
+      const tabId = navBtn.dataset.tab;
+      if (tabId) switchTab(tabId);
+      return;
+    }
+
+    // 2. Language toggle
+    const langBtn = e.target.closest('#app-lang-toggle, [data-action="toggle-lang"], .rmm-lang-toggle, #rmm-btn-lang-toggle');
+    if (langBtn) {
+      e.preventDefault();
+      toggleAppLanguage();
+      return;
+    }
+
+    // 3. Quick muscle map banner / header buttons
+    const muscleMapBtn = e.target.closest('#header-muscle-btn, #btn-quick-muscle-map, .anatomy-quick-banner, [data-action="open-muscle-map"]');
+    if (muscleMapBtn) {
+      e.preventDefault();
+      switchTab('training');
+      return;
+    }
+
+    // 4. Modal Open buttons
+    const addAthBtn = e.target.closest('#btn-open-add-athlete, [data-action="open-add-athlete"]');
+    if (addAthBtn) {
+      e.preventDefault();
+      openAddAthleteModal();
+      return;
+    }
+
+    // 5. Modal Close buttons
+    const closeBtn = e.target.closest('.modal-close-btn, [data-action="close-modal"]');
+    if (closeBtn) {
+      e.preventDefault();
+      const backdrop = closeBtn.closest('.modal-backdrop');
+      if (backdrop) backdrop.classList.remove('active');
+      return;
+    }
+
+    // 6. Athlete Card Action buttons (Delegated)
+    const nutBtn = e.target.closest('.nutrition-btn');
+    if (nutBtn) {
+      const athId = nutBtn.dataset.athleteId || nutBtn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+      if (athId) {
+        e.preventDefault();
+        openNutritionModal(athId);
+      }
+      return;
+    }
+
+    const workBtn = e.target.closest('.workout-btn');
+    if (workBtn) {
+      const athId = workBtn.dataset.athleteId || workBtn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+      if (athId) {
+        e.preventDefault();
+        openWorkoutModal(athId);
+      }
+      return;
+    }
+
+    const shareBtn = e.target.closest('.share-btn, .portal-btn');
+    if (shareBtn) {
+      const athId = shareBtn.dataset.athleteId || shareBtn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+      if (athId) {
+        e.preventDefault();
+        copyClientPortalLink(athId);
+      }
+      return;
+    }
+
+    const exportBtn = e.target.closest('.export-btn, .pdf-btn');
+    if (exportBtn) {
+      const athId = exportBtn.dataset.athleteId || exportBtn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+      if (athId) {
+        e.preventDefault();
+        exportAthleteToPDF(athId);
+      }
+      return;
+    }
+
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (deleteBtn) {
+      const athId = deleteBtn.dataset.athleteId || deleteBtn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+      if (athId) {
+        e.preventDefault();
+        deleteAthlete(athId);
+      }
+      return;
+    }
+
+    // 7. Nutrition Studio Buttons (Delegated)
+    const addMealBtn = e.target.closest('#btn-add-meal, [data-action="add-meal"]');
+    if (addMealBtn) {
+      e.preventDefault();
+      addMealToNutritionStudio();
+      return;
+    }
+
+    const removeMealBtn = e.target.closest('.btn-remove-meal, [data-action="remove-meal"]');
+    if (removeMealBtn) {
+      e.preventDefault();
+      const mealIndex = removeMealBtn.dataset.mealIndex;
+      if (mealIndex !== undefined) removeMealFromStudio(parseInt(mealIndex, 10));
+      return;
+    }
+
+    const saveTemplateBtn = e.target.closest('#btn-save-diet-template, [data-action="save-diet-template"]');
+    if (saveTemplateBtn) {
+      e.preventDefault();
+      saveCustomDietTemplate();
+      return;
+    }
+
+    const assignAthleteBtn = e.target.closest('#btn-assign-diet-athlete, [data-action="assign-diet-athlete"]');
+    if (assignAthleteBtn) {
+      e.preventDefault();
+      assignDietToSelectedAthlete();
+      return;
+    }
+
+    const loadTemplateBtn = e.target.closest('#btn-load-diet-template, [data-action="load-diet-template"]');
+    if (loadTemplateBtn) {
+      e.preventDefault();
+      loadSelectedDietTemplate();
+      return;
+    }
+
+    const resetDietBtn = e.target.closest('#btn-reset-diet-form, [data-action="reset-diet-form"]');
+    if (resetDietBtn) {
+      e.preventDefault();
+      resetNutritionStudioForm();
+      return;
+    }
+
+    const copyDietBtn = e.target.closest('#btn-copy-diet-summary, [data-action="copy-diet-summary"]');
+    if (copyDietBtn) {
+      e.preventDefault();
+      copyDietSummaryToClipboard();
+      return;
+    }
+  });
+}
+
+function rebindAllActionListeners() {
+  // Navigation tabs explicit binding
+  document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      const tab = btn.dataset.tab;
+      if (tab) switchTab(tab);
+    };
+  });
+
+  // Language toggle explicit binding
+  const langToggle = document.getElementById('app-lang-toggle');
+  if (langToggle) {
+    langToggle.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      toggleAppLanguage();
+    };
+  }
+
+  // Quick banner button
+  const quickBtn = document.getElementById('btn-quick-muscle-map');
+  if (quickBtn) {
+    quickBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      switchTab('training');
+    };
+  }
+
+  // Header quick muscle button
+  const headerMuscleBtn = document.getElementById('header-muscle-btn');
+  if (headerMuscleBtn) {
+    headerMuscleBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      switchTab('training');
+    };
+  }
+
+  // Add athlete open button
+  const addAthBtn = document.getElementById('btn-open-add-athlete');
+  if (addAthBtn) {
+    addAthBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      openAddAthleteModal();
+    };
+  }
+
+  // Export roster PDF button
+  const exportPdfBtn = document.getElementById('btn-export-pdf');
+  if (exportPdfBtn) {
+    exportPdfBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      exportAllAthletesToPDF();
+    };
+  }
+
+  // Nutrition Studio action buttons
+  const addMealBtn = document.getElementById('btn-add-meal');
+  if (addMealBtn) {
+    addMealBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      addMealToNutritionStudio();
+    };
+  }
+
+  const saveDietBtn = document.getElementById('btn-save-diet-template');
+  if (saveDietBtn) {
+    saveDietBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      saveCustomDietTemplate();
+    };
+  }
+
+  const assignDietBtn = document.getElementById('btn-assign-diet-athlete');
+  if (assignDietBtn) {
+    assignDietBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      assignDietToSelectedAthlete();
+    };
+  }
+
+  const loadDietBtn = document.getElementById('btn-load-diet-template');
+  if (loadDietBtn) {
+    loadDietBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      loadSelectedDietTemplate();
+    };
+  }
+
+  const resetDietBtn = document.getElementById('btn-reset-diet-form');
+  if (resetDietBtn) {
+    resetDietBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      resetNutritionStudioForm();
+    };
+  }
+
+  const copyDietBtn = document.getElementById('btn-copy-diet-summary');
+  if (copyDietBtn) {
+    copyDietBtn.onclick = (e) => {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      copyDietSummaryToClipboard();
+    };
+  }
+}
+
+/**
+ * ============================================================================
+ * 14. TAB NAVIGATION
  * ============================================================================
  */
 function switchTab(tabId) {
@@ -1765,6 +2952,8 @@ function switchTab(tabId) {
 
   if (tabId === 'training') {
     initTrainingStudio();
+  } else if (tabId === 'nutrition') {
+    initNutritionStudio();
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1772,7 +2961,7 @@ function switchTab(tabId) {
 
 /**
  * ============================================================================
- * 13. GLOBAL SCOPE ASSIGNMENTS (SAFETY FOR INLINE EVENT LISTENERS)
+ * 15. GLOBAL SCOPE ASSIGNMENTS (SAFETY FOR INLINE EVENT LISTENERS)
  * ============================================================================
  */
 window.handleCoachPinSubmit = handleCoachPinSubmit;
@@ -1797,6 +2986,22 @@ window.switchTab = switchTab;
 window.testWebhookConnection = testWebhookConnection;
 window.exportBackupJson = exportBackupJson;
 
+// Language & Delegation
+window.setAppLanguage = setAppLanguage;
+window.toggleAppLanguage = toggleAppLanguage;
+window.rebindAllActionListeners = rebindAllActionListeners;
+
+// Nutrition Studio global bindings
+window.initNutritionStudio = initNutritionStudio;
+window.addMealToNutritionStudio = addMealToNutritionStudio;
+window.removeMealFromStudio = removeMealFromStudio;
+window.updateMealField = updateMealField;
+window.saveCustomDietTemplate = saveCustomDietTemplate;
+window.assignDietToSelectedAthlete = assignDietToSelectedAthlete;
+window.loadSelectedDietTemplate = loadSelectedDietTemplate;
+window.resetNutritionStudioForm = resetNutritionStudioForm;
+window.copyDietSummaryToClipboard = copyDietSummaryToClipboard;
+
 // Studio global bindings
 window.switchStudioBodyView = switchStudioBodyView;
 window.selectStudioMuscle = selectStudioMuscle;
@@ -1809,23 +3014,29 @@ window.initTrainingStudio = initTrainingStudio;
 
 /**
  * ============================================================================
- * 14. INITIALIZATION ON DOM CONTENT LOADED
+ * 16. INITIALIZATION ON DOM CONTENT LOADED
  * ============================================================================
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Check Coach PIN session
+  // 1. Setup persistent global event delegation first
+  setupGlobalEventDelegation();
+
+  // 2. Check Coach PIN session
   checkCoachAuth();
 
-  // Load persistent athletes (starts empty if none in storage)
+  // 3. Load persistent athletes (starts empty if none in storage)
   loadAthletesFromStorage();
 
-  // Render Athletes View
-  renderAthletesView();
+  // 4. Initialize Nutrition Studio
+  initNutritionStudio();
 
-  // Initialize Anatomical Training Studio
+  // 5. Apply saved or default language
+  setAppLanguage(currentAppLang);
+
+  // 6. Initialize Anatomical Training Studio
   initTrainingStudio();
 
-  // Search input live filter
+  // 7. Search input live filter
   const searchInput = document.getElementById('athlete-search-input');
   if (searchInput) {
     searchInput.addEventListener('input', () => {
@@ -1833,7 +3044,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Status dropdown filter
+  // 8. Status dropdown filter
   const statusFilter = document.getElementById('athlete-status-filter');
   if (statusFilter) {
     statusFilter.addEventListener('change', () => {
@@ -1841,17 +3052,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Navigation tab clicks
-  document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tab = btn.dataset.tab;
-      if (tab) switchTab(tab);
-    });
-  });
-
-  // SVG Muscle Node Click Handlers (Workout Modal & Studio)
+  // 9. SVG Muscle Node Click Handlers (Workout Modal & Studio)
   setupModalSvgInteractivity();
   setupStudioSvgInteractivity();
 
-  console.log('[THE RUSH WAY] Core Coach Engine and Anatomical Training Studio initialized.');
+  // 10. Rebind all explicit actions
+  rebindAllActionListeners();
+
+  console.log('[THE RUSH WAY] Core Coach Engine, Nutrition Studio & Anatomical Studio initialized.');
 });
