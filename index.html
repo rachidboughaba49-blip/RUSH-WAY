@@ -205,7 +205,7 @@
               </p>
             </div>
           </div>
-          <button type="button" class="btn btn-primary" style="white-space: nowrap; flex-shrink: 0;">
+          <button type="button" class="btn btn-primary anatomy-quick-banner-btn" id="btn-quick-muscle-map">
             عرض المجسم التشريحي ←
           </button>
         </div>
@@ -215,12 +215,12 @@
             <h1>إدارة الرياضيين والمتدربين</h1>
             <p>متابعة ملفات المشتركين، الخطط الغذائية، والبرامج التدريبية التشريحية مع معيار الخصر الدقيق.</p>
           </div>
-          <div class="view-controls">
+          <div class="view-controls controls">
             <div class="search-box">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              <input type="text" id="athlete-search-input" placeholder="ابحث باسم أو هاتف المتدرب..." />
+              <input type="text" id="athlete-search-input" name="searchInput" placeholder="ابحث باسم أو هاتف المتدرب..." />
             </div>
-            <select class="filter-select" id="athlete-status-filter">
+            <select class="filter-select" id="athlete-status-filter" name="statusFilter">
               <option value="all">جميع الحالات</option>
               <option value="active">نشط (Active)</option>
               <option value="new">جديد (New)</option>

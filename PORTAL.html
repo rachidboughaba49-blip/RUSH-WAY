@@ -90,6 +90,40 @@
         color: var(--text-dim);
         font-size: 0.78rem;
       }
+      @media (max-width: 768px) {
+        .portal-container {
+          max-width: 100%;
+          padding: 14px 10px 48px;
+          width: 100%;
+          overflow-x: hidden;
+        }
+        .portal-header-card {
+          padding: 16px 14px;
+          border-radius: var(--radius-lg);
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .protocol-card {
+          padding: 16px 12px;
+          border-radius: var(--radius-md);
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .exercise-portal-row {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .protocol-card .btn,
+        .btn-primary {
+          width: 100%;
+          min-height: 44px;
+          justify-content: center;
+          font-size: 0.92rem;
+        }
+      }
     </style>
   </head>
   <body>
